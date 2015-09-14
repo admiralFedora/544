@@ -9,7 +9,7 @@ SoftwareSerial XBee(2, 3); // Rx, Tx
 #define THERMISTORNOMINAL 10000
 #define TEMPERATURENOMINAL 25
 #define BCOEFFICIENT 3950
-#define ID 1
+#define ID 2       //Change here to identify each Sensor
 
 void sendJson(float reading){
   char buffer[100];
@@ -21,7 +21,7 @@ void sendJson(float reading){
 
   root.printTo(buffer, sizeof(buffer));
   XBee.print(buffer);
-  Serial.print(buffer);
+  Serial.println(buffer);
 }
 
 float getAverage(){
@@ -58,15 +58,14 @@ void loop() {
   float reading, average;
 
   average = getAverage();
-  reading = SERIESRESISTOR/average;
-  
+  reading = SERIESRESISTOR/average; // Thermistor resistance
+
+  /*
   Serial.print("Thermistor resistance ");
   Serial.println(reading);
-
-  reading = steinhart(reading);
   Serial.print("Temperature ");
-  Serial.println(reading);
-
+  */
+  reading = steinhart(reading); // Temperature
   sendJson(reading);
   //XBee.write("hi");
   delay(5000);
