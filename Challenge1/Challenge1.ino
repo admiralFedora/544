@@ -1,5 +1,6 @@
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
+#include <string.h>
 SoftwareSerial XBee(2, 3); // Rx, Tx
 
 #define PIN A0
@@ -9,19 +10,52 @@ SoftwareSerial XBee(2, 3); // Rx, Tx
 #define THERMISTORNOMINAL 10000
 #define TEMPERATURENOMINAL 25
 #define BCOEFFICIENT 3950
-#define ID 2       //Change here to identify each Sensor
+#define IDREQUEST "IDREQUEST"
+#define REQUEST "REQUEST"
+
+long id;
+bool identified;
 
 void sendJson(float reading){
   char buffer[100];
   StaticJsonBuffer<200> jsonBuffer;
 
   JsonObject& root = jsonBuffer.createObject();
-  root["id"] = ID;
+  root["id"] = id;
   root["temp"] = reading;
 
   root.printTo(buffer, sizeof(buffer));
-  XBee.println(buffer);
+  XBee.print(buffer);
   Serial.println(buffer);
+}
+
+void identify(){
+  char buff[9];
+  int i;
+  while(true){
+    // look for the request coming from the server for the ID
+    for(i = 0; i < 9 && XBee.available(); i++){
+      buff[i] = XBee.read();
+    }
+    // send the ID once the request has been found
+    if(!strcmp(IDREQUEST, buff)){
+      XBee.print(id);
+      break;
+    }
+  }
+}
+
+bool request(){
+  char buff[7];
+  int i;
+  while(true){
+    for(i = 0; i < 7 && XBee.available(); i++){
+      buff[i] = XBee.read();
+    }
+    if(!strcmp(REQUEST, buff)){
+      return true;
+    }
+  }
 }
 
 float getAverage(){
@@ -48,25 +82,29 @@ float steinhart(float resistance){
 }
 
 void setup() {
-  // put your setup code here, to run once:
   XBee.begin(9600);
   Serial.begin(9600);
   analogReference(EXTERNAL);
+  randomSeed(analogRead(PIN));
+  id = random(65535); // generate a specific ID for this device
+  identified = false;
 }
 
 void loop() {
   float reading, average;
 
-  average = getAverage();
-  reading = SERIESRESISTOR/average; // Thermistor resistance
+  if(!identified){
+    identify();
+    identified = true;
+  }
 
-  /*
-  Serial.print("Thermistor resistance ");
-  Serial.println(reading);
-  Serial.print("Temperature ");
-  */
-  reading = steinhart(reading); // Temperature
-  sendJson(reading);
+  if(request()){
+    average = getAverage();
+    reading = SERIESRESISTOR/average; // Thermistor resistance
+
+    reading = steinhart(reading); // Temperature
+    sendJson(reading);
+  }
   //XBee.write("hi");
   delay(5000);
 }
