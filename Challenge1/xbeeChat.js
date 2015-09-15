@@ -62,7 +62,7 @@ io.on('connection', function(socket){
   socket.on('disconnect', function(){
   });
   socket.on('chat message', function(msg){
-    io.emit('chat message', msg+ "mark here");
+    io.emit('chat message', msg );
     sp.write(msg + "\n");
   });
 });
@@ -76,6 +76,7 @@ sp.on("open", function () {
   sp.on('data', function(data) {
     var RecData = SaveData(data);  //String for printing received Data
     console.log('data received:' + RecData );
+    console.log('Raw data received:' + data );
     io.emit("chat message",  "Received Data:" + RecData);
   });
 });

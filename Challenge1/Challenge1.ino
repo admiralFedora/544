@@ -20,7 +20,7 @@ void sendJson(float reading){
   root["temp"] = reading;
 
   root.printTo(buffer, sizeof(buffer));
-  XBee.print(buffer);
+  XBee.println(buffer);
   Serial.println(buffer);
 }
 
