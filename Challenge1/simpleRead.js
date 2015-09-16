@@ -43,7 +43,7 @@ function printAverage(){
   while(i < array.length){
     sen = array[i];
     if((gcounter - sen.counter) >= 3){
-      array = array.splice(i, 1);
+      array.splice(i, 1);
       console.log("sensor " + i + " has died\n");
     } else {
       average += sen.temp;
