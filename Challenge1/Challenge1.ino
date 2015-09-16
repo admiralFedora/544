@@ -8,7 +8,7 @@ SoftwareSerial XBee(2, 3); // Rx, Tx
 #define VCC 3.3
 #define SERIESRESISTOR 10000
 #define SAMPLES 10
-#define SEARCH_DELAY 500
+#define SEARCH_DELAY 100
 #define AVERAGE_DELAY 10
 
 #define THERMISTORNOMINAL 10000
@@ -131,8 +131,8 @@ void setup() {
 }
 
 void loop() {
-
-
+  float reading, average;
+/*
   Serial.print("identifiying...");
   if(!identified){
     identify();
@@ -140,4 +140,13 @@ void loop() {
   }
   Serial.print("identified");
   request();
+  */
+
+  average = getAverage();
+  reading = SERIESRESISTOR/average; // Thermistor resistance
+
+  reading = steinhart(reading); // Temperature
+  sendJson(reading);
+  XBee.flush();
+  delay(5000);
 }
