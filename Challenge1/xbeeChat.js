@@ -29,6 +29,7 @@ function addNewSensor(data){
   console.log("Added ID: " + JsonData.id)
 }
 
+// the start of the sendRequest chain
 function requestData(){
 /*  var buffer = "";
   var sen;
@@ -47,30 +48,38 @@ function requestData(){
   sendRequest(gindex);
 }
 
+// this function sends a request out to a specific sensor
 function sendRequest(index){
-
+  // if requested index is beyond the array don't do anything
   if(index >= arrayLength){
     return;
   }
   var sen = array[index];
+
+  // is this sensor alive?
   if(sen.alive == 0){
     console.log("sensor" + index + " has died\n");
+
+    // remove object from our array
     array = array.splice(index,1);
+    // update the length
     arrayLength = array.length;
+    // send request for the "same" index though it'll be the next over in the old structure
     sendRequest(gindex);
     return;
   }
+  // building our request phrase
   buffer = sen.id + "";
-  console.log(buffer);
   buffer = REQUEST.concat(buffer);
-
   sp.write(buffer);
   console.log(buffer);
 
+  // we are giving each sensor 1.5 seconds to send back data
   setTimeout(function(){
+    // gindex should be different than the local index as recordData increments gindex
     if(gindex != index){
       return;
-    } else {
+    } else { // if recordData never ran then gindex = index and therefore we will need to retry
       //gindex = index + 1;
       sendRequest(gindex);
       //sen.alive = 0;
@@ -78,17 +87,19 @@ function sendRequest(index){
   }, 1500);
 }
 
+// parse and record the received data
 function recordData(data){
   var JsonData = JSON.parse(data);
   var sen;
-  var j = 0;
   for(var i = 0; i < array.length; i++){
     sen = array[i];
     if(sen.id == JsonData.id){
       sen.temp = JsonData.temp;
       console.log("id: "+ sen.id + " temp: " + sen.temp);
-      
+
       gindex = gindex + 1;
+
+      // we don't want to flood the network, so we wait for 1 second before the next sensor request
       setTimeout(function(){sendRequest(gindex)},1000);
       //sendRequest(gindex);
       return;
