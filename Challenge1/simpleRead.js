@@ -83,5 +83,5 @@ sp.on("open", function () {
   sp.on('data', function(data) {
     recordData(data);
   });
-  setInterval()
+  setInterval(printAverage, 15000);
 });
