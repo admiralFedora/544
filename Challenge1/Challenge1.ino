@@ -6,7 +6,7 @@ SoftwareSerial XBee(2, 3); // Rx, Tx
 #define BAUD_RATE 9600
 #define PIN A0
 #define VCC 3.3
-#define SERIESRESISTOR 10000
+#define SERIESRESISTOR 9969
 #define SAMPLES 10
 #define SEARCH_DELAY 100
 #define AVERAGE_DELAY 10
@@ -35,64 +35,6 @@ void sendJson(float reading){
   root.printTo(buffer, sizeof(buffer));
   XBee.println(buffer);
   Serial.println(buffer);
-}
-
-void identify(){
-  StaticJsonBuffer<200> jsonBuffer;
-  char json[100];
-  char buff[10];
-  int i;
-  bool run;
-  run = true;
-
-  memset(json, 0, sizeof(json));
-  memset(buff, 0, sizeof(buff));
-
-  while(run){
-    // look for the request coming from the server for the ID
-    for(i = 0; i < 10 && XBee.available(); i++){
-      buff[i] = XBee.read();
-    }
-    // send the ID once the request has been found
-    if(strcmp(IDREQUEST, buff) == 0){
-      run = false;
-    }
-    memset(buff, 0, sizeof(buff));
-    XBee.flush();
-    delay(SEARCH_DELAY);
-  }
-
-  JsonObject& root = jsonBuffer.createObject();
-  root["id"] = id;
-
-  root.printTo(json, sizeof(json));
-  XBee.println(json);
-}
-
-int request(){
-  float reading, average;
-  char buff[12];
-  int i;
-  bool run = true;
-  Serial.println(phrase);
-  memset(buff, 0, sizeof(buff));
-  while(run){
-    for(i = 0; i < 12 && XBee.available(); i++){
-      buff[i] = XBee.read();
-    }
-    Serial.println(buff);
-    if(strstr(buff, phrase) != NULL){
-      run = false;
-    }
-    memset(buff, 0, sizeof(buff));
-    delay(SEARCH_DELAY);
-  }
-    average = getAverage();
-    reading = SERIESRESISTOR/average; // Thermistor resistance
-
-    reading = steinhart(reading); // Temperature
-    sendJson(reading);
-    XBee.flush();
 }
 
 float getAverage(){
@@ -132,15 +74,6 @@ void setup() {
 
 void loop() {
   float reading, average;
-/*
-  Serial.print("identifiying...");
-  if(!identified){
-    identify();
-    identified = true;
-  }
-  Serial.print("identified");
-  request();
-  */
 
   average = getAverage();
   reading = SERIESRESISTOR/average; // Thermistor resistance
