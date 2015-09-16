@@ -21,6 +21,7 @@ function recordData(data){
   var sen;
   if(array.length == 0){
     array.push(new sensor(JsonData.id, JsonData.temp, gcounter));
+    console.log("New sensor " + JsonData.id + " has come");
     return;
   }
   for(var i = 0; i < array.length; i++){
@@ -32,6 +33,7 @@ function recordData(data){
     }
   }
   array.push(new sensor(JsonData.id, JsonData.temp, gcounter));
+  console.log("New sensor " + JsonData.id + " has come");
 }
 
 function printAverage(){
@@ -48,6 +50,8 @@ function printAverage(){
   }
   average /= array.length;
   console.log("Average temp: " + average);
+  console.log("Number of devices: " + array.length);
+  gcounter++;
 }
 
 var portName = process.argv[2],
