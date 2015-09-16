@@ -6,82 +6,97 @@ var io = require('socket.io')(http);
 var REQUEST = "REQUEST";
 var IDREQUEST = "IDREQUEST";
 
-var sensors = [];
+var gindex = 0;
+var arrayLength;
+var array = [];
 // 0 = arduino search; 1 = arduino request
 var mode = 0;
 
 function sensor(id){
   var temp; // int
-  var alive; // boolean
+  this.alive = 1; // boolean
   this.id = id; // long
 }
 
-/*Four sensors' data   Initialization */
-var id1 = {temp:0,sum:0,count:0};
-var id2 = {temp:0,sum:0,count:0};
-var id3 = {temp:0,sum:0,count:0};
-var id4 = {temp:0,sum:0,count:0};
-
 function swapMode(){
   mode = mode + 1;
-}
-
-function SaveData(data){
-    var result = "";
-    var JsonData = JSON.parse(data);  //parse the current data
-    /*need calibration*/
-    switch(JsonData.id) {
-    	case 1:
-        	id1.temp = JsonData.temp;
-		id1.sum += JsonData.temp;
-		id1.count += 1;
-        	break;
-    	case 2:
-        	id2.temp = JsonData.temp;
-		id2.sum += JsonData.temp;
-		id2.count += 1;
-        	break;
-        case 3:
-        	id3.temp = JsonData.temp;
-		id3.sum += JsonData.temp;
-		id3.count += 1;
-        	break;
-	case 4:
-        	id4.temp = JsonData.temp;
-		id4.sum += JsonData.temp;
-		id4.count += 1;
-        	break;
-    }
-    result += "\n"+ "id 1:  CurTemp: " + id1.temp + " AveTemp: " + (id1.sum/id1.count).toFixed(2)  + "\n" +
-    	     "id 2:  Curtemp: " + id2.temp + " AveTemp: " + (id2.sum/id2.count).toFixed(2)  + "\n" +
-	     "id 3:  Curtemp: " + id3.temp + " AveTemp: " + (id3.sum/id3.count).toFixed(2)  + "\n" +
-	     "id 4:  Curtemp: " + id4.temp + " AveTemp: " + (id4.sum/id4.count).toFixed(2)  + "\n";
-    return result;
+  arrayLength = array.length;
 }
 
 function addNewSensor(data){
   var JsonData = JSON.parse(data);
   array.push(new sensor(JsonData.id));
+  console.log("Added ID: " + JsonData.id)
 }
 
 function requestData(){
-  for(var sen in array){
-    sp.write(REQUEST.concat(sen.id.toString()));
+/*  var buffer = "";
+  var sen;
+  for(var i = 0; i < array.length; i++){
+    sen = array[i];
+    buffer = sen.id + "";
+    console.log(buffer);
+    buffer = REQUEST.concat(buffer);
+
+    sp.write(buffer);
+    console.log(buffer);
     setTimeout(function(){healthUpdate(sen)}, 2000);
   }
+*/
+  gindex = 0;
+  sendRequest(gindex);
 }
 
-function recordData(){
+function sendRequest(index){
+
+  if(index >= arrayLength){
+    return;
+  }
+  var sen = array[index];
+  if(sen.alive == 0){
+    console.log("sensor" + index + " has died\n");
+    array = array.splice(index,1);
+    arrayLength = array.length;
+    sendRequest(gindex);
+    return;
+  }
+  buffer = sen.id + "";
+  console.log(buffer);
+  buffer = REQUEST.concat(buffer);
+
+  sp.write(buffer);
+  console.log(buffer);
+
+  setTimeout(function(){
+    if(gindex != index){
+      return;
+    } else {
+      //gindex = index + 1;
+      sendRequest(gindex);
+      //sen.alive = 0;
+    }
+  }, 1500);
+}
+
+function recordData(data){
   var JsonData = JSON.parse(data);
-  for(var sen in array){
+  var sen;
+  var j = 0;
+  for(var i = 0; i < array.length; i++){
+    sen = array[i];
     if(sen.id == JsonData.id){
       sen.temp = JsonData.temp;
-      break;
+      console.log("id: "+ sen.id + " temp: " + sen.temp);
+      
+      gindex = gindex + 1;
+      setTimeout(function(){sendRequest(gindex)},1000);
+      //sendRequest(gindex);
+      return;
     }
   }
 }
 
-function healthUpdate(var sen){
+function healthUpdate(sen){
   sen.alive = 0;
 }
 
@@ -116,7 +131,7 @@ http.listen(3000, function(){
 sp.on("open", function () {
   console.log('open');
   sp.on('data', function(data) {
-    swtich(mode){
+    switch(mode){
       case 0:
         addNewSensor(data);
         break;

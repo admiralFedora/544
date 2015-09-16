@@ -18,7 +18,7 @@ SoftwareSerial XBee(2, 3); // Rx, Tx
 #define IDREQUEST "IDREQUEST"
 #define REQUEST "REQUEST"
 
-long id;
+int id;
 bool identified;
 char phrase[13];
 
@@ -55,7 +55,6 @@ void identify(){
     }
     // send the ID once the request has been found
     if(strcmp(IDREQUEST, buff) == 0){
-      XBee.print(id);
       run = false;
     }
     memset(buff, 0, sizeof(buff));
@@ -70,18 +69,30 @@ void identify(){
   XBee.println(json);
 }
 
-bool request(){
-  char buff[14];
+int request(){
+  float reading, average;
+  char buff[12];
   int i;
-  while(true){
-    for(i = 0; i < 14 && XBee.available(); i++){
+  bool run = true;
+  Serial.println(phrase);
+  memset(buff, 0, sizeof(buff));
+  while(run){
+    for(i = 0; i < 12 && XBee.available(); i++){
       buff[i] = XBee.read();
     }
-    if(strcmp(REQUEST, phrase) == 0){
-      return true;
+    Serial.println(buff);
+    if(strstr(buff, phrase) != NULL){
+      run = false;
     }
+    memset(buff, 0, sizeof(buff));
     delay(SEARCH_DELAY);
   }
+    average = getAverage();
+    reading = SERIESRESISTOR/average; // Thermistor resistance
+
+    reading = steinhart(reading); // Temperature
+    sendJson(reading);
+    XBee.flush();
 }
 
 float getAverage(){
@@ -112,15 +123,15 @@ void setup() {
   Serial.begin(BAUD_RATE);
   analogReference(EXTERNAL);
   randomSeed(analogRead(PIN)); // seed value from the thermistor
-  id = random(0,65535); // generate a specific ID for this device
+  id = random(10000,32767); // generate a specific ID for this device
   memset(phrase, 0, sizeof(phrase));
   // create the phrase we'll be looking for
-  sprintf(phrase, "%s%05Ls", REQUEST, id);
+  sprintf(phrase, "%s%d", REQUEST, id);
   identified = false;
 }
 
 void loop() {
-  float reading, average;
+
 
   Serial.print("identifiying...");
   if(!identified){
@@ -128,11 +139,5 @@ void loop() {
     identified = true;
   }
   Serial.print("identified");
-  if(request()){
-    average = getAverage();
-    reading = SERIESRESISTOR/average; // Thermistor resistance
-
-    reading = steinhart(reading); // Temperature
-    sendJson(reading);
-  }
+  request();
 }
