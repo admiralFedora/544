@@ -39,14 +39,15 @@ function recordData(data){
 function printAverage(){
   var sen;
   var average = 0;
-  for(var i = 0; i < array.length; i++){
+  var i = 0;
+  while(i < array.length){
     sen = array[i];
     if((gcounter - sen.counter) >= 3){
       array = array.splice(i, 1);
       console.log("sensor " + i + " has died\n");
-      i--;
     } else {
       average += sen.temp;
+      i++;
     }
   }
   average /= array.length;
