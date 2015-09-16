@@ -44,6 +44,7 @@ function printAverage(){
     if((gcounter - sen.counter) >= 3){
       array = array.splice(i, 1);
       console.log("sensor " + i + " has died\n");
+      i--;
     } else {
       average += sen.temp;
     }
