@@ -1,7 +1,4 @@
 var SerialPort = require("serialport");
-var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
 
 var array = [];
 var gcounter = 0;
@@ -42,17 +39,20 @@ function printAverage(){
   var i = 0;
   while(i < array.length){
     sen = array[i];
+    // we are giving our sensors 3 tries before counting them dead
     if((gcounter - sen.counter) >= 3){
+      console.log("sensor " + sen.id + " has died\n");
+      // remove dead sensor from list
       array.splice(i, 1);
-      console.log("sensor " + i + " has died\n");
     } else {
+      console.log("sensor " + sen.id " temp: " + sen.temp + "\n");
       average += sen.temp;
       i++;
     }
   }
   average /= array.length;
-  console.log("Average temp: " + average);
-  console.log("Number of devices: " + array.length);
+  console.log("Average temp: " + average + "\n");
+  console.log("Number of devices: " + array.length + "\n");
   gcounter++;
 }
 
@@ -66,28 +66,11 @@ var sp;  //serial Port
 
 sp = new SerialPort.SerialPort(portName, portConfig);
 
-app.get('/', function(req, res){
-  res.sendfile('index.html');
-});
-
-io.on('connection', function(socket){
-  console.log('a user connected');
-  socket.on('disconnect', function(){
-  });
-  socket.on('chat message', function(msg){
-    io.emit('chat message', msg );
-    sp.write(msg + "\n");
-  });
-});
-
-http.listen(3000, function(){
-  console.log('listening on *:3000');
-});
-
 sp.on("open", function () {
   console.log('open');
   sp.on('data', function(data) {
     recordData(data);
   });
+  // every 15 seconds we'll read from our list of sensors
   setInterval(printAverage, 15000);
 });
