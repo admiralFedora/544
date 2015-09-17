@@ -45,7 +45,7 @@ function printAverage(){
       // remove dead sensor from list
       array.splice(i, 1);
     } else {
-      console.log("sensor " + sen.id " temp: " + sen.temp + "\n");
+      console.log("sensor " + sen.id + " temp: " + sen.temp + "\n");
       average += sen.temp;
       i++;
     }
