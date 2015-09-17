@@ -52,7 +52,7 @@ function printAverage(){
   }
   average /= array.length;
   console.log("Average temp: " + average + "*C\n");
-  console.log("Number of devices: " + array.length + "\n");
+  console.log("Number of devices: " + array.length + "\n\n\n\n\n");
   gcounter++;
 }
 
