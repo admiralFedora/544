@@ -45,13 +45,13 @@ function printAverage(){
       // remove dead sensor from list
       array.splice(i, 1);
     } else {
-      console.log("sensor " + sen.id + " temp: " + sen.temp + "\n");
+      console.log("sensor " + sen.id + " temp: " + sen.temp + "*C\n");
       average += sen.temp;
       i++;
     }
   }
   average /= array.length;
-  console.log("Average temp: " + average + "\n");
+  console.log("Average temp: " + average + "*C\n");
   console.log("Number of devices: " + array.length + "\n");
   gcounter++;
 }
