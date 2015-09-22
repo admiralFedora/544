@@ -34,3 +34,5 @@ function addSensor(id, x, y){
     }
   });
 }
+
+sensorExist(22, 3, 6);
