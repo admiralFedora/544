@@ -35,4 +35,26 @@ function addSensor(id, x, y){
   });
 }
 
-sensorExist(22, 3, 6);
+function addTemperature(id, temp, time){
+  connect.query('INSERT INTO `temperatures` (time, temp, sensors_id) VALUES (?, ?, ?)', [time, temp, id], function(error, row, fields){
+    if(!error){
+      console.log("row was added\n");
+    } else {
+      console.log("oh noes\n");
+      console.log("error");
+      addSensor(id, 0, 0);
+    }
+  });
+}
+
+function queryTempBySensor(id){
+  connect.query('SELECT * FROM `sensors` WHERE `id`=? ORDER BY `time` ASC', [id], function(error, row, fields){
+    if(!error){
+      // do stuff here
+    } else {
+      console.log("oh noes\n");
+    }
+  });
+}
+
+addTemperature(50, 20, "2015-09-09 15:15:15");

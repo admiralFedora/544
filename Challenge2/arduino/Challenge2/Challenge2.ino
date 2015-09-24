@@ -18,12 +18,7 @@ SoftwareSerial XBee(2, 3); // Rx, Tx
 #define TEMPERATURENOMINAL 25
 #define BCOEFFICIENT 3950
 
-#define IDREQUEST "IDREQUEST"
-#define REQUEST "REQUEST"
-
 int id;
-bool identified;
-char phrase[13];
 
 typedef struct {
   int version;
@@ -34,7 +29,7 @@ identification identity;
 
 void sendJson(float reading){
   char buffer[100];
-  StaticJsonBuffer<200> jsonBuffer;
+  StaticJsonBuffer<100> jsonBuffer;
 
   memset(buffer, 0, sizeof(buffer));
 
@@ -90,13 +85,6 @@ void setup() {
     EEPROM_writeAnything(0, identity);
     Serial.print("write id\n");
   }
-
-
-
-  memset(phrase, 0, sizeof(phrase));
-  // create the phrase we'll be looking for
-  sprintf(phrase, "%s%d", REQUEST, id);
-  identified = false;
 }
 
 void loop() {
