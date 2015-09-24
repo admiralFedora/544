@@ -41,7 +41,7 @@ function addTemperature(id, temp, time){
       console.log("row was added\n");
     } else {
       console.log("oh noes\n");
-      console.log("error");
+      console.log(error);
       addSensor(id, 0, 0);
     }
   });
@@ -57,4 +57,4 @@ function queryTempBySensor(id){
   });
 }
 
-addTemperature(50, 20, "2015-09-09 15:15:15");
+addTemperature(51, 20, "2015-09-09 15:15:15");
