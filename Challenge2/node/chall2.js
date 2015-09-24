@@ -36,7 +36,7 @@ function addSensor(id, x, y){
 }
 
 function addTemperature(id, temp, time){
-  connect.query('INSERT INTO `temperatures` (time, temp, sensors_id) VALUES (?, ?, ?)', [time, temp, id], function(error, row, fields){
+  connection.query('INSERT INTO `temperatures` (time, temp, sensors_id) VALUES (?, ?, ?)', [time, temp, id], function(error, row, fields){
     if(!error){
       console.log("row was added\n");
     } else {
@@ -48,7 +48,7 @@ function addTemperature(id, temp, time){
 }
 
 function queryTempBySensor(id){
-  connect.query('SELECT * FROM `sensors` WHERE `id`=? ORDER BY `time` ASC', [id], function(error, row, fields){
+  connection.query('SELECT * FROM `sensors` WHERE `id`=? ORDER BY `time` ASC', [id], function(error, row, fields){
     if(!error){
       // do stuff here
     } else {
