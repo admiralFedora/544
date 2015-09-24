@@ -100,7 +100,6 @@ void setup() {
 }
 
 void loop() {
-  /*
   float reading, average;
 
   average = getAverage();
@@ -109,6 +108,5 @@ void loop() {
   reading = steinhart(reading); // Temperature
   sendJson(reading);
   XBee.flush();
-  delay(5000);
-  */
+  delay(2000);
 }
