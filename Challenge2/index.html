@@ -1,0 +1,365 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Real time temp Data _ Challenge2_Group1</title>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+  </head>
+  <body>
+  <!--external files begin-->
+  <style>
+  	body{
+		color:#cc0000;
+	}
+
+	#myCanvas{
+		margin-left:40px;
+	}
+	.red{color:#cc0000}
+
+	.gray{color:#646464}
+
+	.animony{color:#138f96}
+
+	p.red{
+		font-family:sans-serif;
+		font-weight:bold;
+		margin-left:40px;
+		font-size:22px;
+		margin-bottom:5px;
+	}
+
+	p.gray{
+		margin-left:40px;
+		margin-top:3px;
+	}
+
+  .input{
+    width:30px;
+    text-align: center;
+  }
+
+  .submit{
+    border: #138f96 solid 1px;
+    font-family:Calibri;
+    color:#ffffff;
+    font-size:14px;
+    background-color:#138f96;
+    border-radius: 3px;
+    padding:2px;
+    margin-left:10px;
+    width:60px;
+    cursor:pointer;
+  }
+  </style>
+
+
+  <script>
+  var socket = io();
+  /*$('form').submit(function(){
+    socket.emit('chat message', $('#m').val());
+    $('#m').val('');
+    return false;
+  });*/
+  socket.on('chat message', function(msg){
+    //$('#messages').append($('<li>').text(msg[0].temp));
+    var d = new Date();
+    var realTime = d.getTime(); //in millisec
+    temp = $("#Temp").val();
+    time = $("#Time").val();
+    tempHigh = $(".input[name = HTemp]").val();
+    tempLow = $(".input[name = LTemp]").val();
+    updateChart(temp,time,tempHigh,msg,realTime);
+
+  });
+
+var temp;  //temp: # of lines
+var time;  // time:# of colums
+var tempHigh; //  tempHigh: highest temp
+var tempLow; //  tempHigh: highest temp
+/*DrawFrame: temp: # of lines, time:# of colums, tempHigh: highest temp */
+function drawFrame(temp,time,tempHigh){
+	/*Relative value for diff resolution*/
+	var canvas = document.getElementById("myCanvas");
+	var chart = canvas.getContext("2d");
+
+	len = Math.ceil($("#myCanvas").width() * 0.9);
+	hei = Math.ceil($("#myCanvas").height() * 0.8);
+
+	/*Draw frame*/
+
+	chart.fillStyle="#138f96";
+        chart.fillRect(42, 40, len+10, hei+10);
+        chart.fill();
+
+	chart.fillStyle="#ffffff";
+	chart.fillRect(47,45,len,hei);
+	chart.fill();
+
+	/*Draw Ver line*/
+	chart.strokeStyle="#a3d4d6";
+	chart.lineWidth=2;
+	chart.beginPath();
+	for(i = 1; i < time; i++){
+		chart.moveTo(i*len/time+47-1,45);
+		chart.lineTo(i*len/time+47-1,45+hei);
+	}
+	chart.stroke();
+
+	//Draw Hor line
+	chart.strokeStyle="#d7d7d7";
+	chart.lineWidth=1;
+	chart.beginPath();
+	for(i = 1; i < temp; i++){
+		chart.moveTo(47,i*(hei)/temp+45-1);
+		chart.lineTo(47+len,i*(hei)/temp+45-1);
+	}
+	chart.stroke();
+
+
+}
+
+/*Draw the text   */
+function drawText(temp,tempHigh,tempLow){
+	var canvas = document.getElementById("myCanvas");
+	var chart = canvas.getContext("2d");
+
+	hei = Math.ceil($("#myCanvas").height() * 0.8);
+
+  /*Refresh*/
+  chart.fillStyle="#ffffff";
+  chart.fillRect(0, 0, 42, 50 + hei);
+  chart.fill();
+
+	chart.beginPath();
+	chart.font = "10px Calibri";
+	chart.fillStyle ="#373838";
+	chart.fillText("Celsius: C",15,20);
+	for(i = 0; i <= temp  ; i++){
+		var txt = (tempHigh-i*((tempHigh-tempLow)/ temp)).toFixed(2);
+		chart.fillText(txt,15,i*hei/temp+48);
+	}
+}
+
+/*drawTag draw a tag, at position(x,y) with a label of text*/
+function drawTag(x,y,text){
+	var canvas = document.getElementById("myCanvas");
+	var chart = canvas.getContext("2d");
+	chart.globalAlpha=0.8;
+	/*Draw the point*/
+	chart.fillStyle = "#138f96";
+	chart.beginPath();
+	chart.arc(x, y, 2, 0, 2 * Math.PI);
+	chart.fill();
+
+	/*Draw the tag*/
+	chart.beginPath();
+	chart.moveTo(x+4,y-4);
+	chart.lineTo(x+10,y-8);
+	chart.lineTo(x+10,y+8);
+	chart.lineTo(x+4, y+4);
+	chart.closePath();
+	chart.fill();
+        chart.fillRect(x+10, y-8, 35, 16);
+        chart.fill();
+
+	//Draw the text
+	chart.beginPath();
+	chart.font = "12px Calibri";
+	chart.fillStyle ="#ffffff";
+	chart.fillText(text,x+11,y+4);
+}
+
+/*drawTag draw a label, at position(x,y) with a label of id*/
+function drawLabel(temp2,text,rgba){
+
+	var canvas = document.getElementById("myCanvas");
+	var chart = canvas.getContext("2d");
+  var len = Math.ceil($("#myCanvas").width() * 0.9);
+  var y = (tempHigh - temp2)*(hei/(tempHigh-tempLow))+52; //y is the temp position
+  var x = Math.ceil(0.5*len/time+46) ; //x is the time line position
+
+  /*Draw the arrow*/
+	chart.fillStyle = rgba;
+	chart.beginPath();
+	chart.moveTo(x-3,y+3);
+	chart.lineTo(x,y-3);
+	chart.lineTo(x+3,y+3);
+  chart.closePath();
+  chart.fill();
+
+  //Draw the text
+  chart.fillStyle ="rgba(0,0,0,0.6)";
+	chart.beginPath();
+	chart.font = "nomal 10px Arial";
+	chart.fillText(text,x+6,y+3);
+  chart.closePath();
+  chart.fill();
+}
+
+/*drawLine(temp1,temp2,rgb) temp1,temp2: points; rgb: rgb color, X:point2 time line */
+function drawLine(temp1,temp2,X,rgb){
+	var canvas = document.getElementById("myCanvas");
+	var chart = canvas.getContext("2d");
+	len = Math.ceil($("#myCanvas").width() * 0.9);
+	hei = Math.ceil($("#myCanvas").height() * 0.8);
+
+	if (temp1 == -274 && temp2 != -274){
+		var x1 = Math.ceil((X-1.5)*len/time+46) ; //x1 is the time line position
+		var y1 = (tempHigh - temp1)*(hei/(tempHigh-tempLow))+44; //y1 is the temp1 line position
+		chart.fillStyle = rgb;
+		/*Draw point1*/
+		chart.beginPath();
+		chart.arc(x1, y1, 3, 0, 2 * Math.PI);
+		chart.fill();
+
+	}
+	else{
+		var x1 = Math.ceil((X-1.5)*len/time+46) ; //x1 is the time line position
+		var x2 = Math.ceil((X-0.5)*len/time+46) ; //x2 is the time line position
+		var y1 = (tempHigh - temp1)*(hei/(tempHigh-tempLow))+44; //y1 is the temp1 line position
+		var y2 = (tempHigh - temp2)*(hei/(tempHigh-tempLow))+44; //y2 is the temp1 line position
+		chart.fillStyle = rgb;
+
+		/*Draw Line*/
+		chart.strokeStyle = rgb;
+		chart.beginPath();
+		chart.moveTo(x1,y1);
+		chart.lineTo(x2,y2);
+		chart.stroke();
+
+		/*Draw point1*/
+		chart.beginPath();
+		chart.arc(x1, y1, 3, 0, 2 * Math.PI);
+		chart.fill();
+
+		/*Draw point2*/
+		chart.beginPath();
+		chart.arc(x2, y2, 3, 0, 2 * Math.PI);
+		chart.fill();
+
+	}
+}
+
+function refreshTime(){
+    var canvas = document.getElementById("myCanvas");
+  	var chart = canvas.getContext("2d");
+
+  	len = Math.ceil($("#myCanvas").width() * 0.9);
+  	hei = Math.ceil($("#myCanvas").height() * 0.8);
+    //cler top of chart
+    chart.fillStyle="#ffffff";
+    chart.fillRect(54, 0, len+10, 40);
+    chart.fill();
+    //clear bottom of chart
+    chart.fillStyle="#ffffff";
+    chart.fillRect(54, 50 + hei, len+64, hei+80);
+    chart.fill();
+
+    //print time line
+
+}
+
+
+function updateChart(temp,time,tempHigh,msg,realTime){
+	drawFrame(temp,time,tempHigh);
+	for(i =0 ; i< msg.length; i++){
+		if(msg[i].temp.length == 1){drawLine(-274,msg[i].temp[0],(realTime-msg[i].startTime)/(1000*5*time),msg[i].rgba)} //only draw one point
+		else{
+      if(msg[i].temp.length <= time){ //canvas not full
+          for(j = 0; j < msg[i].temp.length-1; j++){
+            //if(msg[i].temp[j]>tempHigh)  { tempHigh = msg[i].temp[j] ;updateChart(temp,time,tempHigh,msg,realTime);}
+            drawLine(msg[i].temp[j],msg[i].temp[j+1],(j+1)%time+1,msg[i].rgba);
+
+          }
+          drawLabel(msg[i].temp[0],"id: "+ msg[i].id,msg[i].rgba);
+      }
+      else {
+
+      }
+
+		}
+
+    refreshTime();
+	}
+}
+
+$( document ).ready(function() {
+  temp = $("#Temp").val();
+  time = $("#Time").val();
+  tempHigh = $(".input[name = HTemp]").val();
+  tempLow = $(".input[name = LTemp]").val();
+	drawText(temp,tempHigh,tempLow);
+  drawFrame(temp,time,tempHigh);
+  $(".submit").hover(function(){
+			$(this).stop().animate({
+				opacity:"0.8"
+				}, 500);
+			},function(){
+				$(this).stop().animate({
+				opacity:"1"
+			}, 500);
+	});
+
+  $( "#Temp" ).change(function() {
+    temp = $("#Temp").val();
+    drawFrame(temp,time,tempHigh);
+  });
+
+  $( "#Time" ).change(function() {
+    time = $("#Time").val();
+    drawFrame(temp,time,tempHigh);
+  });
+
+  $( ".submit" ).click(function() {
+    tempHigh = $(".input[name = HTemp]").val();
+    tempLow = $(".input[name = LTemp]").val();
+    drawText(temp,tempHigh,tempLow);
+  });
+
+});
+
+</script>
+
+  <!--external files ending-->
+    <p class="red" >Boston University</p>
+    <p class="gray" >Group 1, ENG EC544</p>
+    <p class="gray" >Pete,Carlos, Hao, Avi, Ying</p>
+    <p class="red" >time slot issue</p>
+    <p class="red" >mouse position</p>
+    <p class="red" >refresh</p>
+    <ul id="messages"></ul>
+    <div id="info"></div>
+    <canvas id="myCanvas"  width="1000px" height="400px"style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+    <p class="gray">Temp. High: <input class="input" type="text" name="HTemp" value="32">&nbsp;&#8451;&nbsp;
+    Temp. Low: <input class="input"  type="text" name="LTemp" value="25">&nbsp;&#8451;&nbsp;<input class="submit" type="submit" value="Submit">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Temp. Grids:&nbsp;&nbsp;
+    <select id="Temp">
+      <option value="2">2</option>
+      <option value="4">4</option>
+      <option value="6">6</option>
+      <option value="8">8</option>
+      <option value="10">10</option>
+      <option value="12" selected>12</option>
+      <option value="14">14</option>
+      <option value="16">16</option>
+      <option value="18">18</option>
+      <option value="20">20</option>
+    </select>&nbsp;&nbsp;
+    Time. Grids:
+    <select id="Time">
+      <option value="4">4</option>
+      <option value="8">8</option>
+      <option value="12">12</option>
+      <option value="16">16</option>
+      <option value="20" selected>20</option>
+    </select></p>
+    <!--<form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>-->
+    <script src="/socket.io/socket.io.js"></script>
+
+  </body>
+</html>
