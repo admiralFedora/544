@@ -60,9 +60,9 @@ function addSensor(id, x, y, temp, time){
   });
 }
 
-// time is formated as YYYY-MM-DD HH:MM::SS
+// time is formated as YYYY-MM-DD HH:MM:SS
 function addTemperature(id, temp, time){
-  connection.query('INSERT INTO `temperatures` (time, temp, sensors_id) VALUES (?, ?, ?)', [time, temp, id], function(error, row, fields){
+  connection.query('INSERT INTO `temperatures` (time, temp, sensors_id) VALUES (?, ?, ?)', [getTimeStamp(), temp, id], function(error, row, fields){
     if(!error){
       console.log("row was added\n");
     } else {
@@ -84,7 +84,23 @@ function queryTempBySensor(id){
 }
 
 function queryAverage(){
-  
+  connection.query('SELECT * FROM `average` ORDER BY `time` ASC', function(error, row, fields){
+    if(!error){
+      // do stuff here
+    } else {
+      console.log("oh noes\n");
+    }
+  });
+}
+
+function insertAverage(value){
+  connection.query('INSERT INTO `average` (average, time) VALLUES (?, ?)', [value, getTimeStamp()], function(error, row, fields){
+    if(!error){
+      // do stuff here
+    } else {
+      console.log("oh noes\n");
+    }
+  });
 }
 
 addTemperature(51, 20, getTimeStamp());
