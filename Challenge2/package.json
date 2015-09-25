@@ -1,0 +1,23 @@
+{
+  "name": "ec544_arduino_sketches",
+  "version": "0.0.1",
+  "description": "Demos for EC544 at Boston University",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nesciosquid/EC544_Arduino_sketches.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nesciosquid/EC544_Arduino_sketches/issues"
+  },
+  "homepage": "https://github.com/Nesciosquid/EC544_Arduino_sketches#readme",
+  "devDependencies": {
+    "express": "^4.13.3",
+    "serialport": "^1.7.4",
+    "socket.io": "^1.3.6"
+  }
+}
