@@ -1,7 +1,10 @@
+#include "EEPROMAnything.h"
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
 #include <string.h>
 SoftwareSerial XBee(2, 3); // Rx, Tx
+
+#define VERSION 1
 
 #define BAUD_RATE 9600
 #define PIN A0
@@ -15,16 +18,18 @@ SoftwareSerial XBee(2, 3); // Rx, Tx
 #define TEMPERATURENOMINAL 25
 #define BCOEFFICIENT 3950
 
-#define IDREQUEST "IDREQUEST"
-#define REQUEST "REQUEST"
-
 int id;
-bool identified;
-char phrase[13];
+
+typedef struct {
+  int version;
+  int id;
+} identification;
+
+identification identity;
 
 void sendJson(float reading){
   char buffer[100];
-  StaticJsonBuffer<200> jsonBuffer;
+  StaticJsonBuffer<100> jsonBuffer;
 
   memset(buffer, 0, sizeof(buffer));
 
@@ -64,12 +69,22 @@ void setup() {
   XBee.begin(BAUD_RATE);
   Serial.begin(BAUD_RATE);
   analogReference(EXTERNAL);
-  randomSeed(analogRead(PIN)); // seed value from the thermistor
-  id = random(10000,32767); // generate a specific ID for this device
-  memset(phrase, 0, sizeof(phrase));
-  // create the phrase we'll be looking for
-  sprintf(phrase, "%s%d", REQUEST, id);
-  identified = false;
+
+  EEPROM_readAnything(0, identity);
+
+  if(identity.version == VERSION){
+    id = identity.id;
+    Serial.print("found old id\n");
+  } else {
+    randomSeed(analogRead(PIN)); // seed value from the thermistor
+    id = random(10000,32767); // generate a specific ID for this device
+
+    identity.id = id;
+    identity.version = VERSION;
+
+    EEPROM_writeAnything(0, identity);
+    Serial.print("write id\n");
+  }
 }
 
 void loop() {
@@ -81,5 +96,5 @@ void loop() {
   reading = steinhart(reading); // Temperature
   sendJson(reading);
   XBee.flush();
-  delay(5000);
+  delay(2000);
 }

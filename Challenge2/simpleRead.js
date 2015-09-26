@@ -8,11 +8,11 @@ var gcounter = 0;
 var dataSet = [];// most recently 20 temp records for all sensors; ************
 /**/
 function printD(){
-	console.log("\n\n"+"---------------------------------");
+	console.log("\n\n"+"----------------------------------------------------------");
 	for(i= 0 ; i< dataSet.length; i++){
 		console.log(dataSet[i].id +"  | "+ dataSet[i].temp + " | "+ dataSet[i].rgba+ " | "+dataSet[i].startTime)
 	}
-	console.log("---------------------------------"+"\n\n");
+	console.log("----------------------------------------------------------------"+"\n\n");
 }
 
 /**/
@@ -33,22 +33,22 @@ function addSenData(id,temp){
 	 var rgba;
 	 switch(ran) {
 	    case 1:
-		rgba = "rgba("+id % 4 * ran +"," + ran*40 + ","+ 25  +",0.6)";
+		rgba = "rgba("+id % 4 * ran +"," + ran*40 + ","+ 25  +",0.8)";
 		break;
 	    case 2:
-		rgba = "rgba("+ 230 +"," + id % 100 + 160  + "," +ran*25  +",0.6)";
+		rgba = "rgba("+ 230 +"," + id % 100 + 160  + "," +ran*25  +",0.8)";
 		break;
 	    case 3:
-		rgba = "rgba("+248 +"," +130  + ","+id % 100 + 150  +",0.6)";
+		rgba = "rgba("+248 +"," +130  + ","+id % 100 + 150  +",0.8)";
 		break;
 	    case 4:
-		rgba = "rgba("+ran *25 +"," + id % 100 + 150  + ","+130  +",0.6)";
+		rgba = "rgba("+ran *25 +"," + id % 100 + 150  + ","+130  +",0.8)";
 		break;
 	    case 5:
-		rgba = "rgba("+ 210 +"," + ran*30 + "," +id % 100 + 20 +",0.6)";
+		rgba = "rgba("+ 210 +"," + ran*30 + "," +id % 100 + 20 +",0.8)";
 		break;
 	    case 6:
-		rgba = "rgba("+id % 100 + 130+","+130  + ","+ran*35  +",0.6)";
+		rgba = "rgba("+id % 100 + 130+","+130  + ","+ran*35  +",0.8)";
 		break;
 }
 	 dataSet.push({"id":id,"temp":[temp],"rgba":rgba,"startTime":n});
@@ -58,11 +58,11 @@ function addSenData(id,temp){
 function updateSenData(data){
         var curData = JSON.parse(data);
 	var id = curData.id;
-	var temp = curData.temp;	
+	var temp = curData.temp;
 	for(i = 0; i < dataSet.length; i++){
 		//console.log("i: "+ i + "  dataSet.length: "+dataSet.length);
 		//console.log("id: "+id +"  dataid: "+dataSet[i].id);
-		
+
 		if(id == dataSet[i].id){
 			dataSet[i].temp.push(temp);  //add a new temp
 			//console.log("dataSet["+i+"].temp: "+dataSet[i].temp+"\n");
@@ -70,7 +70,7 @@ function updateSenData(data){
 				dataSet[i].temp.splice(0, 1);
 			}
 			return;
-		}		
+		}
 	}
 	addSenData(id,temp);
 
@@ -157,10 +157,11 @@ sp.on("open", function () {
   sp.on('data', function(data) {
     recordData(data);
     updateSenData(data);
+		printD();// for testing
     io.emit("chat message", dataSet);
   });
   // every 5 seconds we'll read from our list of sensors
   setInterval(printAverage, 15000);
   // send data to html every 5 sec ******************************************
-  
+
 });
