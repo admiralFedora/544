@@ -4,6 +4,8 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var array = [];
 var gcounter = 0;
+var colorSet = ["rgba(19,78,15,0.8)","rgba(252,227,15,0.8)","rgba(252,43,15,0.8)","rgba(58,188,18,0.8)","rgba(255,176,24,0.8)","rgba(28,164,251,0.8)","rgba(140,15,176,0.8)","rgba(176,15,114,0.8)",
+"rgba(127,2,3,0.8)","rgba(72,72,72,0.8)","rgba(168,255,0,0.8)","rgba(0,36,85,0.8)","rgba(3,119,82,0.8)"]// 12 main colors;
 
 var dataSet = [];// most recently 20 temp records for all sensors; ************
 /**/
@@ -29,34 +31,45 @@ function sensor(id, temp, counter){
 function addSenData(id,temp){
  	 var d = new Date();
 	 var n = d.getTime();
-	 var ran = Math.floor( Math.random() * (id%10) ) + 1;
+	 var ran = Math.floor( Math.random() * 12 ) + 1;
 	 var rgba;
-	 switch(ran) {
-	    case 1:
-		rgba = "rgba("+id % 4 * ran +"," + ran*40 + ","+ 25  +",0.8)";
-		break;
-	    case 2:
-		rgba = "rgba("+ 230 +"," + id % 100 + 160  + "," +ran*25  +",0.8)";
-		break;
-	    case 3:
-		rgba = "rgba("+248 +"," +130  + ","+id % 100 + 150  +",0.8)";
-		break;
-	    case 4:
-		rgba = "rgba("+ran *25 +"," + id % 100 + 150  + ","+130  +",0.8)";
-		break;
-	    case 5:
-		rgba = "rgba("+ 210 +"," + ran*30 + "," +id % 100 + 20 +",0.8)";
-		break;
-	    case 6:
-		rgba = "rgba("+id % 100 + 130+","+130  + ","+ran*35  +",0.8)";
-		break;
-}
+
+	 if( ran % colorSet.length < colorSet.length){ rgba = colorSet[ran-1]; colorSet.splice(ran-1,1);}//remove the color that has been used
+	 else{
+		 switch(ran % 5) { //randomly generate
+			  case 0:
+		 rgba = "rgba("+id % 10 + 130+"," + 130  + ","+ ran % 5*35  +",0.8)";
+		 break;
+		    case 1:
+			rgba = "rgba("+id % 4 * ran +"," + ran % 6 * 40 + ","+ 25  +",0.8)";
+			break;
+		    case 2:
+			rgba = "rgba("+ 230 +"," + id % 10 + 120  + "," +ran%5*25  +",0.8)";
+			break;
+		    case 3:
+			rgba = "rgba("+28 +"," +ran % 5 *25  + ","+ id % 10 + 120  +",0.8)";
+			break;
+		    case 4:
+			rgba = "rgba("+ran%7 *25 +"," + id % 10 + 130  + ","+45 +",0.8)";
+			break;
+	 };
+  }
+
 	 dataSet.push({"id":id,"temp":[temp],"rgba":rgba,"startTime":n});
+}
+
+function deleteSenData(id){
+	for(i = 0; i < dataSet.length; i++){
+		if(dataSet[i].id == id){
+			dataSet.splice(i,1);
+			return;
+		}
+	}
 }
 
 /*update existed sensor's new temp**************************************************/
 function updateSenData(data){
-        var curData = JSON.parse(data);
+  var curData = JSON.parse(data);
 	var id = curData.id;
 	var temp = curData.temp;
 	for(i = 0; i < dataSet.length; i++){
@@ -111,6 +124,7 @@ function printAverage(){
       console.log("sensor " + sen.id + " has died\n");
       // remove dead sensor from list
       array.splice(i, 1);
+			deleteSenData(sen.id);
     } else {
       console.log("sensor " + sen.id + " temp: " + sen.temp + "*C\n");
       average += sen.temp;
@@ -161,7 +175,7 @@ sp.on("open", function () {
     io.emit("chat message", dataSet);
   });
   // every 5 seconds we'll read from our list of sensors
-  setInterval(printAverage, 15000);
+  setInterval(printAverage, 10000);
   // send data to html every 5 sec ******************************************
 
 });
