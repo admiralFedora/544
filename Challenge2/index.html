@@ -391,7 +391,7 @@ function updateChart(temp,time,tempHigh,msg,realTime){
             if(maxTemp < msg[i].temp[j]){ maxTemp = msg[i].temp[j]; highPos[0] = (j+1-(msg[i].temp.length - time))%time; highPos[1] = maxTemp;};
             if(minTemp > msg[i].temp[j]){ minTemp = msg[i].temp[j]; lowPos[0] = (j+1-(msg[i].temp.length - time))%time; lowPos[1] = minTemp; };
           }
-          drawLabel(1,msg[i].temp[0],"id: "+ msg[i].id,msg[i].rgba);//
+          drawLabel(1,msg[i].temp[msg[i].temp.length-time],"id: "+ msg[i].id,msg[i].rgba);//
         }else{//end temp value at right side
           var LineBegin = time-msg[i].temp.length;
           for(j = 0; j < msg[i].temp.length; j++){
@@ -402,6 +402,7 @@ function updateChart(temp,time,tempHigh,msg,realTime){
             if(maxTemp < msg[i].temp[j]){ maxTemp = msg[i].temp[j]; highPos[0] = (j+LineBegin)%time; highPos[1] = maxTemp;};
             if(minTemp > msg[i].temp[j]){ minTemp = msg[i].temp[j]; lowPos[0] = (j+LineBegin)%time; lowPos[1] = minTemp; };
         };
+        drawLabel(1,msg[i].temp[LineBegin],"id: "+ msg[i].id,msg[i].rgba);//
   		};
   	};
   };
