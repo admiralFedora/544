@@ -66,11 +66,14 @@
     //$('#messages').append($('<li>').text(msg[0].temp));
     var d = new Date();
     var realTime = d.getTime(); //in millisec
+    Gmsg = msg;
+
     temp = $("#Temp").val();
     time = $("#Time").val();
     tempHigh = $(".input[name = HTemp]").val();
     tempLow = $(".input[name = LTemp]").val();
     updateChart(temp,time,tempHigh,msg,realTime);
+
 
   });
 
@@ -78,7 +81,8 @@ var temp;  //temp: # of lines
 var time;  // time:# of colums
 var tempHigh; //  tempHigh: highest temp
 var tempLow; //  tempHigh: highest temp
-var tableGrids; //check ifthe chart is full
+var tableFull = false; //check if the chart is full; bolean
+var Gmsg = []; // globle msg for data searching;
 
 /*DrawFrame: temp: # of lines, time:# of colums, tempHigh: highest temp */
 function drawFrame(temp,time,tempHigh){
@@ -187,13 +191,13 @@ function drawTag(X,curTemp,text){
 }
 
 /*drawTag draw a label, at position(x,y) with a label of id*/
-function drawLabel(temp2,text,rgba){
+function drawLabel(X,temp2,text,rgba){
 
 	var canvas = document.getElementById("myCanvas");
 	var chart = canvas.getContext("2d");
   var len = Math.ceil($("#myCanvas").width() * 0.9);
   var y = (tempHigh - temp2)*(hei/(tempHigh-tempLow))+52; //y is the temp position
-  var x = Math.ceil(0.5*len/time+46) ; //x is the time line position
+  var x = Math.ceil((X-0.5)*len/time+46) ; //x is the time line position
 
   /*Draw the arrow*/
 	chart.fillStyle = rgba;
@@ -207,14 +211,14 @@ function drawLabel(temp2,text,rgba){
   //Draw the text
   chart.fillStyle ="rgba(0,0,0,0.6)";
 	chart.beginPath();
-	chart.font = "nomal 10px Arial";
+	chart.font = "nomal 12px Arial";
 	chart.fillText(text,x+6,y+3);
   chart.closePath();
   chart.fill();
 }
 
 /*drawLine(temp1,temp2,rgb) temp1,temp2: points; rgb: rgb color, X:point2 time line */
-function drawLine(temp1,temp2,X,rgb){
+function drawLine(temp1,temp2,X,rgb,w,type){
 	var canvas = document.getElementById("myCanvas");
 	var chart = canvas.getContext("2d");
 	len = Math.ceil($("#myCanvas").width() * 0.9);
@@ -226,6 +230,7 @@ function drawLine(temp1,temp2,X,rgb){
 		chart.fillStyle = rgb;
 		/*Draw point1*/
 		chart.beginPath();
+    chart.lineWidth = w;
 		chart.arc(x1, y1, 3, 0, 2 * Math.PI);
 		chart.fill();
 
@@ -235,52 +240,79 @@ function drawLine(temp1,temp2,X,rgb){
 		var x2 = Math.ceil((X-0.5)*len/time+46) ; //x2 is the time line position
 		var y1 = (tempHigh - temp1)*(hei/(tempHigh-tempLow))+44; //y1 is the temp1 line position
 		var y2 = (tempHigh - temp2)*(hei/(tempHigh-tempLow))+44; //y2 is the temp1 line position
-		chart.fillStyle = rgb;
 
-		/*Draw Line*/
-		chart.strokeStyle = rgb;
-		chart.beginPath();
-		chart.moveTo(x1,y1);
-		chart.lineTo(x2,y2);
-		chart.stroke();
+    /*Draw Line*/
+    chart.strokeStyle = rgb;
+    chart.lineWidth = w;
+    chart.beginPath();
+    chart.moveTo(x1,y1);
+    chart.lineTo(x2,y2);
+    chart.stroke();
 
-		/*Draw point1*/
-		chart.beginPath();
-		chart.arc(x1, y1, 3, 0, 2 * Math.PI);
-		chart.fill();
+    if(type = 1){ //regular line
 
-		/*Draw point2*/
-		chart.beginPath();
-		chart.arc(x2, y2, 3, 0, 2 * Math.PI);
-		chart.fill();
+  		/*Draw point1*/
+      chart.fillStyle = rgb;
+      chart.lineWidth = w;
+  		chart.beginPath();
+  		chart.arc(x1, y1, 3, 0, 2 * Math.PI);
+  		chart.fill();
+
+  		/*Draw point2*/
+      chart.lineWidth = w;
+  		chart.beginPath();
+  		chart.arc(x2, y2, 3, 0, 2 * Math.PI);
+  		chart.fill();
+    }
+    else{  // ave line
+
+  		/*Draw point1*/
+      chart.fillStyle = rgb;
+      chart.lineWidth = w;
+  		chart.beginPath();
+  		chart.rect(x1-1, y1-1, 4, 4);
+  		chart.fill();
+
+  		/*Draw point2*/
+      chart.lineWidth = w;
+  		chart.beginPath();
+  		chart.rect(x2-1, y2-1, 4, 4);
+  		chart.fill();
+    };
+
 
 	}
 }
 
 function drawMouseInfo(){//draw temp & time info on Canvas
 
-  function writeMessage(canvas, message) {
-    var len = Math.ceil($("#myCanvas").width() * 0.9);
-    var context = canvas.getContext('2d');
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        context.font = '18pt Calibri';
-        context.fillStyle = 'black';
-        context.fillText(message, 50+len, 25);
-      }
+  var canvas = document.getElementById('myCanvas');
+  var chart = canvas.getContext('2d');
+  var len = Math.ceil($("#myCanvas").width() * 0.9);
+  var hei = Math.ceil($("#myCanvas").height() * 0.8);
 
-      function getMousePos(canvas, evt) {
+  function getMousePos(canvas, evt) {
         var rect = canvas.getBoundingClientRect();
         return {
           x: evt.clientX - rect.left,
           y: evt.clientY - rect.top
         };
-      }
-      var canvas = document.getElementById('myCanvas');
-      var context = canvas.getContext('2d');
+      };
 
-      canvas.addEventListener('mousemove', function(evt) {
+  function writeMessage(canvas, message) {
+    var chart = canvas.getContext('2d');
+        chart.clearRect(len-50, 5, 180, 25);
+        chart.font = '12px Calibri';
+        chart.fillStyle = "rgba(19,143,150,0.6)";
+        chart.fillText(message, len-50, 25);
+      };
+
+  canvas.addEventListener('mousemove', function(evt) {
         var mousePos = getMousePos(canvas, evt);
-        var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
+        var m1 = "";//message 1: Time
+        var m2 = (tempHigh-(mousePos.y- 44)/(hei/(tempHigh-tempLow))).toFixed(2);//message 1: Temp
+        //y1 = (tempHigh - temp1)*(hei/(tempHigh-tempLow))+44
+        var message =  Math.ceil(mousePos.x) + '; Temp: ' + m2;
         writeMessage(canvas, message);
       }, false);
 };
@@ -293,7 +325,7 @@ function refreshTime(sTime){
   	hei = Math.ceil($("#myCanvas").height() * 0.8);
     //cler top of chart
     chart.fillStyle="#ffffff";
-    chart.fillRect(42, 0, len+10, 40);
+    chart.fillRect(40, 0, len+10, 40);
     chart.fill();
 
     //clear bottom of chart
@@ -320,30 +352,61 @@ function updateChart(temp,time,tempHigh,msg,realTime){
   var minTemp=1000; // calculate the minimum temp, reset chart scroll
   var highPos = [0,0];  //maxmium temp , for print label
   var lowPos = [0,0];  // minimum temp, for print label
+  var ave = []; // data for drawing the ave line
   var d = new Date();
 	var n = d.getHours()*3600 + d.getMinutes()*60 + d.getSeconds();
+  var sT = new Date(msg[0].startTime); //First start time
+  var n2 = sT.getHours()*3600 + sT.getMinutes()*60 + sT.getSeconds();
 
 	drawFrame(temp,time,tempHigh);
-	for(i =0 ; i< msg.length; i++){
-		if(msg[i].temp.length == 1){drawLine(-274,msg[i].temp[0],(realTime-msg[i].startTime)/(1000*5*time),msg[i].rgba)} //only draw one point
-		else{
-      if(msg[i].temp.length <= time){ //canvas not full, draw from right side,
-          for(j = 0; j < msg[i].temp.length-1; j++){
-            //if(msg[i].temp[j]>tempHigh)  { tempHigh = msg[i].temp[j] ;updateChart(temp,time,tempHigh,msg,realTime);}
-            drawLine(msg[i].temp[j],msg[i].temp[j+1],(j+1)%time+1,msg[i].rgba);
-            if(maxTemp < msg[i].temp[j]){ maxTemp = msg[i].temp[j]; highPos[0] = (j+1)%time; highPos[1] = maxTemp;};
-            if(minTemp > msg[i].temp[j]){ minTemp = msg[i].temp[j]; lowPos[0] = (j+1)%time; lowPos[1] = minTemp; };
+  //if ((realTime-msg[0].startTime)/1000 >= 3 * time) {tableFull = true} else {tableFull = false}; //check if the table is full, compare to first start time
+  if (msg[0].temp.length >= time) {tableFull = true} else {tableFull = false}; //check if the table is full, compare to first start time
+  if(!tableFull){//if chart is not full, draw from left to right, left side is the current time
+    outerLoop:{
+      for(i =0 ; i < msg.length; i++){
+        var startX = Math.round((msg[i].startTime - msg[0].startTime) / 1000 / 5)+1;//begin to draw line in time line
+    		if(msg[i].temp.length == 1){drawLine(-274,msg[i].temp[0],2,msg[i].rgba);} //only draw one point
+    		else{
+          for(j = 0; j < time-startX; j++){
+            drawLine(msg[i].temp[j],msg[i].temp[j+1],startX+j+1,msg[i].rgba,1,2);
+            ave[startX+j] = ((ave[startX+j] + msg[i].temp[j]) / msg.length).toFixed(2);
+            console.log( ((ave[startX+j] + msg[i].temp[j]) / msg.length).toFixed(2));
+            if(maxTemp < msg[i].temp[j]){ maxTemp = msg[i].temp[j]; highPos[0] = (j+startX) % time; highPos[1] = maxTemp;};
+            if(minTemp > msg[i].temp[j]){ minTemp = msg[i].temp[j]; lowPos[0] = (j+startX) % time; lowPos[1] = minTemp; };
           }
-          drawLabel(msg[i].temp[0],"id: "+ msg[i].id,msg[i].rgba);
-      }
-      else {
-
-      }
-
-		}
-	}
-  refreshTime(n);//n is the current time in sec******************
-  //drawMouseInfo();
+          drawLabel(startX,msg[i].temp[0],"id: "+ msg[i].id,msg[i].rgba);
+    		};
+    	};
+    }
+    refreshTime(n2); //n is the current time in sec******************
+  }else if(tableFull){//draw from right to left, right side is the current time
+    for(i =0 ; i < msg.length; i++){
+  		if(msg[i].temp.length == 1){drawLine(-274,msg[i].temp[0],(realTime-msg[i].startTime)/(1000*5*time),msg[i].rgba)} //?only draw one point
+  		else{
+        if( time <= msg[i].temp.length){//draw from left side
+          for(j = msg[i].temp.length - time; j < msg[i].temp.length-1; j++){
+            drawLine(msg[i].temp[j],msg[i].temp[j+1],(j+1-(msg[i].temp.length - time))%time+1,msg[i].rgba,1,2);
+            ave[j-(msg[i].temp.length - time)] = ((ave[startX+j] + msg[i].temp[j]) / msg.length).toFixed(2);
+            console.log( ((ave[startX+j] + msg[i].temp[j]) / msg.length).toFixed(2));
+            if(maxTemp < msg[i].temp[j]){ maxTemp = msg[i].temp[j]; highPos[0] = (j+1-(msg[i].temp.length - time))%time; highPos[1] = maxTemp;};
+            if(minTemp > msg[i].temp[j]){ minTemp = msg[i].temp[j]; lowPos[0] = (j+1-(msg[i].temp.length - time))%time; lowPos[1] = minTemp; };
+          }
+          drawLabel(1,msg[i].temp[0],"id: "+ msg[i].id,msg[i].rgba);//
+        }else{//end temp value at right side
+          var LineBegin = time-msg[i].temp.length;
+          for(j = 0; j < msg[i].temp.length; j++){
+            //console.log("grids: "+Math.ceil((j+time-msg[i].temp.length)%time+1)+"\n j: "+j+"\n time: "+time+"\n length: "+msg[i].temp.length);
+            drawLine(msg[i].temp[j],msg[i].temp[j+1],(j+LineBegin)%time+1,msg[i].rgba,1,2);
+            ave[j+LineBegin] = ((ave[startX+j] + msg[i].temp[j]) / msg.length).toFixed(2);
+            console.log( ((ave[startX+j] + msg[i].temp[j]) / msg.length).toFixed(2));
+            if(maxTemp < msg[i].temp[j]){ maxTemp = msg[i].temp[j]; highPos[0] = (j+LineBegin)%time; highPos[1] = maxTemp;};
+            if(minTemp > msg[i].temp[j]){ minTemp = msg[i].temp[j]; lowPos[0] = (j+LineBegin)%time; lowPos[1] = minTemp; };
+        };
+  		};
+  	};
+  };
+  refreshTime(n-5*time);//n is the current time in sec******************
+};
 
   $(".input[name = HTemp]").val(Math.floor(maxTemp+1));
   $(".input[name = LTemp]").val(Math.ceil(minTemp-1));
@@ -352,8 +415,11 @@ function updateChart(temp,time,tempHigh,msg,realTime){
   /* Draw wo tags of the highest & lowest temp*/
   drawTag(highPos[0],highPos[1],maxTemp + " *C"); // highest temp
   drawTag(lowPos[0],lowPos[1],minTemp + " *C"); // lowest temp
-  console.log(highPos +"\n"+ lowPos+"\n\n");
-}
+console.log(ave);
+  for(i = 0; i < ave.length-1; i++){//draw ave line
+    drawLine(ave[i],ave[i+1],i+1,"rgba(204,0,0,0.2)",2,1);
+  }
+};
 
 $( document ).ready(function() {
   temp = $("#Temp").val();
@@ -388,6 +454,8 @@ $( document ).ready(function() {
     drawText(temp,tempHigh,tempLow);
   });
 
+  drawMouseInfo();
+
 });
 
 </script>
@@ -395,14 +463,15 @@ $( document ).ready(function() {
   <!--external files ending-->
     <p class="red" >Boston University</p>
     <p class="gray" >Group 1, ENG EC544</p>
-    <p class="gray" >Pete,Carlos, Hao, Avi, Ying</p>
-    <p class="red" >time slot issue</p>
-    <p class="red" >mouse position</p>
+    <p class="gray" >Pete, Carlos, Hao, Avi, Ying</p>
+    <p class="red" >max min tag when new sensor come</p>
     <p class="red" >Draw Average</p>
+    <p class="red" >Draw Info Tag In mouse Info event. fadein fadeout,wrapped circle</p>
+    <p class="red" >Database query</p>
     <ul id="messages"></ul>
     <div id="info"></div>
     <canvas id="myCanvas"  width="1000px" height="400px"style="border:1px solid #d3d3d3;">
-Your browser does not support the HTML5 canvas tag.</canvas>
+    Your browser does not support the HTML5 canvas tag.</canvas>
     <p class="gray">Temp. High: <input class="input" type="text" name="HTemp" value="32">&nbsp;&#8451;&nbsp;
     Temp. Low: <input class="input"  type="text" name="LTemp" value="25">&nbsp;&#8451;&nbsp;<input class="submit" type="submit" value="Submit">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     Temp. Grids:&nbsp;&nbsp;
@@ -430,6 +499,5 @@ Your browser does not support the HTML5 canvas tag.</canvas>
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>-->
     <script src="/socket.io/socket.io.js"></script>
-
   </body>
 </html>

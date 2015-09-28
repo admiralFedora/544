@@ -32,7 +32,7 @@ function addSenData(id,temp){
  	 var d = new Date();
 	 var n = d.getTime();
 	 var ran = Math.floor( Math.random() * 12 ) + 1;
-	 var rgba;
+	 var rgba = "rgba(19,143,150,0.8)";
 
 	 if( ran % colorSet.length < colorSet.length){ rgba = colorSet[ran-1]; colorSet.splice(ran-1,1);}//remove the color that has been used
 	 else{
@@ -49,7 +49,7 @@ function addSenData(id,temp){
 		    case 3:
 			rgba = "rgba("+28 +"," +ran % 5 *25  + ","+ id % 10 + 120  +",0.8)";
 			break;
-		    case 4:
+		    default:
 			rgba = "rgba("+ran%7 *25 +"," + id % 10 + 130  + ","+45 +",0.8)";
 			break;
 	 };
