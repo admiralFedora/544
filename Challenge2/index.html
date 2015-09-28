@@ -66,15 +66,18 @@
     //$('#messages').append($('<li>').text(msg[0].temp));
     var d = new Date();
     var realTime = d.getTime(); //in millisec
+    var ave = [[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],
+               [-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0]];
+               // data for drawing the ave line, structure: [[temp1,Sen#],[temp2,Sen#].........]
     Gmsg = msg;
 
     temp = $("#Temp").val();
     time = $("#Time").val();
     tempHigh = $(".input[name = HTemp]").val();
     tempLow = $(".input[name = LTemp]").val();
+
     updateChart(temp,time,tempHigh,msg,realTime);
-
-
+    if($("#drawAveLine").prop( "checked" )){drawAveLine(msg,ave);};
   });
 
 var temp;  //temp: # of lines
@@ -122,8 +125,6 @@ function drawFrame(temp,time,tempHigh){
 		chart.lineTo(47+len,i*(hei)/temp+45-1);
 	}
 	chart.stroke();
-
-
 }
 
 /*Draw the text   */
@@ -245,43 +246,44 @@ function drawLine(temp1,temp2,X,rgb,w,type){
     chart.strokeStyle = rgb;
     chart.lineWidth = w;
     chart.beginPath();
-    chart.moveTo(x1,y1);
-    chart.lineTo(x2,y2);
+    chart.moveTo(x1+1,y1);
+    chart.lineTo(x2-1,y2);
+    chart.closePath();
     chart.stroke();
 
-    if(type = 1){ //regular line
-
+    if(type == 1){ //regular line
   		/*Draw point1*/
       chart.fillStyle = rgb;
       chart.lineWidth = w;
   		chart.beginPath();
   		chart.arc(x1, y1, 3, 0, 2 * Math.PI);
+      chart.closePath();
   		chart.fill();
 
   		/*Draw point2*/
       chart.lineWidth = w;
   		chart.beginPath();
   		chart.arc(x2, y2, 3, 0, 2 * Math.PI);
-  		chart.fill();
-    }
-    else{  // ave line
-
-  		/*Draw point1*/
-      chart.fillStyle = rgb;
-      chart.lineWidth = w;
-  		chart.beginPath();
-  		chart.rect(x1-1, y1-1, 4, 4);
-  		chart.fill();
-
-  		/*Draw point2*/
-      chart.lineWidth = w;
-  		chart.beginPath();
-  		chart.rect(x2-1, y2-1, 4, 4);
+      chart.closePath();
   		chart.fill();
     };
-
-
 	}
+}
+
+function drawAveLine(msg,ave){
+  for (i = 0; i< msg.length; i++){
+    for( j =0; j< msg[i].temp.length; j++){
+      if(ave[j][0] > -274){
+        ave[j][0] += msg[i].temp[j];
+        ave[j][1] +=1;
+      }else{
+        ave[j]=[msg[i].temp[j],1];
+      }
+    }
+  };
+  for(i = ave.length - time; i < ave.length-1; i++){ //draw ave line
+    drawLine((ave[i][0]/ave[i][1]).toFixed(2),(ave[i+1][0]/ave[i+1][1]).toFixed(2),i+2,"rgba(204,0,0,0.15)",2,2);
+  }
 }
 
 function drawMouseInfo(){//draw temp & time info on Canvas
@@ -328,6 +330,11 @@ function refreshTime(sTime){
     chart.fillRect(40, 0, len+10, 40);
     chart.fill();
 
+    //cler right side of chart
+    chart.fillStyle="#ffffff";
+    chart.fillRect(len+52, 40, 38, hei);
+    chart.fill();
+
     //clear bottom of chart
     chart.fillStyle="#ffffff";
     chart.fillRect(42, 50 + hei, len+64, hei+80);
@@ -352,7 +359,6 @@ function updateChart(temp,time,tempHigh,msg,realTime){
   var minTemp=1000; // calculate the minimum temp, reset chart scroll
   var highPos = [0,0];  //maxmium temp , for print label
   var lowPos = [0,0];  // minimum temp, for print label
-  var ave = []; // data for drawing the ave line
   var d = new Date();
 	var n = d.getHours()*3600 + d.getMinutes()*60 + d.getSeconds();
   var sT = new Date(msg[0].startTime); //First start time
@@ -368,9 +374,7 @@ function updateChart(temp,time,tempHigh,msg,realTime){
     		if(msg[i].temp.length == 1){drawLine(-274,msg[i].temp[0],2,msg[i].rgba);} //only draw one point
     		else{
           for(j = 0; j < time-startX; j++){
-            drawLine(msg[i].temp[j],msg[i].temp[j+1],startX+j+1,msg[i].rgba,1,2);
-            ave[startX+j] = ((ave[startX+j] + msg[i].temp[j]) / msg.length).toFixed(2);
-            console.log( ((ave[startX+j] + msg[i].temp[j]) / msg.length).toFixed(2));
+            drawLine(msg[i].temp[j],msg[i].temp[j+1],startX+j+1,msg[i].rgba,1,1);
             if(maxTemp < msg[i].temp[j]){ maxTemp = msg[i].temp[j]; highPos[0] = (j+startX) % time; highPos[1] = maxTemp;};
             if(minTemp > msg[i].temp[j]){ minTemp = msg[i].temp[j]; lowPos[0] = (j+startX) % time; lowPos[1] = minTemp; };
           }
@@ -381,13 +385,11 @@ function updateChart(temp,time,tempHigh,msg,realTime){
     refreshTime(n2); //n is the current time in sec******************
   }else if(tableFull){//draw from right to left, right side is the current time
     for(i =0 ; i < msg.length; i++){
-  		if(msg[i].temp.length == 1){drawLine(-274,msg[i].temp[0],(realTime-msg[i].startTime)/(1000*5*time),msg[i].rgba)} //?only draw one point
+  		if(msg[i].temp.length == 1){drawLine(-274,msg[i].temp[0],(realTime-msg[i].startTime)/(1000*5*time),msg[i].rgba,1,1)} //?only draw one point
   		else{
         if( time <= msg[i].temp.length){//draw from left side
           for(j = msg[i].temp.length - time; j < msg[i].temp.length-1; j++){
-            drawLine(msg[i].temp[j],msg[i].temp[j+1],(j+1-(msg[i].temp.length - time))%time+1,msg[i].rgba,1,2);
-            ave[j-(msg[i].temp.length - time)] = ((ave[startX+j] + msg[i].temp[j]) / msg.length).toFixed(2);
-            console.log( ((ave[startX+j] + msg[i].temp[j]) / msg.length).toFixed(2));
+            drawLine(msg[i].temp[j],msg[i].temp[j+1],(j+1-(msg[i].temp.length - time))%time+1,msg[i].rgba,1,1);
             if(maxTemp < msg[i].temp[j]){ maxTemp = msg[i].temp[j]; highPos[0] = (j+1-(msg[i].temp.length - time))%time; highPos[1] = maxTemp;};
             if(minTemp > msg[i].temp[j]){ minTemp = msg[i].temp[j]; lowPos[0] = (j+1-(msg[i].temp.length - time))%time; lowPos[1] = minTemp; };
           }
@@ -396,18 +398,16 @@ function updateChart(temp,time,tempHigh,msg,realTime){
           var LineBegin = time-msg[i].temp.length;
           for(j = 0; j < msg[i].temp.length; j++){
             //console.log("grids: "+Math.ceil((j+time-msg[i].temp.length)%time+1)+"\n j: "+j+"\n time: "+time+"\n length: "+msg[i].temp.length);
-            drawLine(msg[i].temp[j],msg[i].temp[j+1],(j+LineBegin)%time+1,msg[i].rgba,1,2);
-            ave[j+LineBegin] = ((ave[startX+j] + msg[i].temp[j]) / msg.length).toFixed(2);
-            console.log( ((ave[startX+j] + msg[i].temp[j]) / msg.length).toFixed(2));
-            if(maxTemp < msg[i].temp[j]){ maxTemp = msg[i].temp[j]; highPos[0] = (j+LineBegin)%time; highPos[1] = maxTemp;};
-            if(minTemp > msg[i].temp[j]){ minTemp = msg[i].temp[j]; lowPos[0] = (j+LineBegin)%time; lowPos[1] = minTemp; };
-        };
-        drawLabel(1,msg[i].temp[LineBegin],"id: "+ msg[i].id,msg[i].rgba);//
-  		};
-  	};
-  };
+            drawLine(msg[i].temp[j],msg[i].temp[j+1],(j+LineBegin+1)%time+1,msg[i].rgba,1,1);
+            if(maxTemp < msg[i].temp[j]){ maxTemp = msg[i].temp[j]; highPos[0] = j+LineBegin+1; highPos[1] = maxTemp;};
+            if(minTemp > msg[i].temp[j]){ minTemp = msg[i].temp[j]; lowPos[0] = j+LineBegin+1; lowPos[1] = minTemp; };
+            };
+          drawLabel(LineBegin+1,msg[i].temp[0],"id: "+ msg[i].id,msg[i].rgba);//
+  		    };
+  	  };
+   };
   refreshTime(n-5*time);//n is the current time in sec******************
-};
+  };
 
   $(".input[name = HTemp]").val(Math.floor(maxTemp+1));
   $(".input[name = LTemp]").val(Math.ceil(minTemp-1));
@@ -416,10 +416,6 @@ function updateChart(temp,time,tempHigh,msg,realTime){
   /* Draw wo tags of the highest & lowest temp*/
   drawTag(highPos[0],highPos[1],maxTemp + " *C"); // highest temp
   drawTag(lowPos[0],lowPos[1],minTemp + " *C"); // lowest temp
-console.log(ave);
-  for(i = 0; i < ave.length-1; i++){//draw ave line
-    drawLine(ave[i],ave[i+1],i+1,"rgba(204,0,0,0.2)",2,1);
-  }
 };
 
 $( document ).ready(function() {
@@ -465,8 +461,6 @@ $( document ).ready(function() {
     <p class="red" >Boston University</p>
     <p class="gray" >Group 1, ENG EC544</p>
     <p class="gray" >Pete, Carlos, Hao, Avi, Ying</p>
-    <p class="red" >max min tag when new sensor come</p>
-    <p class="red" >Draw Average</p>
     <p class="red" >Draw Info Tag In mouse Info event. fadein fadeout,wrapped circle</p>
     <p class="red" >Database query</p>
     <ul id="messages"></ul>
@@ -495,7 +489,9 @@ $( document ).ready(function() {
       <option value="12">12</option>
       <option value="16">16</option>
       <option value="20" selected>20</option>
-    </select></p>
+    </select>&nbsp;&nbsp;
+    <input type="checkbox" id="drawAveLine" checked>Draw Average Line<br>
+  </p>
     <!--<form action="">
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>-->
