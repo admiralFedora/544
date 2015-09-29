@@ -143,11 +143,7 @@
     addHtmlInfo(realTime,ave);
 
     //Print sensor list
-    var idString = "Connected Sensors: ";
-    for(i = 0 ; i< msg.length; i++ ){
-        idString += "<p class = \"idList\">ID: "+msg[i].id +"</p>";
-    }
-    $("#idTag").html(idString);
+    printSensorList();
 
   });
 
@@ -532,6 +528,14 @@ function addHtmlInfo(realTime,ave){
   + s.substring(3,5) + " &nbsp;&#8451</div><br/><p class=\"time\"> Real-Time: "+ t +"</p>" );
 }
 
+function printSensorList(){//Print sensor list
+  var idString = "Connected Sensors: ";
+  for(i = 0 ; i< Gmsg.length; i++ ){
+      idString += "<p class = \"idList\">ID: "+Gmsg[i].id +"</p>";
+  }
+  $("#idTag").html(idString);
+}
+
 $( document ).ready(function() {
   temp = $("#Temp").val();
   time = $("#Time").val();
@@ -567,17 +571,19 @@ $( document ).ready(function() {
 
   drawMouseInfo();
 
+  $("#printSensors").change(function() {
+    $( "#idTag" ).toggle( "slow" );
+  });
+
   var rightAlign = 0;
   if($(window).width() - $("#myCanvas").width() > 165 ){
-    rightAlign = $(window).width() - $("#myCanvas").width() - 65 - 120 ;
+    rightAlign = $(window).width() - $("#myCanvas").width() - 65 - 130 ;
   }else {
     rightAlign = 20;
   }
   $("#idTag").css({"position":"absolute","right":rightAlign,"top":"273px"});
 
-  var mouseX;
-  var mouseY;
-  $("#idTag").mousedown();
+
 });
 
 </script>
@@ -592,7 +598,7 @@ $( document ).ready(function() {
     <canvas id="myCanvas"  width="1000px" height="400px"style="border:1px solid #d3d3d3;">
     Your browser does not support the HTML5 canvas tag.</canvas>
     <p class="gray">Temp. High: <input class="input" type="text" name="HTemp" value="32">&nbsp;&#8451;&nbsp;
-    Temp. Low: <input class="input"  type="text" name="LTemp" value="25">&nbsp;&#8451;&nbsp;<input class="submit" type="submit" value="Submit">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Temp. Low: <input class="input"  type="text" name="LTemp" value="25">&nbsp;&#8451;&nbsp;<!--<input class="submit" type="submit" value="Submit">&nbsp;&nbsp;-->&nbsp;&nbsp;&nbsp;
     Temp. Grids:&nbsp;&nbsp;
     <select id="Temp">
       <option value="2">2</option>
@@ -614,7 +620,8 @@ $( document ).ready(function() {
       <option value="16">16</option>
       <option value="20" selected>20</option>
     </select>&nbsp;&nbsp;
-    <input type="checkbox" id="drawAveLine" checked>Draw Average Line<br>
+    <input type="checkbox" id="drawAveLine" checked>Draw Average Line &nbsp;&nbsp;
+    <input type="checkbox" id="printSensors" checked>Print Connected Sensors<br>
     </p>
     <div id="idTag"></div>
     <div id="mouseInfoTag"></div>
