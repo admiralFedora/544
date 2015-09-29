@@ -54,7 +54,8 @@ function addSensor(id, x, y, temp, time){
       console.log("new sensor was added\n");
       addTemperature(id, temp, time);
     } else {
-      console.log('oh noes\n');
+      console.log('error adding sensor\n');
+      console.log(error);
       return false;
     }
   });
@@ -66,7 +67,7 @@ function addTemperature(id, temp, time){
     if(!error){
       console.log("row was added\n");
     } else {
-      console.log("oh noes\n");
+      console.log("error adding temperature\n");
       console.log(error);
       addSensor(id, 0, 0, temp, time);
     }
@@ -78,7 +79,7 @@ function queryTempBySensor(id){
     if(!error){
       console.log(row);
     } else {
-      console.log("oh noes\n");
+      console.log("error querying temp by sensor\n");
       console.log(error);
     }
   });
@@ -89,7 +90,7 @@ function queryTempBySensorRange(id, time1, time2){
     if(!error){
       // do stuff here
     } else {
-      console.log("error encountered\n");
+      console.log("error querying temp by sensor range\n");
       console.log(error);
     }
   })
@@ -100,7 +101,8 @@ function queryAverage(){
     if(!error){
       // do stuff here
     } else {
-      console.log("oh noes\n");
+      console.log("error querying average\n");
+      console.log(error);
     }
   });
 }
@@ -110,7 +112,7 @@ function querAverageRange(time1, time2){
     if(!error){
       // do stuff here
     } else {
-      console.log("error occured");
+      console.log("error querying average range");
       console.log(error);
     }
   });
@@ -121,7 +123,8 @@ function insertAverage(value){
     if(!error){
       // do stuff here
     } else {
-      console.log("oh noes\n");
+      console.log("error inserting average\n");
+      console.log(error);
     }
   });
 }
