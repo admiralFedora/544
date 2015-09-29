@@ -74,17 +74,18 @@ function addTemperature(id, temp, time){
 }
 
 function queryTempBySensor(id){
-  connection.query('SELECT * FROM `sensors` WHERE `id`=? ORDER BY `time` ASC', [id], function(error, row, fields){
+  connection.query('SELECT * FROM `temperatures` WHERE `sensors_id`=? ORDER BY `time` ASC', [id], function(error, row, fields){
     if(!error){
-      // do stuff here
+      console.log(row);
     } else {
       console.log("oh noes\n");
+      console.log(error);
     }
   });
 }
 
 function queryTempBySensorRange(id, time1, time2){
-  connection.query('SELECT * FROM `average` WHERE `id`=? `time` BETWEEN ? AND ?', [id, time1, time2], function(error, row, fields){
+  connection.query('SELECT * FROM `temperatures` WHERE `sensors_id`=? `time` BETWEEN ? AND ?', [id, time1, time2], function(error, row, fields){
     if(!error){
       // do stuff here
     } else {
@@ -126,3 +127,5 @@ function insertAverage(value){
 }
 
 addTemperature(51, 20, getTimeStamp());
+addTemperature(1, 50, getTimeStamp());
+queryTempBySensor(1);
