@@ -83,12 +83,34 @@ function queryTempBySensor(id){
   });
 }
 
+function queryTempBySensorRange(id, time1, time2){
+  connection.query('SELECT * FROM `average` WHERE `id`=? `time` BETWEEN ? AND ?', [id, time1, time2], function(error, row, fields){
+    if(!error){
+      // do stuff here
+    } else {
+      console.log("error encountered\n");
+      console.log(error);
+    }
+  })
+}
+
 function queryAverage(){
   connection.query('SELECT * FROM `average` ORDER BY `time` ASC', function(error, row, fields){
     if(!error){
       // do stuff here
     } else {
       console.log("oh noes\n");
+    }
+  });
+}
+
+function querAverageRange(time1, time2){
+  connection.query('SELECT * FROM `average` WHERE `time` BETWEEN ? AND ?', [time1, time2], function(error, row, fields){
+    if(!error){
+      // do stuff here
+    } else {
+      console.log("error occured");
+      console.log(error);
     }
   });
 }
