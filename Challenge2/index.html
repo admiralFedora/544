@@ -9,36 +9,26 @@
   <body>
   <!--external files begin-->
   <style>
-  	body{
-		color:#cc0000;
-	}
 
-	#myCanvas{
-		margin-left:40px;
-	}
-	.red{color:#cc0000}
+	#myCanvas{ margin-left:60px;}
 
-	.gray{color:#646464}
+	.red{ color:#cc0000}
 
-	.animony{color:#138f96}
+	.gray{ color:#646464}
+
+	.animony{ color:#138f96}
 
 	p.red{
 		font-family:sans-serif;
 		font-weight:bold;
-		margin-left:40px;
+		margin-left:60px;
 		font-size:22px;
 		margin-bottom:5px;
 	}
 
-	p.gray{
-		margin-left:40px;
-		margin-top:3px;
-	}
+	p.gray{	margin-left:60px;	margin-top:3px;}
 
-  .input{
-    width:30px;
-    text-align: center;
-  }
+  .input{width:30px;text-align: center;}
 
   .submit{
     border: #138f96 solid 1px;
@@ -52,6 +42,76 @@
     width:60px;
     cursor:pointer;
   }
+
+  #realTimeInfo{ margin-left:62px; margin-top:30px;}
+
+  .time{
+    margin-top:40px;
+    font-size: 18px;
+    font-weight:bold;
+    font-family: Calibri;
+    color:#138f96;
+  }
+
+  .first{
+    float:left;
+    font-size: 45px;
+    font-weight:bold;
+    font-family: Calibri;
+    color:#138f96;
+  }
+
+  .sec{
+    float:left;
+    margin-top:5px;
+    font-size: 35px;
+    font-weight:bold;
+    font-family: Calibri;
+    color:#138f96;
+  }
+
+  #idTag{
+    width:80px;
+    border-radius: 3px;
+    font-family: Calibri;
+    font-style: italic;
+    font-size: 13px;
+    font-weight:bold;
+    opacity:0.6;
+    background-color:#141414;
+    color:#ffffff;
+    padding:10px;
+  }
+
+  .idList{
+    margin-left:10px;
+    font-size: 11px;
+    margin-top: 4px;
+    margin-bottom:4px;
+    margin-right: 14px;
+    text-align: right;
+  }
+  .idList:first-child{ margin-top: 15px;}
+
+
+  .tempClass1{ color:#ff7901; font-size: 10px;}
+  .tempClass2{ color:#0179f4; font-size: 10px;}
+  .infoId{ color:#cc0000; font-size: 12px; font-weight:bold; margin-top:5px; margin-bottom:5px;}
+  #mouseInfoTag > p { margin:3px 5px; }
+  #mouseInfoTag > p:last-child { font-weight:bold; }
+  #mouseInfoTag{
+    position:fixed;
+    display:block;
+    width:88px;
+    border-radius: 3px;
+    font-size:10px;
+    font-family: sans-serif;
+    opacity:0.7;
+    background-color:#141414;
+    color:#ffffff;
+    padding:4px;
+  }
+
   </style>
 
 
@@ -66,18 +126,29 @@
     //$('#messages').append($('<li>').text(msg[0].temp));
     var d = new Date();
     var realTime = d.getTime(); //in millisec
-    var ave = [[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],
+    ave = [[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],
                [-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0]];
-               // data for drawing the ave line, structure: [[temp1,Sen#],[temp2,Sen#].........]
-    Gmsg = msg;
+               // initialization
+    Gmsg = msg;//Gmsg used for searching the values when mouse move on the canvas
 
+    //Update values
     temp = $("#Temp").val();
     time = $("#Time").val();
     tempHigh = $(".input[name = HTemp]").val();
     tempLow = $(".input[name = LTemp]").val();
 
+    //update the table and real-time information
     updateChart(temp,time,tempHigh,msg,realTime);
     if($("#drawAveLine").prop( "checked" )){drawAveLine(msg,ave);};
+    addHtmlInfo(realTime,ave);
+
+    //Print sensor list
+    var idString = "Connected Sensors: ";
+    for(i = 0 ; i< msg.length; i++ ){
+        idString += "<p class = \"idList\">ID: "+msg[i].id +"</p>";
+    }
+    $("#idTag").html(idString);
+
   });
 
 var temp;  //temp: # of lines
@@ -86,8 +157,10 @@ var tempHigh; //  tempHigh: highest temp
 var tempLow; //  tempHigh: highest temp
 var tableFull = false; //check if the chart is full; bolean
 var Gmsg = []; // globle msg for data searching;
+var ave = [[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],
+           [-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0]];
+           // data for drawing the ave line, structure: [[temp1,Sen#],[temp2,Sen#].........]/*DrawFrame: temp: # of lines, time:# of colums, tempHigh: highest temp */
 
-/*DrawFrame: temp: # of lines, time:# of colums, tempHigh: highest temp */
 function drawFrame(temp,time,tempHigh){
 	/*Relative value for diff resolution*/
 	var canvas = document.getElementById("myCanvas");
@@ -282,8 +355,9 @@ function drawAveLine(msg,ave){
     }
   };
   for(i = ave.length - time; i < ave.length-1; i++){ //draw ave line
-    drawLine((ave[i][0]/ave[i][1]).toFixed(2),(ave[i+1][0]/ave[i+1][1]).toFixed(2),i+2,"rgba(204,0,0,0.15)",2,2);
+    drawLine((ave[i][0]/ave[i][1]).toFixed(2),(ave[i+1][0]/ave[i+1][1]).toFixed(2),i+2-(20-time),"rgba(204,0,0,0.5)",2,2);
   }
+  drawLabel(1,(ave[ave.length-time][0]/ave[ave.length-time][1]).toFixed(2),"Average","rgba(204,0,0,0.5)");
 }
 
 function drawMouseInfo(){//draw temp & time info on Canvas
@@ -303,20 +377,51 @@ function drawMouseInfo(){//draw temp & time info on Canvas
 
   function writeMessage(canvas, message) {
     var chart = canvas.getContext('2d');
-        chart.clearRect(len-50, 5, 180, 25);
+        chart.clearRect(len-45, 5, 180, 32);
         chart.font = '12px Calibri';
         chart.fillStyle = "rgba(19,143,150,0.6)";
-        chart.fillText(message, len-50, 25);
+        chart.fillText(message, len-45, 32);
       };
+
+  function searchPrint(X,tempValue,mousePos){// given the position of mouse and searchthedata
+    $("#mouseInfoTag").css({"display":"none"});
+    for( i = 0; i < Gmsg.length; i++){
+      if(Math.abs(Gmsg[i].temp[X-1+(20-time)] - tempValue) * Math.ceil(hei/(tempHigh-tempLow)) < 2 ) {
+        chart.strokeStyle= Gmsg[i].rgba.replace("0.8", "0.3");// lighter color
+        chart.lineWidth = 2;
+        chart.beginPath();
+        chart.arc(Math.ceil((X-1+0.5)*len/time+46),(tempHigh - Gmsg[i].temp[X-1+(20-time)])*(hei/(tempHigh-tempLow))+44,5,0,2*Math.PI);
+        chart.stroke();
+
+        var tempComp = " + 0.00";
+        var tempClass = "tempClass1";
+        var diff = Gmsg[i].temp[X-1+(20-time)] - ave[X-1+(20-time)][0]/ave[X-1+(20-time)][1];
+        var d = new Date(Gmsg[i].startTime);
+        var curTime = d.getHours()+":"+d.getMinutes()+":"+d.getSeconds();
+
+        if(diff > 0){tempComp = " +"+ diff.toFixed(2)+"&#8593";}
+        else{tempComp = " "+ diff.toFixed(2)+"&#8595"; tempClass = "tempClass2"}
+        var mouseInfo = "<p class = \"infoId\">ID: "+Gmsg[i].id +"</p><p>Temp.: "+Gmsg[i].temp[X-1+(20-time)]+
+                        "*C </p><p>Start at: "+ curTime +"</p><p class = \""+tempClass+"\">Ave. "+ tempComp +"</p>"
+        $("#mouseInfoTag").html(mouseInfo);
+        var rect = canvas.getBoundingClientRect();
+        var x = mousePos.x + rect.left - 35;
+        var y = mousePos.y + rect.top + 10; //10 pixer offset
+        $("#mouseInfoTag").css({"left":x,"top":y,"display":"block"});
+      }
+    }
+  };
 
   canvas.addEventListener('mousemove', function(evt) {
         var mousePos = getMousePos(canvas, evt);
         var m1 = "";//message 1: Time
         var m2 = (tempHigh-(mousePos.y- 44)/(hei/(tempHigh-tempLow))).toFixed(2);//message 1: Temp
         //y1 = (tempHigh - temp1)*(hei/(tempHigh-tempLow))+44
-        var message =  Math.ceil(mousePos.x) + '; Temp: ' + m2;
+        var message =  'Temperature: ' + m2;
         writeMessage(canvas, message);
+        searchPrint(Math.ceil((mousePos.x - 46)/(len/time)),m2,mousePos);
       }, false);
+
 };
 
 function refreshTime(sTime){
@@ -327,12 +432,12 @@ function refreshTime(sTime){
   	hei = Math.ceil($("#myCanvas").height() * 0.8);
     //cler top of chart
     chart.fillStyle="#ffffff";
-    chart.fillRect(40, 0, len+10, 40);
+    chart.fillRect(40, 0, len+14, 40);
     chart.fill();
 
     //cler right side of chart
     chart.fillStyle="#ffffff";
-    chart.fillRect(len+52, 40, 38, hei);
+    chart.fillRect(len+53, 40, 38, hei);
     chart.fill();
 
     //clear bottom of chart
@@ -348,11 +453,9 @@ function refreshTime(sTime){
   	for(i = 0; i <= time  ; i++){
       var timeSlot = sTime+i*5;// every 5 secs update all senso's data
   		var txt = Math.floor((timeSlot)/3600 % 12) +":"+ Math.floor((timeSlot)/60 % 60)+":"+Math.floor(timeSlot% 60);
-  		chart.fillText(txt,i*len/time+42, 58 + hei);
+  		chart.fillText(txt,i*len/time+42, 60 + hei);
   	}
 }
-
-function searchPrint(mouseX,mouseY){};// given the position of mouse and searchthedata
 
 function updateChart(temp,time,tempHigh,msg,realTime){
   var maxTemp=-274; // calculate the maximum temp, reset chart scroll
@@ -397,7 +500,6 @@ function updateChart(temp,time,tempHigh,msg,realTime){
         }else{//end temp value at right side
           var LineBegin = time-msg[i].temp.length;
           for(j = 0; j < msg[i].temp.length; j++){
-            //console.log("grids: "+Math.ceil((j+time-msg[i].temp.length)%time+1)+"\n j: "+j+"\n time: "+time+"\n length: "+msg[i].temp.length);
             drawLine(msg[i].temp[j],msg[i].temp[j+1],(j+LineBegin+1)%time+1,msg[i].rgba,1,1);
             if(maxTemp < msg[i].temp[j]){ maxTemp = msg[i].temp[j]; highPos[0] = j+LineBegin+1; highPos[1] = maxTemp;};
             if(minTemp > msg[i].temp[j]){ minTemp = msg[i].temp[j]; lowPos[0] = j+LineBegin+1; lowPos[1] = minTemp; };
@@ -417,6 +519,18 @@ function updateChart(temp,time,tempHigh,msg,realTime){
   drawTag(highPos[0],highPos[1],maxTemp + " *C"); // highest temp
   drawTag(lowPos[0],lowPos[1],minTemp + " *C"); // lowest temp
 };
+
+function addHtmlInfo(realTime,ave){
+  var sT = new Date(realTime);
+  var t = "";
+  if (sT.getHours() < 10) {t += "0"+sT.getHours()+":";} else t +=sT.getHours()+":";
+  if (sT.getMinutes() < 10) {t += "0"+sT.getMinutes()+":";} else t +=sT.getMinutes()+":";
+  if (sT.getSeconds() < 10) {t += "0"+sT.getSeconds() }else t +=sT.getSeconds();
+  if (tableFull) {var s = ((ave[ave.length-1][0]/ave[ave.length-1][1]).toFixed(2)).toString();}
+  else{var s = ((ave[Gmsg[0].temp.length-1][0]/ave[Gmsg[0].temp.length-1][1]).toFixed(2)).toString();};
+  $("#realTimeInfo").html( "<div class=\"first\">" + s.substring(0,3) +"</div><div class=\"sec\"> &nbsp;"
+  + s.substring(3,5) + " &nbsp;&#8451</div><br/><p class=\"time\"> Real-Time: "+ t +"</p>" );
+}
 
 $( document ).ready(function() {
   temp = $("#Temp").val();
@@ -453,6 +567,17 @@ $( document ).ready(function() {
 
   drawMouseInfo();
 
+  var rightAlign = 0;
+  if($(window).width() - $("#myCanvas").width() > 165 ){
+    rightAlign = $(window).width() - $("#myCanvas").width() - 65 - 120 ;
+  }else {
+    rightAlign = 20;
+  }
+  $("#idTag").css({"position":"absolute","right":rightAlign,"top":"273px"});
+
+  var mouseX;
+  var mouseY;
+  $("#idTag").mousedown();
 });
 
 </script>
@@ -461,10 +586,9 @@ $( document ).ready(function() {
     <p class="red" >Boston University</p>
     <p class="gray" >Group 1, ENG EC544</p>
     <p class="gray" >Pete, Carlos, Hao, Avi, Ying</p>
-    <p class="red" >Draw Info Tag In mouse Info event. fadein fadeout,wrapped circle</p>
-    <p class="red" >Database query</p>
-    <ul id="messages"></ul>
-    <div id="info"></div>
+    <!--<p class="red" >Draw Info Tag In mouse Info event. fadein fadeout,wrapped circle</p>
+    <p class="red" >Database query</p>-->
+    <div id="realTimeInfo" >NaN Info</div>
     <canvas id="myCanvas"  width="1000px" height="400px"style="border:1px solid #d3d3d3;">
     Your browser does not support the HTML5 canvas tag.</canvas>
     <p class="gray">Temp. High: <input class="input" type="text" name="HTemp" value="32">&nbsp;&#8451;&nbsp;
@@ -491,7 +615,9 @@ $( document ).ready(function() {
       <option value="20" selected>20</option>
     </select>&nbsp;&nbsp;
     <input type="checkbox" id="drawAveLine" checked>Draw Average Line<br>
-  </p>
+    </p>
+    <div id="idTag"></div>
+    <div id="mouseInfoTag"></div>
     <!--<form action="">
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>-->
