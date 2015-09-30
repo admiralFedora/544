@@ -119,7 +119,7 @@ function querAverageRange(time1, time2){
 }
 
 function insertAverage(value){
-  connection.query('INSERT INTO `average` (average, time) VALLUES (?, ?)', [value, getTimeStamp()], function(error, row, fields){
+  connection.query('INSERT INTO `average` (average, time) VALUES (?, ?)', [value, getTimeStamp()], function(error, row, fields){
     if(!error){
       // do stuff here
     } else {
@@ -127,6 +127,17 @@ function insertAverage(value){
       console.log(error);
     }
   });
+}
+
+function querySensors(){
+  connection.query('SELECT id FROM `sensors`', function(error, row, fields){
+    if(!error){
+        // do stuff here
+    } else {
+      console.log("error querying sensors\n");
+      console.log(error);
+    }
+  })
 }
 
 addTemperature(51, 20, getTimeStamp());
