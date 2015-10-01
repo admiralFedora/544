@@ -873,10 +873,7 @@ $( document ).ready(function() {
 
   externalChart();// test
 
-  $("#rangeQuery").click(function(){
-    GreturnData = []; // renew;
-    queryRangeTimeById($("#sensorId").val(),$("#timeStartInput").val(),$("#timePeriod").val());
-  });
+
 
   /*$("#loadSensor").click(function(){
     querySensorsId();
@@ -926,6 +923,7 @@ $( document ).ready(function() {
     </p>
     <hr class = "line"/>
     <p class="grayHQ">Historical Query</p><br/><br/>
+
     <div id = "historical_query">
       <div class="query" id="query1">
         <div class = "chart">
