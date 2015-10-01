@@ -7,8 +7,20 @@ var gcounter = 0;
 var colorSet = ["rgba(19,78,15,0.8)","rgba(252,227,15,0.8)","rgba(252,43,15,0.8)","rgba(58,188,18,0.8)","rgba(255,176,24,0.8)","rgba(28,164,251,0.8)","rgba(140,15,176,0.8)","rgba(176,15,114,0.8)",
 "rgba(127,2,3,0.8)","rgba(72,72,72,0.8)","rgba(168,255,0,0.8)","rgba(0,36,85,0.8)","rgba(3,119,82,0.8)"]// 12 main colors;
 
-var dataSet = [];// most recently 20 temp records for all sensors; ************
-/**/
+var dataSet = [{"type":"Update"}];// most recently 20 temp records for all sensors ************
+var GdataReturn;
+
+/*Database setting*/
+var serialPort = require('serialport');
+var mysql = require('mysql');
+var connection = mysql.createConnection({
+  host  : 'localhost',
+	port	:	'3307',
+  user  : 'root',
+  password  : 'root',
+  database  : 'mydb'
+});
+
 function printD(){
 	console.log("\n\n"+"----------------------------------------------------------");
 	for(i= 0 ; i< dataSet.length; i++){
@@ -17,7 +29,6 @@ function printD(){
 	console.log("----------------------------------------------------------------"+"\n\n");
 }
 
-/**/
 // sensor object
 function sensor(id, temp, counter){
   this.temp = temp // int
@@ -73,12 +84,8 @@ function updateSenData(data){
 	var id = curData.id;
 	var temp = curData.temp;
 	for(i = 0; i < dataSet.length; i++){
-		//console.log("i: "+ i + "  dataSet.length: "+dataSet.length);
-		//console.log("id: "+id +"  dataid: "+dataSet[i].id);
-
 		if(id == dataSet[i].id){
 			dataSet[i].temp.push(temp);  //add a new temp
-			//console.log("dataSet["+i+"].temp: "+dataSet[i].temp+"\n");
 			if(dataSet[i].temp.length > 20){     //maxmum 20 values
 				dataSet[i].temp.splice(0, 1);
 			}
@@ -86,7 +93,6 @@ function updateSenData(data){
 		}
 	}
 	addSenData(id,temp);
-
 }
 
 // function to record data on a per object basis
@@ -99,16 +105,16 @@ function recordData(data){
     console.log("New sensor " + JsonData.id + " has come");
     return;
   }
+	addTemperature(JsonData.id,JsonData.temp,getTimeStamp());
   for(var i = 0; i < array.length; i++){
     sen = array[i];
-    if(sen.id == JsonData.id){
+    if(sen.id == JsonData.id){ //update
       sen.temp = JsonData.temp;
       sen.counter = gcounter;
       return;
     }
   }
   /*update data that existed*************************************************************/
-
   array.push(new sensor(JsonData.id, JsonData.temp, gcounter));
   console.log("New sensor " + JsonData.id + " has come");
 }
@@ -134,9 +140,170 @@ function printAverage(){
   average /= array.length;
   console.log("Average temp: " + average.toFixed(2) + "*C\n");
   console.log("Number of devices: " + array.length + "\n\n\n\n\n");
+	insertAverage(average.toFixed(2));
   gcounter++;
 }
 
+function getTimeStamp() {
+
+    var date = new Date();
+
+    var hour = date.getHours();
+    hour = (hour < 10 ? "0" : "") + hour;
+
+    var min  = date.getMinutes();
+    min = (min < 10 ? "0" : "") + min;
+
+    var sec  = date.getSeconds();
+    sec = (sec < 10 ? "0" : "") + sec;
+
+    var year = date.getFullYear();
+
+    var month = date.getMonth() + 1;
+    month = (month < 10 ? "0" : "") + month;
+
+    var day  = date.getDate();
+    day = (day < 10 ? "0" : "") + day;
+
+    return year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec;
+}
+
+function addSensor(id, x, y, temp, time){
+  connection.query('INSERT INTO `sensors` VALUES (?, ?, ?)', [id, x, y],function(error, row, fields){
+    if(!error){
+      console.log("new sensor was added\n");
+      addTemperature(id, temp, time);
+    } else {
+      console.log('oh noes\n');
+      return false;
+    }
+  });
+}
+
+// time is formated as YYYY-MM-DD HH:MM:SS
+function addTemperature(id, temp, time){
+  connection.query('INSERT INTO `temperatures` (time, temp, sensors_id) VALUES (?, ?, ?)', [time, temp, id], function(error, row, fields){
+    if(!error){
+      //added
+    } else {
+      console.log("oh noes\n");
+      console.log(error);
+      addSensor(id, 0, 0, temp, time);
+    }
+  });
+}
+
+function insertAverage(value){
+  connection.query('INSERT INTO `average` (average, time) VALUES (?, ?)', [value, getTimeStamp()], function(error, row, fields){
+    if(!error){
+      // do stuff here
+    } else {
+      console.log("error inserting average\n");
+      console.log(error);
+    }
+  });
+}
+
+// time is formated as YYYY-MM-DD HH:MM:SS
+function addTemperature(id, temp, time){
+  connection.query('INSERT INTO `temperatures` (time, temp, sensors_id) VALUES (?, ?, ?)', [getTimeStamp(), temp, id], function(error, row, fields){
+    if(!error){
+      //added temp
+    } else {
+      console.log("oh noes\n");
+      console.log(error);
+      addSensor(id, 0, 0, temp, time);
+    }
+  });
+}
+
+function querySensors(){
+  connection.query('SELECT id FROM `sensors`', function(error, row, fields){
+    if(!error){
+      var resSet = [{"type":"QueryIdReturn"}];
+      resSet.push.apply(resSet, row)
+      io.emit("chat message", resSet); //send back the ids;
+    } else {
+      console.log("error querying sensors\n");
+      console.log(error);
+    }
+  })
+};
+
+function queryTempBySensor(id){
+  connection.query('SELECT * FROM `temperatures` WHERE `sensors_id`=? ORDER BY `time` ASC', [id], function(error, row, fields){
+    if(!error){
+			console.log(row);
+    } else {
+      console.log("oh noes\n");
+      console.log(error);
+    }
+  });
+}
+
+function queryAverage(){
+  connection.query('SELECT * FROM `average` ORDER BY `time` ASC', function(error, row, fields){
+    if(!error){
+      // do stuff here
+    } else {
+      console.log("oh noes\n");
+    }
+  });
+}
+
+function queryTempBySensorRange(id, time1, time2){
+  connection.query('SELECT * FROM `temperatures` WHERE `sensors_id`=? AND `time` BETWEEN ? AND ?', [id, time1, time2], function(error, row, fields){
+    if(!error){
+      GdataReturn = [{"type":"QueryRangeReturn"}];
+      row = limitResult(row);
+      GdataReturn.push.apply(GdataReturn, row);
+      io.emit("chat message", GdataReturn); //send back the temps;
+      //queryAverageRange(time1, time2);
+    } else {
+      console.log("error encountered\n");
+      console.log(error);
+    }
+  })
+}
+
+
+function queryAverageRange(time1, time2){
+  connection.query('SELECT * FROM `average` WHERE `time` BETWEEN ? AND ?', [time1, time2], function(error, row, fields){
+    if(!error){
+      GdataReturn = [{"type":"QueryRangeReturn"}];
+      row = limitResult(row);
+      GdataReturn.push.apply(GdataReturn, row);
+      io.emit("chat message", GdataReturn); //send back the temps;
+    } else {
+      console.log("error occured");
+      console.log(error);
+    }
+  });
+}
+
+function limitResult(ReturnData){
+  var repeatData = [];
+  if (ReturnData.length > 500){
+    for(i = 1; i < ReturnData.length; i +=20){
+      repeatData.push(ReturnData[i]);
+    };
+  }else if(ReturnData.length > 100){
+    for(i = 1; i < ReturnData.length; i +=10){
+      repeatData.push(ReturnData[i]);
+    };
+  }else if(ReturnData.length > 50){
+    for(i = 1; i < ReturnData.length; i +=5){
+      repeatData.push(ReturnData[i]);
+    };
+  }else{
+    for(i = 1; i < ReturnData.length; i +=2){
+      repeatData.push(ReturnData[i]);
+    };
+  };
+  return repeatData;
+}
+
+connection.connect();
 var portName = process.argv[2],
 portConfig = {
   baudRate: 9600,
@@ -157,6 +324,21 @@ io.on('connection', function(socket){
   socket.on('chat message', function(msg){
     io.emit('chat message', msg);
     sp.write(msg + "\n");
+    /*Responses*/
+    if(msg[0].type == "queryId"){querySensors(); return;}
+    else if(msg[0].type == "queryRange"){  //add to GdataReturn
+      app.get('/', function(req, res){
+        res.sendfile('hist.html');
+      });
+      for(i =0; i < msg[0].id.length; i++){
+        GdataReturn = [];
+        queryTempBySensorRange(msg[0].id[i], msg[0].time1.toString(), msg[0].time2.toString());
+      }
+
+      return;
+    }
+    else if(msg[0].type == "queryId"){querySensors(); return;}
+    /*End*/
   });
 });
 
@@ -171,11 +353,11 @@ sp.on("open", function () {
   sp.on('data', function(data) {
     recordData(data);
     updateSenData(data);
-		printD();// for testing
+		//printD();// for testing
     io.emit("chat message", dataSet);
   });
   // every 5 seconds we'll read from our list of sensors
-  setInterval(printAverage, 10000);
-  // send data to html every 5 sec ******************************************
+  setInterval(printAverage, 8000);
+  // send data to html every 8 sec ******************************************
 
 });
