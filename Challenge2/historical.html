@@ -1,0 +1,455 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Real time temp Data _ Challenge2_Group1</title>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.js"></script>
+    <script src="//canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+  <!--external files begin-->
+  <style>
+    .head{float:left; width:100%; }
+
+    .goupInfo{float:left;margin-right:120px; }
+
+    #myCanvas{ margin-left:60px;}
+
+    .red{ color:#cc0000}
+
+    .gray{ color:#646464;}
+
+    div.gray{margin-top:6px;margin-bottom:8px;}
+    .animony{ color:#137f96}
+
+    p.red{
+      font-family:sans-serif;
+      font-weight:bold;
+      margin-left:60px;
+      font-size:22px;
+      margin-bottom:5px;
+      margin-top:10px;
+    }
+
+    p.gray{	margin-left:60px;	margin-top:3px;}
+
+    .input{width:30px;text-align: center;}
+
+    .submit{
+      border: #137f96 solid 1px;
+      font-family:Calibri;
+      color:#ffffff;
+      font-size:14px;
+      background-color:#137f96;
+      border-radius: 3px;
+      height:100%;
+      padding:2px;
+      margin-left:10px;
+      cursor:pointer;
+      padding:3px 5px;
+    }
+
+    #realTimeInfo{ margin-left:545px; margin-top:15px;float:left;}
+
+    .time{
+      margin-top:40px;
+      font-size: 18px;
+      font-weight:bold;
+      font-family: Calibri;
+      color:#137f96;
+    }
+
+    .first{
+      float:left;
+      font-size: 45px;
+      font-weight:bold;
+      font-family: Calibri;
+      color:#137f96;
+    }
+
+    .sec{
+      float:left;
+      margin-top:5px;
+      font-size: 35px;
+      font-weight:bold;
+      font-family: Calibri;
+      color:#137f96;
+    }
+
+    #idTag{
+      width:80px;
+      border-radius: 3px;
+      font-family: Calibri;
+      font-style: italic;
+      font-size: 13px;
+      font-weight:bold;
+      opacity:0.6;
+      background-color:#141414;
+      color:#ffffff;
+      padding:10px;
+    }
+
+    .idList{
+      margin-left:10px;
+      font-size: 11px;
+      margin-top: 4px;
+      margin-bottom:4px;
+      margin-right: 14px;
+      text-align: right;
+    }
+    .idList:first-child{ margin-top: 15px;}
+
+
+    .tempClass1{ color:#ff7901; font-size: 10px;}
+    .tempClass2{ color:#0179f4; font-size: 10px;}
+    .infoId{ color:#cc0000; font-size: 12px; font-weight:bold; margin-top:5px; margin-bottom:5px;}
+    #mouseInfoTag > p { margin:3px 5px; }
+    #mouseInfoTag > p:last-child { font-weight:bold; }
+    #mouseInfoTag{
+      position:fixed;
+      display:block;
+      width:92px;
+      border-radius: 3px;
+      font-size:10px;
+      font-family: sans-serif;
+      opacity:0.7;
+      background-color:#141414;
+      color:#ffffff;
+      padding:4px;
+    }
+
+    .line{
+      margin-top:20px;
+      color: #434242;
+    }
+
+    .grayHQ{ color:#646464; font-size:20px; margin-left:60px;}
+
+    #historical_query{
+      margin-top:10px;
+      margin-left:50px;
+    }
+    .query{ display:flex;}
+    .query_area{
+      width:400px;
+      margin-right:30px;
+      margin-left:50px;
+      border-left: 1px solid #aaaaaa;
+      padding:10px 25px 10px 50px;
+    }
+    .chart{width:50%;}
+    .timeRange{margin-left:auto;margin-right:auto;margin-top:20px;width:50%;display:flex}
+    #chartInfo, #chartInfo{margin-left:6px; width:208px;}
+    #rangeQuery, #rangeQueryText{margin-left:0px;padding:3px 28px;}
+    .separate{color:#137f96;height:2px;width:100%}
+
+    #timeStartInput, #timeEndInput{width:120px;}
+    #sensorId{width:143px}
+    #loadSensor{ margin-left:0px; margin-top:16px;}
+  </style>
+
+
+  <script>
+  var socket = io();
+  /*$('form').submit(function(){
+    socket.emit('chat message', $('#m').val());
+    $('#m').val('');
+    return false;
+  });*/
+  socket.on('chat message', function(msg){
+    //$('#messages').append($('<li>').text(msg[0].temp));
+    var d = new Date();
+    var realTime = d.getTime(); //in millisec
+    var pastTime = new Date(realTime - 3600 *1000);;// get the past one hours time
+    ave = [[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],
+               [-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0]];
+
+    // initialization
+    console.log("head");
+    console.log(msg);
+    if (msg[0].type == "Update")  { msg = msg.splice(1,msg.length-1); }
+    else if (msg[0].type == "QueryIdReturn")  {msg = msg.splice(1,msg.length-1);addSensortoSelect(msg); return;}
+    else if (msg[0].type == "QueryRangeReturn")  { msg = msg.splice(1,msg.length-1); console.log(msg); queryRangeTimeByIdReturn(msg);return;}
+    else if (msg[0].type == "Other")  { msg = msg.splice(1,msg.length-1); }
+    else return;
+    Gmsg = msg;//Gmsg used for searching the values when mouse move on the canvas
+
+    //Update values
+    temp = $("#Temp").val();
+    time = $("#Time").val();
+    tempHigh = $(".input[name = HTemp]").val();
+    tempLow = $(".input[name = LTemp]").val();
+
+    //update the table and real-time information
+    updateChart(temp,time,tempHigh,msg,realTime);
+
+    if($("#drawAveLine").prop( "checked" )){drawAveLine(msg,ave);};
+    addHtmlInfo(realTime,ave);
+    if(!Gini) {addSensortoSelect(msg); $("#timeStartInput").val(formatTime(realTime-1800*1000));Gini = true;}
+    //Print sensor list
+    printSensorList();
+
+  });
+
+var temp;  //temp: # of lines
+var time;  // time:# of colums
+var tempHigh; //  tempHigh: highest temp
+var tempLow; //  tempHigh: highest temp
+var tableFull = false; //check if the chart is full; bolean
+var Gmsg = []; // globle msg for data searching;
+var Gini = false; // global value fo initialization
+var GreturnData;
+var ave = [[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],
+           [-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0],[-275,0]];
+           // data for drawing the ave line, structure: [[temp1,Sen#],[temp2,Sen#].........]/*DrawFrame: temp: # of lines, time:# of colums, tempHigh: highest temp */
+
+
+
+
+function formatTime(timeIn){
+  var inputTime = new Date(timeIn);
+  var hour = inputTime.getHours();
+  hour = (hour < 10 ? "0" : "") + hour;
+  var min  = inputTime.getMinutes();
+  min = (min < 10 ? "0" : "") + min;
+  var sec  = inputTime.getSeconds();
+  sec = (sec < 10 ? "0" : "") + sec;
+  var year = inputTime.getFullYear();
+  var month = inputTime.getMonth() + 1;
+  month = (month < 10 ? "0" : "") + month;
+  var day  = inputTime.getDate();
+  day = (day < 10 ? "0" : "") + day;
+  return year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec;
+}
+
+function timeToMs(timeIn){
+  var timeValue = new Date(timeIn);
+  return timeValue.getTime();
+}
+
+
+function addSensortoSelect(items){/*add current id to select options*/
+  var sensorId = "<select id=\"sensorId\"><option value=\"all\" selected>All Sensors</option> ";
+  $.each(items, function (i, item) {
+    sensorId += "<option value=\""+item.id+"\"> ID: "+item.id+"</option>";
+  });
+  sensorId += "</select>";
+  $("#sensorId").html(sensorId);
+}
+
+/*Query section*/
+function querySensorsId(){
+  socket.emit('chat message', [{"type":"queryId"}]); //query all Id
+}
+
+function queryRangeTimeById(id,st,et){
+  var idSet = [];
+  if (id=="all"){
+    $("#sensorId option").each(function()
+    {
+      idSet.push($(this).val());
+    });
+  };
+  idSet = idSet.splice(1,idSet.length-1);
+  console.log(et);
+  console.log(st);
+  socket.emit('chat message', [{"type":"queryRange","id":id,"time1":st,"time2":et}]); //query all Id
+};
+
+function queryRangeTimeByIdReturn(ReturnData){
+  console.log("queryRangeTimeByIdReturn");
+  var repeatData = [];
+  if(ReturnData.length > 50){
+    for(i = 1; i < ReturnData.length; i +=5){
+      repeatData.push({"label": ReturnData[i].time,"y":ReturnData[i].temp});
+    };
+  }else{
+    for(i = 1; i < ReturnData.length; i +=2){
+      repeatData.push({"label": ReturnData[i].time,"y":ReturnData[i].temp});
+    };
+  };
+  var newData =   {
+      "type": "spline",
+      "showInLegend": true,
+      "name": ReturnData[0].sensors_id.toString(),
+      "dataPoints": repeatData,
+    };
+
+  GreturnData.push(newData) ;
+
+  //console.log(GreturnData);
+      var chart = new CanvasJS.Chart("chartContainer",
+      {
+        theme:"theme2",
+        title:{
+          text: "Historical Temp. Query"
+        },
+        animationEnabled: false,
+        axisY :{
+          includeZero: true,
+          // suffix: " k",
+          valueFormatString: "#.",
+          suffix: " *C"
+
+        },
+        toolTip: {
+          shared: "true"
+        },
+
+        data: GreturnData,
+        /*data: [
+        {
+          type: "spline",
+          showInLegend: true,
+          name: ReturnData[0].sensors_id.toString(),
+          dataPoints: repeatData
+        }
+      ],*/
+        legend:{
+          cursor:"pointer",
+          itemclick : function(e) {
+            if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible ){
+              e.dataSeries.visible = false;
+            }
+            else {
+              e.dataSeries.visible = true;
+            }
+            chart.render();
+          }
+        },
+      });
+  chart.render();
+};
+
+
+
+function formatTime(timeIn){
+  var inputTime = new Date(timeIn);
+  var hour = inputTime.getHours();
+  hour = (hour < 10 ? "0" : "") + hour;
+  var min  = inputTime.getMinutes();
+  min = (min < 10 ? "0" : "") + min;
+  var sec  = inputTime.getSeconds();
+  sec = (sec < 10 ? "0" : "") + sec;
+  var year = inputTime.getFullYear();
+  var month = inputTime.getMonth() + 1;
+  month = (month < 10 ? "0" : "") + month;
+  var day  = inputTime.getDate();
+  day = (day < 10 ? "0" : "") + day;
+  return year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec;
+}
+
+function convetTime(st,end,f){
+  var time1 = new Date(st);
+  var time2 = new Date(end);
+  if(f == 1){
+    var s = time1.getTime();
+    var e = time2.getTime();
+    var diff = e-s;
+    var Nst = new Date(s - diff);
+    var Nen = new Date(e - diff);
+    $("#timeStartInput").val(formatTime(Nst));
+    $("#timeEndInput").val(formatTime(Nen));
+  }else{
+    var s = time1.getTime();
+    var e = time2.getTime();
+    var diff = e-s;
+    var Nst = new Date(s + diff);
+    var Nen = new Date(e + diff);
+    $("#timeStartInput").val(formatTime(Nst));
+    $("#timeEndInput").val(formatTime(Nen));
+  }
+}
+
+
+$( document ).ready(function() {
+
+  $(".submit").hover(function(){
+			$(this).stop().animate({
+				opacity:"0.8"
+				}, 500);
+			},function(){
+				$(this).stop().animate({
+				opacity:"1"
+			}, 500);
+	});
+
+  var curTime = new Date();
+  var EndTime = curTime.getTime();
+  $("#timeEndInput").val(formatTime(EndTime));
+
+  $("#rangeQuery").click(function(){
+    GreturnData = []; // renew;
+    queryRangeTimeById($("#sensorId").val(),$("#timeStartInput").val(),$("#timeEndInput").val());
+  });
+
+  $("#loadSensor").click(function(){
+    querySensorsId();
+  });
+
+  $("#buttonAfter").click(function(){
+    convetTime($("#timeStartInput").val(),$("#timeEndInput").val(),1)
+    $("#rangeQuery").click();
+    $("#chartInfo").html(  $("#timeStartInput").val()+" - "+$("#timeEndInput").val().substring($("#timeEndInput").val().length-9,$("#timeEndInput").val().length));
+  });
+
+  $("#buttonBefore").click(function(){
+    convetTime($("#timeStartInput").val(),$("#timeEndInput").val(),0)
+    $("#rangeQuery").click();
+    $("#chartInfo").html(  $("#timeStartInput").val()+" - "+$("#timeEndInput").val().substring($("#timeEndInput").val().length-9,$("#timeEndInput").val().length));
+  });
+
+});
+
+
+//--------------------------------test chart-----------------------------------------------------
+
+
+</script>
+
+    <div class="head">
+      <div class="goupInfo">
+        <p class="red" >Boston University</p>
+        <p class="gray" >Group 1, ENG EC544</p>
+        <p class="gray" >Pete, Carlos, Hao, Avi, Ying</p>
+      </div>
+    </div>
+    <hr class = "line"/>
+    <p class="grayHQ">Historical Query</p><br/><br/>
+    <div id = "historical_query">
+      <div class="query" id="query1">
+        <div class = "chart">
+          <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+          <div class="timeRange">
+            <div class= "submit" id="buttonBefore">&#60;</div>
+            <div class= "gray" id="chartInfo">2014-09-30 11:00-12:00</div>
+            <div class= "submit" id="buttonAfter">&#62;</div>
+          </div>
+        </div>
+
+        <div class = "query_area">
+          <div class="gray">Query: &nbsp;&nbsp;</div><br/>
+          <select id="sensorId">
+            <option value="all" selected>All Sensors</option>
+          </select>&nbsp;&nbsp;<br/>
+          <input class="submit" type="submit" id="loadSensor" value="Load Historical Sensors">
+          <br/><br/>
+          <div class = "gray">Time Range: &nbsp;&nbsp;</div>
+          <div class="gray">Start at&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id = "timeStartInput" type="text">&nbsp;&nbsp;</div>
+          <div class="gray">End to&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id = "timeEndInput" type="text">&nbsp;&nbsp;</div>
+
+          <input class="submit" type="submit" id="rangeQuery" value="Query">&nbsp;&nbsp;
+          <input class="submit" type="submit" id="rangeQueryText" value=" Text ">
+        </div>
+      </div>
+
+
+    <!--<form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>-->
+
+  </body>
+</html>
