@@ -1,25 +1,32 @@
 var app = require('express')();
 var SerialPort = require("serialport");
 var xbee = require("xbee-api");
-var xbeeApi = xbee.XBeeAPI({
-  api_mode: 2,
-  module: "Any",
-  raw_frames: false
+var Q = require("q");
+var xbeeAPI = new xbee.XBeeAPI({
+  api_mode: 2
 });
 var xbeeConst = xbee.constants;
 
 var sp = new SerialPort.SerialPort(process.argv[2], {
-  baudrate:9600,
-  parser:xbeeApi.rawParser()
+  baudrate: 9600,
+  parser: xbeeAPI.rawParser()
 });
 
-var sensors[];
+var sensors = [];
 
 // sensor object
 function sensor(id){
   var status;
   var frameId;
+  var deferred;
   this.id = id;
+}
+
+function sendData(dest, data, id){
+  var type = xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST;
+  this.id = id;
+  this.destination16 = dest;
+  this.data = data;
 }
 
 function addSensor(id){
@@ -30,12 +37,30 @@ function checkStatus(frame){
   var sen;
   for(var i = 0; i < sensors.length; i++){
     sen = sensors[i];
-    if(frame.remote16 == sen.id
-        && frame.id == sen.frameId && frame.deliveryStatus == 0){
-        // remove dead sensor
-        sensors.splice(i,1);
+    if(frame.id == sen.frameId){
+        sen.deferred.resolve(frame);
     }
   }
+}
+
+function turnOnLights(sensor_num){
+  var sen = sensors[sensor_num];
+  sen.deferred = Q.defer();
+  sen.frameId = xbeeAPI.nextFrameId();
+  var sendingFrame = new sendingData(sen.id, "F", sen.frameId);
+
+  sp.write(xbeeAPI.buildFrame(sendingFrame));
+
+  sen.deferred.promise.timeout(3000)
+  .then(function(f){
+    console.log("command received correctly");
+    console.log("Frame:", f);
+  })
+  .catch(function(e){
+    // remove dead sensor
+    console.log("Removing dead sensor", sen.id);
+    sensors.splice(sensor_num, 1);
+  });
 }
 
 var server = app.listen(3000, '0.0.0.0', function(){
@@ -53,7 +78,11 @@ app.get('/sensors', function(req, res){
 
 app.post('/turnOnAll', function(req, res){
   if(sensors.length == 0){
-    res.json({"msg":"No sensors to turn on"});
+    res.status(400).json({"msg":"No sensors to turn on"});
+  } else {
+    for(var i = 0; i < sensors.length; i++){
+      turnOnLights(i);
+    }
   }
 });
 
@@ -61,11 +90,23 @@ app.post('/test', function(req, res){
   res.json({"test":"huh"});
 });
 
-xbeeApi.on("frame_object", function(frame){
+xbeeAPI.on("frame_object", function(frame){
   console.log(frame); // for debug purposes
   if(frame.type == xbeeConst.FRAME_TYPE.NODE_IDENTIFICATION){
     addSensor(frame.sender16);
   } else if (frame.type == xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_STATUS){
     checkStatus(frame);
   }
+});
+
+sp.on("open",function(){
+  var sampleFrame = {
+      type: xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST, // xbee_api.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST
+      id: 0x0F, // optional, nextFrameId() is called per default
+      destination16: "2941", // optional, "fffe" is default
+      data: "TxData0A" // Can either be string or byte array.
+  };
+
+  sp.write(xbeeAPI.buildFrame(sampleFrame));
+  console.log(xbeeAPI.buildFrame(sampleFrame));
 });
