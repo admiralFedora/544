@@ -51,11 +51,18 @@ app.get('/sensors', function(req, res){
   res.json(JSON.stringify(sensors));
 });
 
+app.post('/turnOnAll', function(req, res){
+  if(sensors.length == 0){
+    res.json({"msg":"No sensors to turn on"});
+  }
+});
+
 app.post('/test', function(req, res){
   res.json({"test":"huh"});
 });
 
 xbeeApi.on("frame_object", function(frame){
+  console.log(frame); // for debug purposes
   if(frame.type == xbeeConst.FRAME_TYPE.NODE_IDENTIFICATION){
     addSensor(frame.sender16);
   } else if (frame.type == xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_STATUS){
