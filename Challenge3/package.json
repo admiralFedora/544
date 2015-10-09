@@ -3,6 +3,7 @@
   "version":"0.0.1",
   "dependencies":{
     "express":"^4.0",
-    "serialport":"^1.7.0"
+    "serialport":"^1.7.0",
+    "xbee-api":"^0.3.0"
   }
 }
