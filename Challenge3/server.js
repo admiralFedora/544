@@ -3,7 +3,7 @@ var SerialPort = require("serialport");
 var xbee = require("xbee-api");
 var Q = require("q");
 var xbeeAPI = new xbee.XBeeAPI({
-  api_mode: 2
+  api_mode: 1
 });
 var xbeeConst = xbee.constants;
 
@@ -14,12 +14,19 @@ var sp = new SerialPort.SerialPort(process.argv[2], {
 
 var sensors = [];
 
+// counter object
+function counter(num){
+  this.num = num;
+}
+
 // sensor object
-function sensor(id){
+function sensor(id, idLong){
   var status;
   var frameId;
   var deferred;
+  var counter;
   this.id = id;
+  this.idLong = idLong;
 }
 
 function sendData(dest, data, id){
@@ -29,37 +36,65 @@ function sendData(dest, data, id){
   this.data = data;
 }
 
-function addSensor(id){
-  sensors.push(new sensor(id));
+function addSensor(id, idLong){
+  console.log("new sensor", idLong);
+  sensors.push(new sensor(id, idLong));
 }
 
 function checkStatus(frame){
   var sen;
   for(var i = 0; i < sensors.length; i++){
     sen = sensors[i];
-    if(frame.id == sen.frameId){
+    if(frame.id == sen.frameId
+        && frame.remote16 == sen.id && frame.deliveryStatus == 0){
+        console.log("resolving", frame.id);
         sen.deferred.resolve(frame);
     }
   }
 }
 
-function turnOnLights(sensor_num){
+function turnOnLights(sensor_num, count, res){
   var sen = sensors[sensor_num];
+  sen.counter = count;
   sen.deferred = Q.defer();
   sen.frameId = xbeeAPI.nextFrameId();
-  var sendingFrame = new sendingData(sen.id, "F", sen.frameId);
+  var sendingFrame = new sendData(sen.id, "F", sen.frameId);
 
-  sp.write(xbeeAPI.buildFrame(sendingFrame));
+  sp.write(xbeeAPI.buildFrame({
+    type: xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST,
+    id: sen.frameId,
+    destination64: sen.idLong,
+    data: [0x1]
+  }));
+
+  console.log("sending to ", sen.idLong);
 
   sen.deferred.promise.timeout(3000)
   .then(function(f){
+    sen.counter.num--;
     console.log("command received correctly");
-    console.log("Frame:", f);
+    if(sen.counter.num == 0){
+      var msg = "";
+      for(var i = 0; i < sensors.length; i++){
+        msg += "sensor" + sen.id;
+      }
+      res.json({"msg":msg});
+    }
   })
   .catch(function(e){
+    sen.counter.num--;
     // remove dead sensor
     console.log("Removing dead sensor", sen.id);
     sensors.splice(sensor_num, 1);
+    if(sen.counter.num == 0 && sensor.length > 0){
+      var msg = "";
+      for(var i = 0; i < sensors.length; i++){
+        msg += "sensor" + sen.id;
+      }
+      res.json({"msg":msg});
+    } else {
+      res.json({"msg":"All sensors have died"})
+    }
   });
 }
 
@@ -76,12 +111,13 @@ app.get('/sensors', function(req, res){
   res.json(JSON.stringify(sensors));
 });
 
-app.post('/turnOnAll', function(req, res){
+app.get('/turnOnAll', function(req, res){
   if(sensors.length == 0){
     res.status(400).json({"msg":"No sensors to turn on"});
   } else {
+    var count = new counter(sensors.length);
     for(var i = 0; i < sensors.length; i++){
-      turnOnLights(i);
+      turnOnLights(i, count, res);
     }
   }
 });
@@ -93,7 +129,8 @@ app.post('/test', function(req, res){
 xbeeAPI.on("frame_object", function(frame){
   console.log(frame); // for debug purposes
   if(frame.type == xbeeConst.FRAME_TYPE.NODE_IDENTIFICATION){
-    addSensor(frame.sender16);
+    console.log(frame.sender64);
+    addSensor(frame.sender16, frame.sender64);
   } else if (frame.type == xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_STATUS){
     checkStatus(frame);
   }
@@ -103,10 +140,10 @@ sp.on("open",function(){
   var sampleFrame = {
       type: xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST, // xbee_api.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST
       id: 0x0F, // optional, nextFrameId() is called per default
-      destination16: "2941", // optional, "fffe" is default
+      destination64: "0013a20040a1a178",
       data: "TxData0A" // Can either be string or byte array.
   };
 
-  sp.write(xbeeAPI.buildFrame(sampleFrame));
-  console.log(xbeeAPI.buildFrame(sampleFrame));
+  /*console.log(xbeeAPI.buildFrame(sampleFrame));
+  sp.write(xbeeAPI.buildFrame(sampleFrame));*/
 });
