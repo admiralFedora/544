@@ -64,7 +64,7 @@ function turnOnLights(sensor_num, count, res){
     type: xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST,
     id: sen.frameId,
     destination64: sen.idLong,
-    data: [0x1]
+    data: [0x8]
   }));
 
   console.log("sending to ", sen.idLong);
@@ -158,7 +158,8 @@ sp.on("open",function(){
       destination64: "0013a20040a1a178",
       data: "TxData0A" // Can either be string or byte array.
   };
-
-  setInterval(repeatSending, 6000);
+  //console.log(xbeeAPI.buildFrame(sampleFrame));
+  sp.write(xbeeAPI.buildFrame(sampleFrame));
+  //setInterval(repeatSending, 6000);
 
 });
