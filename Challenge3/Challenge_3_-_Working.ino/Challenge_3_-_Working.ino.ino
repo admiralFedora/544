@@ -9,7 +9,7 @@ ModemStatusResponse msr = ModemStatusResponse();
 
 SoftwareSerial XBee(2, 3); // Rx, Tx
 
-int LED = 2; //GPIO pin 2
+int LED = 7; //GPIO pin 2
 int Status = 0; //Initializing Status to OFF
 
 void LEDON(int pin) 
@@ -26,6 +26,7 @@ void setup()
 {
   pinMode(LED, OUTPUT); //setting GPIO pin to Output
   digitalWrite(LED, LOW);
+  
   // start serial
   Serial.begin(9600);
   XBee.begin(9600);
@@ -47,7 +48,7 @@ void loop()
         xbee.getResponse().getZBRxResponse(rx);
         if(rx.getOption() == ZB_PACKET_ACKNOWLEDGED)
         {
-          Serial.println("hi");
+          Serial.println("Packet Received!");
           
           switch(rx.getData(0))
           {
