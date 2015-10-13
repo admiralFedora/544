@@ -3,7 +3,7 @@
 XBee xbee = XBee(); // Create an XBee object at the top of your sketch
 XBeeResponse response = XBeeResponse();
 // create reusable response objects for responses we expect to handle 
-Rx16Response rx16 = Rx16Response();
+ZBRxResponse rx = ZBRxResponse();
 ModemStatusResponse msr = ModemStatusResponse();
 
 int Led = 0;
@@ -57,20 +57,20 @@ void loop() {
     
     xbee.readPacket();
     
-    xbee.getResponse().getRx16Response(rx16);
-    Serial.print(rx);//add
-    Serial.println("in the loop");//add
+    xbee.getResponse().getZBRxResponse(rx);
+    //Serial.print(rx);//add
+    Serial.println("in the get response loop");//add
     Serial.println(xbee.getResponse().getApiId());
 
     if (xbee.getResponse().isAvailable()) //Packet received 
     {
       
       //Packet is of an LED command type
-      if (xbee.getResponse().getApiId() == RX_16_RESPONSE) {
+      if (xbee.getResponse().getApiId() == ZB_RX_RESPONSE) {
         // got a zb rx packet
         
         // now fill our zb rx class
-        xbee.getResponse().getRx16Response(rx16);
+        xbee.getResponse().getZBRxResponse(rx);
 /*
         if (rx.getOption() == ZB_PACKET_ACKNOWLEDGED) 
         {
