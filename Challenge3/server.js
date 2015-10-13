@@ -3,7 +3,7 @@ var SerialPort = require("serialport");
 var xbee = require("xbee-api");
 var Q = require("q");
 var xbeeAPI = new xbee.XBeeAPI({
-  api_mode: 1
+  api_mode: 2
 });
 var xbeeConst = xbee.constants;
 
@@ -141,7 +141,9 @@ function repeatSending(){ //send packet every 6 secs
   var sampleFrame = {
       type: xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST, // xbee_api.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST
       id: 0x0F, // optional, nextFrameId() is called per default
-      destination64: "0013a20040a1a178",
+      destination64: "0013a20040a1a153",
+      //destination64: "0013a20040a1a153",
+      //destination16: "97BF",
       data: "TxData0A" // Can either be string or byte array.
   };
   console.log(xbeeAPI.buildFrame(sampleFrame));
