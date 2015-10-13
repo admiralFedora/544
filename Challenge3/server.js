@@ -19,6 +19,7 @@ function counter(num){
   this.num = num;
 }
 
+// message object
 function message(msg){
   this.msg = msg;
 }
@@ -35,13 +36,8 @@ function sensor(id, idLong){
   this.idLong = idLong;
 }
 
-function sendData(dest, data, id){
-  var type = xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST;
-  this.id = id;
-  this.destination16 = dest;
-  this.data = data;
-}
-
+// function for adding a sensors
+// does not add a sensor if it already exists
 function addSensor(id, idLong){
   var sen;
   var add = true;
@@ -58,6 +54,7 @@ function addSensor(id, idLong){
   }
 }
 
+// checks the delivery status and resolves the promise made during the initial send
 function checkStatus(frame){
   var sen;
   for(var i = 0; i < sensors.length; i++){
@@ -70,7 +67,7 @@ function checkStatus(frame){
   }
 }
 
-
+// starts the send light off procedure which includes creating a promise
 function turnOffLights(sensor_num, count, res, msg){
   var sen = sensors[sensor_num];
   sen.message = msg;
@@ -111,6 +108,7 @@ function turnOffLights(sensor_num, count, res, msg){
   });
 }
 
+// starts the send light on procedure which includes creating a promise
 function turnOnLights(sensor_num, count, res, msg){
   var sen = sensors[sensor_num];
   sen.message = msg;
@@ -151,6 +149,7 @@ function turnOnLights(sensor_num, count, res, msg){
   });
 }
 
+// starts the send getStatus procedure which includes creating a promise
 function sendStatusCheck(sensor_num, count, res, msg){
   var sen = sensors[sensor_num];
   sen.res = res;
@@ -186,10 +185,8 @@ function getStatus(frame){
   var sen = "";
   var idLong = frame.remote64;
   var data = frame.data[0];
-  console.log("sensors lenght", sensors.length);
   for(var i = 0; i < sensors.length; i++){
     sen = sensors[i];
-    console.log("id", idLong, sen.idLong);
     if(idLong == sen.idLong){
       sen.counter.num--;
       switch(data){
@@ -209,7 +206,6 @@ function getStatus(frame){
     }
   }
 }
-
 
 var server = app.listen(3000, '0.0.0.0', function(){
   console.log("listening on *:3000");
@@ -278,11 +274,4 @@ xbeeAPI.on("frame_object", function(frame){
 });
 
 sp.on("open",function(){
-  var sampleFrame = {
-      type: xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST, // xbee_api.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST
-      id: 0x0F, // optional, nextFrameId() is called per default
-      destination64: "0013a20040a1a178",
-      data: "TxData0A" // Can either be string or byte array.
-  };
-
 });
