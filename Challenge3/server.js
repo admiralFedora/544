@@ -136,6 +136,19 @@ xbeeAPI.on("frame_object", function(frame){
   }
 });
 
+//-------------------------------------------------------
+function repeatSending(){ //send packet every 6 secs
+  var sampleFrame = {
+      type: xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST, // xbee_api.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST
+      id: 0x0F, // optional, nextFrameId() is called per default
+      destination64: "0013a20040a1a178",
+      data: "TxData0A" // Can either be string or byte array.
+  };
+  console.log(xbeeAPI.buildFrame(sampleFrame));
+  sp.write(xbeeAPI.buildFrame(sampleFrame));
+}
+//-------------------------------------------------------
+
 sp.on("open",function(){
   var sampleFrame = {
       type: xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST, // xbee_api.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST
@@ -144,6 +157,6 @@ sp.on("open",function(){
       data: "TxData0A" // Can either be string or byte array.
   };
 
-  /*console.log(xbeeAPI.buildFrame(sampleFrame));
-  sp.write(xbeeAPI.buildFrame(sampleFrame));*/
+  setInterval(repeatSending, 6000);
+
 });
