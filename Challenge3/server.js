@@ -3,7 +3,7 @@ var SerialPort = require("serialport");
 var xbee = require("xbee-api");
 var Q = require("q");
 var xbeeAPI = new xbee.XBeeAPI({
-  api_mode: 1
+  api_mode: 2
 });
 var xbeeConst = xbee.constants;
 
@@ -19,12 +19,17 @@ function counter(num){
   this.num = num;
 }
 
+function message(msg){
+  this.msg = msg;
+}
+
 // sensor object
 function sensor(id, idLong){
   var status;
   var frameId;
   var deferred;
   var counter;
+  var message;
   this.id = id;
   this.idLong = idLong;
 }
@@ -53,8 +58,50 @@ function checkStatus(frame){
   }
 }
 
-function turnOnLights(sensor_num, count, res){
+
+function turnOffLights(sensor_num, count, res, msg){
   var sen = sensors[sensor_num];
+  sen.message = msg;
+  sen.counter = count;
+  sen.deferred = Q.defer();
+  sen.frameId = xbeeAPI.nextFrameId();
+  var sendingFrame = new sendData(sen.id, "F", sen.frameId);
+
+  sp.write(xbeeAPI.buildFrame({
+    type: xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST,
+    id: sen.frameId,
+    destination64: sen.idLong,
+    data: [0x0]
+  }));
+
+  console.log("sending to ", sen.idLong);
+
+  sen.deferred.promise.timeout(3000)
+  .then(function(f){
+    sen.counter.num--;
+    console.log("command received correctly");
+    sen.message = "sensor " + sen.id + " turned off;";
+    if(sen.counter.num == 0){
+      res.json({"msg":sen.message});
+    }
+  })
+  .catch(function(e){
+    sen.counter.num--;
+    // remove dead sensor
+    console.log("Removing dead sensor", sen.id);
+    sen.message = "sensor " + sen.id + " has died;";
+    if(sen.counter.num == 0 && sensor.length > 0){
+      res.json({"msg":sen.message});
+    } else {
+      res.json({"msg":"All sensors have died"})
+    }
+    sensors.splice(sensor_num, 1);
+  });
+}
+
+function turnOnLights(sensor_num, count, res, msg){
+  var sen = sensors[sensor_num];
+  sen.message = msg;
   sen.counter = count;
   sen.deferred = Q.defer();
   sen.frameId = xbeeAPI.nextFrameId();
@@ -73,28 +120,22 @@ function turnOnLights(sensor_num, count, res){
   .then(function(f){
     sen.counter.num--;
     console.log("command received correctly");
+    sen.message = "sensor " + sen.id + " turned on;";
     if(sen.counter.num == 0){
-      var msg = "";
-      for(var i = 0; i < sensors.length; i++){
-        msg += "sensor" + sen.id;
-      }
-      res.json({"msg":msg});
+      res.json({"msg":sen.message});
     }
   })
   .catch(function(e){
     sen.counter.num--;
     // remove dead sensor
     console.log("Removing dead sensor", sen.id);
-    sensors.splice(sensor_num, 1);
+    sen.message = "sensor " + sen.id + " has died;";
     if(sen.counter.num == 0 && sensor.length > 0){
-      var msg = "";
-      for(var i = 0; i < sensors.length; i++){
-        msg += "sensor" + sen.id;
-      }
-      res.json({"msg":msg});
+      res.json({"msg":sen.message});
     } else {
       res.json({"msg":"All sensors have died"})
     }
+    sensors.splice(sensor_num, 1);
   });
 }
 
@@ -116,8 +157,21 @@ app.get('/turnOnAll', function(req, res){
     res.status(400).json({"msg":"No sensors to turn on"});
   } else {
     var count = new counter(sensors.length);
+    var msg = new message("");
     for(var i = 0; i < sensors.length; i++){
-      turnOnLights(i, count, res);
+      turnOnLights(i, count, res, msg);
+    }
+  }
+});
+
+app.get('/turnOffAll', function(req, res){
+  if(sensors.length == 0){
+    res.status(400).json({"msg":"No sensors to turn off"});
+  } else {
+    var count = new counter(sensors.length);
+    var msg = new message("");
+    for(var i = 0; i < sensors.length; i++){
+      turnOffLights(i, count, res, msg);
     }
   }
 });
@@ -136,19 +190,6 @@ xbeeAPI.on("frame_object", function(frame){
   }
 });
 
-//-------------------------------------------------------
-function repeatSending(){ //send packet every 6 secs
-  var sampleFrame = {
-      type: xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST, // xbee_api.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST
-      id: 0x0F, // optional, nextFrameId() is called per default
-      destination64: "0013a20040a1a178",
-      data: "TxData0A" // Can either be string or byte array.
-  };
-  console.log(xbeeAPI.buildFrame(sampleFrame));
-  sp.write(xbeeAPI.buildFrame(sampleFrame));
-}
-//-------------------------------------------------------
-
 sp.on("open",function(){
   var sampleFrame = {
       type: xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST, // xbee_api.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST
@@ -156,7 +197,5 @@ sp.on("open",function(){
       destination64: "0013a20040a1a178",
       data: "TxData0A" // Can either be string or byte array.
   };
-
-  setInterval(repeatSending, 6000);
 
 });
