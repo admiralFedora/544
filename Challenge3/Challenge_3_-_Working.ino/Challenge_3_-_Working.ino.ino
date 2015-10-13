@@ -3,16 +3,21 @@
 
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
+
+uint8_t payload[] = { 0 }; //Payload Packet
+
 // create reusable response objects for responses we expect to handle 
 ZBRxResponse rx = ZBRxResponse();
 ModemStatusResponse msr = ModemStatusResponse();
+
+//Sending Status of the LED
+XBeeAddress64 addr64 = XBeeAddress64();
+ZBTxRequest zbTx = ZBTxRequest(addr64, payload, sizeof(payload));
 
 SoftwareSerial XBee(2, 3); // Rx, Tx
 
 int LED = 7; //GPIO pin 2
 int Status = 0; //Initializing Status to OFF
-
-//uint8_t payload[] = { 0 }; //Payload Packet
 
 void LEDON(int pin) 
 {
@@ -48,9 +53,17 @@ void loop()
       {
 
         xbee.getResponse().getZBRxResponse(rx);
+        /* DELETE
+        char test[64];
+        sprintf(test, "help 0%x", rx.getRemoteAddress64());
+        //sprintf(test, rx.getRemoteAddress64(), sizeof(rx.getRemoteAddress64()));
+        Serial.println(test);*/
+        addr64 = rx.getRemoteAddress64();
+        
         if(rx.getOption() == ZB_PACKET_ACKNOWLEDGED)
         {
           Serial.println("Packet Received!");
+          //Serial.println();
           
           switch(rx.getData(0))
           {
@@ -71,11 +84,11 @@ void loop()
               Status = digitalRead(LED);
               Serial.println("LED Status:");
               Serial.println(Status);
-              /*
-              payload[0] = Status;
-              ZBTxRequest tx = ZBTxRequest(0x1874, payload, sizeof(payload));
-              //We also need to xbee.send this status value to the coordinator
-              */
+              
+              //Sending
+              payload[0] = Status & 0xff;
+              xbee.send(zbTx);
+             
               break;
           }
         } else {
