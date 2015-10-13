@@ -12,6 +12,8 @@ SoftwareSerial XBee(2, 3); // Rx, Tx
 int LED = 7; //GPIO pin 2
 int Status = 0; //Initializing Status to OFF
 
+//uint8_t payload[] = { 0 }; //Payload Packet
+
 void LEDON(int pin) 
 {
     digitalWrite(pin, HIGH);
@@ -56,18 +58,24 @@ void loop()
               // if packet contains a 0, turn OFF the LED
               //digitalWrite(LED, LOW);
               LEDOFF(LED);
+              Serial.println("LED OFF");
               break;
             case 1:
               // if packet contains a 1, turn ON the LED
               //digitalWrite(LED, HIGH);
               LEDON(LED);
+              Serial.println("LED ON");
               break;
             case 8: //REQUEST Status
               // if packet contains an 8, read in the status of the LED
               Status = digitalRead(LED);
+              Serial.println("LED Status:");
               Serial.println(Status);
-
+              /*
+              payload[0] = Status;
+              ZBTxRequest tx = ZBTxRequest(0x1874, payload, sizeof(payload));
               //We also need to xbee.send this status value to the coordinator
+              */
               break;
           }
         } else {
