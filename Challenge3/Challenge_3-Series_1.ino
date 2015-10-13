@@ -58,7 +58,7 @@ void loop() {
     xbee.readPacket();
     
     xbee.getResponse().getRx16Response(rx16);
-    Serial.print(rx);//add
+    //Serial.print(rx);//add
     Serial.println("in the loop");//add
     Serial.println(xbee.getResponse().getApiId());
 
