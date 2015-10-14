@@ -5,7 +5,6 @@
     <title>SmartLight - Group1</title>
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
   </head>
   <body>
   <style>
@@ -53,7 +52,7 @@
    font-size: 18px;
    border: #ffffff solid 0px;
    padding:0px;
-   margin-top:8px;
+   margin-top:25px;
  }
 
   p.red{
@@ -96,6 +95,26 @@
      left: -5px;
  }
 
+ #idTag{
+   display: none;
+   width:200px;
+   border-radius: 3px;
+   font-family: Calibri;
+   font-style: italic;
+   font-size: 13px;
+   font-weight:bold;
+   border: #646464 solid 1px;
+   background-color: #ffffff;
+   opacity:0.6;
+   color:#141414;
+ }
+
+ #idTag p:nth-child(odd) {
+    background: #83d5e1;
+ }
+
+ #idTag p{margin: 0px;padding: 4px;}
+
  @media only screen and (max-device-width : 667px) {
     #info{display: none;}
 
@@ -117,9 +136,28 @@
 
 
   <script>
-  var socket = io();
-  socket.on('chat message', function(msg){
-  });
+  var statusList= [];
+
+  function stringParse(str){
+    var result = [];
+    var temp = '';
+    temp = str.substring(8,str.length-2);
+    while(temp.length != 0){
+      result.push = temp.substring(0,temp.indexOf(";"));
+      console.log(temp.substring(0,temp.indexOf(";")));
+      temp = temp.slice(temp.indexOf(";")+1,temp.length);
+    }
+    return result;
+  }
+
+  function addIdTag(){//Print sensor list
+    var idString = "";
+    for(i = 0 ; i< statusList.length; i++ ){
+        idString += "<p class = \"idList\">"+statusList[i] +"</p>";
+    }
+    $("#idTag").html(idString);
+    $("#idTag").css({"position":"absolute","left":"65px","top":"240px"});
+  }
 
   function turnOnAll() {
     var xhttp = new XMLHttpRequest();
@@ -144,15 +182,18 @@
   }
 
   function getStatus() {
+
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
+      statusList.push("No sensor connected");
       if (xhttp.readyState == 4 && xhttp.status == 200) {
-          //document.getElementById("demo").innerHTML = xhttp.responseText;
+          statusList.splice(0,1);
+          stringParse(xhttp.responseText);
       }
     }
     xhttp.open("GET", "getStatus", true);
     xhttp.send();
-    window.location = "/getStatus";
+
   }
 
   function detectmob() {
@@ -171,8 +212,6 @@
   }
 
   $( document ).ready(function() {
-
-
     $(".submit").hover(function(){
   			$(this).stop().animate({
   				opacity:"0.8"
@@ -214,8 +253,10 @@
       }
     });
 
-    $("#status").click(function(){
+    $("#checkButton").click(function(){
       getStatus();
+      addIdTag();
+      $( "#idTag" ).toggle( "slow" );
     });
 
   });
@@ -230,7 +271,7 @@
       <p class="gray" >Pete, Carlos, Hao, Avi, Ying</p>
       </div>
       <p class="gray" id="mobileInfo" >Challenge 3: Smart Light</p>
-      <input class="submit" id="checkButton" type="submit" id="status" value="Check Lights Status>>">
+      <p class="submit" id="checkButton" type="submit" >Check Lights Status>></p>
       <div class="panel">
         <span class="light_container">
         <img id="light" src="http://hhao.hostei.com/doc/files/CDN/lightOff.png"/>
@@ -239,7 +280,7 @@
         <input class="submit" type="submit" id="turnOn" value="Turn On"><br/>
       </div>
     </div>
-
+    <div id="idTag"></div>
 
   </body>
 </html>
