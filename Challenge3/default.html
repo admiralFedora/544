@@ -154,7 +154,24 @@
     xhttp.send();
   }
 
+  function detectmob() {
+   if( navigator.userAgent.match(/Android/i)
+   || navigator.userAgent.match(/webOS/i)
+   || navigator.userAgent.match(/iPhone/i)
+   || navigator.userAgent.match(/iPod/i)
+   || navigator.userAgent.match(/BlackBerry/i)
+   || navigator.userAgent.match(/Windows Phone/i)
+   ){
+      return true;
+    }
+   else {
+      return false;
+    }
+  }
+
   $( document ).ready(function() {
+
+
     $(".submit").hover(function(){
   			$(this).stop().animate({
   				opacity:"0.8"
@@ -164,7 +181,6 @@
   				opacity:"1"
   			}, 500);
   	});
-console.log($( window ).width());//---------------------------
 
     $("span.light_container").hover(function(){
         $(this).append('<div class="tip"><p>Our Smart Light</p></div>');
@@ -184,10 +200,15 @@ console.log($( window ).width());//---------------------------
       if($("#turnOn").val() == "Turn On"){
         $("#turnOn").val("Turn Off");
         turnOnAll();
+        if(detectmob()){$("body").css({"background-image": "url(\"http://hhao.hostei.com/doc/hao_hu_601termproject/img/bg.png\")","background-repeat": "repeat"})};
         $("#light").attr("src", "http://hhao.hostei.com/doc/files/CDN/lightOn.png");
       }else{
         $("#turnOn").val("Turn On");
         turnOffAll();
+        if(detectmob()){
+          $("body").css({"background-image": "none","background-color": "#373737"});
+          $("#mobileInfo").css({"color": "#ffffff"});
+        };
         $("#light").attr("src", "http://hhao.hostei.com/doc/files/CDN/lightOff.png");
       }
     });
