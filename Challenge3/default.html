@@ -152,6 +152,7 @@
     }
     xhttp.open("GET", "getStatus", true);
     xhttp.send();
+    window.location = "/getStatus";
   }
 
   function detectmob() {
@@ -200,7 +201,7 @@
       if($("#turnOn").val() == "Turn On"){
         $("#turnOn").val("Turn Off");
         turnOnAll();
-        if(detectmob()){$("body").css({"background-image": "url(\"http://hhao.hostei.com/doc/hao_hu_601termproject/img/bg.png\")","background-repeat": "repeat"})};
+        if(detectmob()){$("#mobileInfo").css({"color": "#646464"});$("body").css({"background-image": "url(\"http://hhao.hostei.com/doc/hao_hu_601termproject/img/bg.png\")","background-repeat": "repeat"})};
         $("#light").attr("src", "http://hhao.hostei.com/doc/files/CDN/lightOn.png");
       }else{
         $("#turnOn").val("Turn On");
