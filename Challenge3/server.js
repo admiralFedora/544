@@ -74,17 +74,13 @@ function turnOffLights(sensor_num, count, res, msg){
   sen.counter = count;
   sen.deferred = Q.defer();
   sen.frameId = xbeeAPI.nextFrameId();
-  var sendingFrame = new sendData(sen.id, "F", sen.frameId);
+  //var sendingFrame = new sendData(sen.id, "F", sen.frameId);
 
   sp.write(xbeeAPI.buildFrame({
     type: xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST,
     id: sen.frameId,
     destination64: sen.idLong,
-<<<<<<< HEAD
-    data: [0x8]
-=======
     data: [0x0]
->>>>>>> f6524241cbb20e3a7a558fe8c854d16b2f33e1bd
   }));
 
   console.log("sending to ", sen.idLong);
@@ -119,7 +115,7 @@ function turnOnLights(sensor_num, count, res, msg){
   sen.counter = count;
   sen.deferred = Q.defer();
   sen.frameId = xbeeAPI.nextFrameId();
-  var sendingFrame = new sendData(sen.id, "F", sen.frameId);
+  //var sendingFrame = new sendData(sen.id, "F", sen.frameId);
 
   sp.write(xbeeAPI.buildFrame({
     type: xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST,
@@ -161,7 +157,7 @@ function sendStatusCheck(sensor_num, count, res, msg){
   sen.counter = count;
   sen.deferred = Q.defer();
   sen.frameId = xbeeAPI.nextFrameId();
-  var sendingFrame = new sendData(sen.id, "F", sen.frameId);
+  //var sendingFrame = new sendData(sen.id, "F", sen.frameId);
 
   sp.write(xbeeAPI.buildFrame({
     type: xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST,
@@ -216,7 +212,7 @@ var server = app.listen(3000, '0.0.0.0', function(){
 });
 
 app.get('/', function(req, res){
-  res.send("hello");
+  res.sendfile("default.html");
 });
 
 // this end point returns the array of active sensors
@@ -277,34 +273,5 @@ xbeeAPI.on("frame_object", function(frame){
   }
 });
 
-<<<<<<< HEAD
-//-------------------------------------------------------
-function repeatSending(){ //send packet every 6 secs
-  var sampleFrame = {
-      type: xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST, // xbee_api.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST
-      id: 0x0F, // optional, nextFrameId() is called per default
-      destination64: "0013a20040a1a153",
-      //destination64: "0013a20040a1a153",
-      //destination16: "97BF",
-      data: "TxData0A" // Can either be string or byte array.
-  };
-  console.log(xbeeAPI.buildFrame(sampleFrame));
-  sp.write(xbeeAPI.buildFrame(sampleFrame));
-}
-//-------------------------------------------------------
-
 sp.on("open",function(){
-  var sampleFrame = {
-      type: xbeeConst.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST, // xbee_api.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST
-      id: 0x0F, // optional, nextFrameId() is called per default
-      destination64: "0013a20040a1a178",
-      data: "TxData0A" // Can either be string or byte array.
-  };
-  //console.log(xbeeAPI.buildFrame(sampleFrame));
-  sp.write(xbeeAPI.buildFrame(sampleFrame));
-  //setInterval(repeatSending, 6000);
-
-=======
-sp.on("open",function(){
->>>>>>> f6524241cbb20e3a7a558fe8c854d16b2f33e1bd
 });

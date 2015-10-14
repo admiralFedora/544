@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>SmartLight - Group1</title>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+  <style>
+
+  </style>
+
+
+  <script>
+  var socket = io();
+  socket.on('chat message', function(msg){
+  });
+
+  function turnOnAll() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (xhttp.readyState == 4 && xhttp.status == 200) {
+        //do something
+      }
+    }
+    xhttp.open("GET", "turnOnAll", true);
+    xhttp.send();
+  }
+
+  function turnOffAll() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (xhttp.readyState == 4 && xhttp.status == 200) {
+          //do something  
+      }
+    }
+    xhttp.open("GET", "turnOffAll", true);
+    xhttp.send();
+  }
+
+  $( document ).ready(function() {
+    $("#turnOn").click(function(){
+      turnOnAll();
+    });
+
+    $("#status").click(function(){
+      turnOffAll();
+    });
+
+  });
+
+  </script>
+
+    <div class="head">
+      <div class="goupInfo">
+        <input class="submit" type="submit" id="turnOn" value="Turn On">&nbsp;&nbsp;
+        <input class="submit" type="submit" id="status" value="Check Status">
+      </div>
+    </div>
+
+
+  </body>
+</html>
