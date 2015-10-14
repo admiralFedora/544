@@ -9,78 +9,87 @@
   </head>
   <body>
   <style>
+  body{
+   background-image: url("http://hhao.hostei.com/doc/hao_hu_601termproject/img/bg.png");
+   background-repeat: repeat;
+  }
 
-    @media all and (max-width: 1500px) {
+  .panel{
+    margin-left:auto;
+    margin-right:auto;
+    width:140px;
+    height:300px;
+    margin-top:50px;
+  }
 
-    }
+  .submit{
+    color:#ffffff;
+    background-color:#38b1c2;
+    border: #38b1c2 solid 1px;
+    font-family:Calibri;
+    font-weight:bold;
+    font-size:14px;
+    border-radius: 3px;
+    width:100px;
+    padding:5px 8px;
+    cursor:pointer;
+    margin-left: 18px;
+    margin-right: 20px;
+    margin-top: 30px;
+  }
 
-    body{
-    	background-image: url("http://hhao.hostei.com/doc/hao_hu_601termproject/img/bg.png");
-    	background-repeat: repeat;
-    }
+ #checkButton{
+   margin-left:60px;
+   color:#38b1c2;
+   background-color: Transparent;
+   width:auto;
+   font-size: 18px;
+   border: #ffffff solid 0px;
+   padding:0px;
+   margin-top:8px;
+ }
 
-    .panel{
-      margin-left:auto;
-      margin-right:auto;
-      width:140px;
-      height:300px;
-      margin-top:50px;
-    }
+  p.red{
+    color:#cc0000;
+    font-family:sans-serif;
+    font-weight:bold;
+    margin-left:60px;
+    font-size:22px;
+    margin-bottom:15px;
+    margin-top:50px;
+  }
 
-    .submit{
-      color:#ffffff;
-      background-color:#38b1c2;
-      border: #38b1c2 solid 1px;
-      font-family:Calibri;
-      font-weight:bold;
-      font-size:14px;
-      border-radius: 3px;
-      width:100px;
-      padding:5px 8px;
-      cursor:pointer;
-      margin-left: 18px;
-      margin-right: 20px;
-      margin-top: 30px;
-    }
+  p.gray{	color:#646464; margin-left:60px;	margin-top:3px;margin-bottom:3px}
 
-    p.red{
-      color:#cc0000;
-      font-family:sans-serif;
-      font-weight:bold;
-      margin-left:60px;
-      font-size:22px;
-      margin-bottom:15px;
-      margin-top:50px;
-    }
+  #info{display:block;}
 
-    p.gray{	color:#646464; margin-left:60px;	margin-top:3px;margin-bottom:3px}
+  div.tip {
+   background-color: #ffffff;
+   color:#38b1c2;
+   z-index: 1000000;
+   width: 160px;
+   border-radius: 5px;
+   padding:2px;
+   text-align: center;
+   position: absolute;
+ }
 
-    div.tip {
-     background-color: #ffffff;
-     color:#38b1c2;
-     z-index: 1000000;
-     width: 160px;
-     border-radius: 5px;
-     padding:2px;
-     text-align: center;
+ div.tip:before {
+     border-color: transparent #ffffff transparent transparent;
+     border-right: 6px solid #ffffff;
+     border-style: solid;
+     border-width: 6px 6px 6px 0px;
+     content: "";
+     display: block;
+     height: 0;
+     width: 0;
+     line-height: 2px;
      position: absolute;
-   }
+     top: 5%;
+     left: -5px;
+ }
 
-   div.tip:before {
-   	  border-color: transparent #ffffff transparent transparent;
-   	  border-right: 6px solid #ffffff;
-   	  border-style: solid;
-   	  border-width: 6px 6px 6px 0px;
-   	  content: "";
-   	  display: block;
-   	  height: 0;
-   	  width: 0;
-   	  line-height: 2px;
-   	  position: absolute;
-   	  top: 5%;
-   	  left: -5px;
-   }
-
+  }
 
   </style>
 
@@ -133,12 +142,13 @@
   				opacity:"1"
   			}, 500);
   	});
+console.log($( window ).width());//---------------------------
 
     $("span.light_container").hover(function(){
         $(this).append('<div class="tip"><p>Our Smart Light</p></div>');
         $("div.tip").css({"left":$( window ).width()*0.5 + 60});
         $(this).stop().animate({
-  				opacity:"0.8"
+  				opacity:"0.5"
   				}, 500);
   			},function(){
           $("div.tip").remove();
@@ -169,17 +179,20 @@
   </script>
 
     <div class="head">
+      <div id = "info">
       <p class="red" >Boston University</p>
       <p class="gray" >GROUP 1, ENG EC544</p>
+      <p class="gray" >Challenge3: Smart Light</p>
       <p class="gray" >Pete, Carlos, Hao, Avi, Ying</p>
-      <br/>
+      </div>
+
+      <input class="submit" id="checkButton" type="submit" id="status" value="Check Lights Status>>">
       <div class="panel">
         <span class="light_container">
         <img id="light" src="http://hhao.hostei.com/doc/files/CDN/lightOff.png"/>
         </span>
         <br/>
         <input class="submit" type="submit" id="turnOn" value="Turn On"><br/>
-        <input class="submit" type="submit" id="status" value="Check Status">
       </div>
     </div>
 
