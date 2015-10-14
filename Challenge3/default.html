@@ -10,6 +10,51 @@
   <body>
   <style>
 
+    @media all and (max-width: 1500px) {
+
+    }
+
+    body{
+    	background-image: url("http://hhao.hostei.com/doc/hao_hu_601termproject/img/bg.png");
+    	background-repeat: repeat;
+    }
+
+    .panel{
+      margin-left:auto;
+      margin-right:auto;
+      width:300px;
+      height:300px;
+      margin-top:50px;
+    }
+
+    .submit{
+      color:#ffffff;
+      background-color:#38b1c2;
+      border: #38b1c2 solid 1px;
+      font-family:Calibri;
+      font-weight:bold;
+      font-size:14px;
+      border-radius: 3px;
+      width:100px;
+      padding:3px 8px;
+      cursor:pointer;
+      margin-left: 20px;
+      margin-right: 20px;
+    }
+
+    p.red{
+      color:#cc0000;
+      font-family:sans-serif;
+      font-weight:bold;
+      margin-left:60px;
+      font-size:22px;
+      margin-bottom:15px;
+      margin-top:50px;
+    }
+
+    p.gray{	color:#646464; margin-left:60px;	margin-top:3px;margin-bottom:3px}
+
+
   </style>
 
 
@@ -33,20 +78,47 @@
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
       if (xhttp.readyState == 4 && xhttp.status == 200) {
-          //do something  
+          //do something
       }
     }
     xhttp.open("GET", "turnOffAll", true);
     xhttp.send();
   }
 
+  function getStatus() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (xhttp.readyState == 4 && xhttp.status == 200) {
+          //document.getElementById("demo").innerHTML = xhttp.responseText;
+      }
+    }
+    xhttp.open("GET", "getStatus", true);
+    xhttp.send();
+  }
+
   $( document ).ready(function() {
+    $(".submit").hover(function(){
+  			$(this).stop().animate({
+  				opacity:"0.8"
+  				}, 500);
+  			},function(){
+  				$(this).stop().animate({
+  				opacity:"1"
+  			}, 500);
+  	});
+
     $("#turnOn").click(function(){
-      turnOnAll();
+      if($("#turnOn").val() == "Turn On"){
+        $("#turnOn").val("Turn Off");
+        turnOnAll();
+      }else{
+        $("#turnOn").val("Turn On");
+        turnOffAll();
+      }
     });
 
     $("#status").click(function(){
-      turnOffAll();
+      getStatus();
     });
 
   });
@@ -54,7 +126,10 @@
   </script>
 
     <div class="head">
-      <div class="goupInfo">
+      <p class="red" >Boston University</p>
+      <p class="gray" >GROUP 1, ENG EC544</p>
+      <p class="gray" >Pete, Carlos, Hao, Avi, Ying</p>
+      <div class="panel">
         <input class="submit" type="submit" id="turnOn" value="Turn On">&nbsp;&nbsp;
         <input class="submit" type="submit" id="status" value="Check Status">
       </div>
