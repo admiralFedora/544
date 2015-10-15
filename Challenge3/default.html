@@ -95,12 +95,11 @@
      left: -5px;
  }
 
- #idTag{
+ #idTag, #msg{
    display: none;
-   width:200px;
+   width:180px;
    border-radius: 3px;
    font-family: Calibri;
-   font-style: italic;
    font-size: 13px;
    font-weight:bold;
    border: #646464 solid 1px;
@@ -110,10 +109,33 @@
  }
 
  #idTag p:nth-child(odd) {
+    font-size:14px;
     background: #83d5e1;
+    color:#ffffff;
  }
 
- #idTag p{margin: 0px;padding: 4px;}
+ #idTag p{margin: 0px;padding: 6px 10px;}
+ #msg p{margin: 0px;padding: 6px 10px;}
+ #msg {color:#ffffff;border: #38b1c2 solid 1px;background-color:  #38b1c2; text-align: center}
+ #msg:hover{opacity:0.5}
+
+ span.attention1, span.attention2{
+ 	cursor: pointer;
+  display: inline-block;
+ 	width: 16px;
+ 	height: 16px;
+ 	line-height: 16px;
+ 	color: White;
+ 	font-size: 13px;
+ 	font-weight: bold;
+ 	border-radius: 8px;
+ 	text-align: center;
+ 	position: relative;
+ }
+ span.attention1{background-color:#32ff17}
+ span.attention2{background-color:#ff1717}
+
+ span.attention1:hover, span.attention2:hover{opacity:0.5}
 
  @media only screen and (max-device-width : 667px) {
     #info{display: none;}
@@ -136,34 +158,57 @@
 
 
   <script>
-  var statusList= [];
+  var statusList = [];
 
-  function stringParse(str){
-    var result = [];
+  function updateStatus(str,flag,flagUpdate){//flag: action(1) or status query(0) /FlagUpdate: set light on/off
     var temp = '';
-    temp = str.substring(8,str.length-2);
+    temp = str.substring(8,str.length-2);//remove header
     while(temp.length != 0){
-      result.push = temp.substring(0,temp.indexOf(";"));
-      console.log(temp.substring(0,temp.indexOf(";")));
+      statusList.push(temp.substring(0,temp.indexOf(";")));
       temp = temp.slice(temp.indexOf(";")+1,temp.length);
     }
-    return result;
-  }
 
-  function addIdTag(){//Print sensor list
     var idString = "";
     for(i = 0 ; i< statusList.length; i++ ){
         idString += "<p class = \"idList\">"+statusList[i] +"</p>";
     }
     $("#idTag").html(idString);
-    $("#idTag").css({"position":"absolute","left":"65px","top":"240px"});
+    $("#idTag").css({"position":"absolute","left":"65px","top":"210px"});
+    if(flag == 1){sendMessage(statusList)};
+
+    function checkAll(Gstatus){
+      var check ="";
+      for(i =0; i< Gstatus.length;i++){
+        if(i == 0){check = Gstatus[i].substring(Gstatus[i].length-2,Gstatus[i].length)}
+        if(check != Gstatus[i].substring(Gstatus[i].length-2,Gstatus[i].length)){return false;}//problem found
+      }
+      return true;
+    }
+
+    function sendMessage(object){
+      var htmlString ="";
+      if(checkAll(object)){
+          htmlString = "<p class = \"idList\">&nbsp;&nbsp;<span class=\"attention1\">&#10003</span>&nbsp;&nbsp;All sensors working correctly</p>";
+      }else{
+          htmlString = "<p class = \"idList\">&nbsp;&nbsp;<span class=\"attention2\">!</span>&nbsp;&nbsp;One or more sensor have problem</p>";
+      }
+      $("#msg").html(htmlString);
+      $("#msg").css({"position":"absolute","width":"20%","left":"40%","top":"40px"});
+    	$("#msg").fadeIn( 1000 ).fadeOut( 2000 );
+    }
+
   }
+
+
+
 
   function turnOnAll() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
+      statusList=["No sensor connected"];
       if (xhttp.readyState == 4 && xhttp.status == 200) {
-        //do something
+        statusList.splice(0,1);
+        updateStatus(xhttp.responseText,1,0);
       }
     }
     xhttp.open("GET", "turnOnAll", true);
@@ -173,8 +218,10 @@
   function turnOffAll() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
+      statusList=["No sensor connected"];
       if (xhttp.readyState == 4 && xhttp.status == 200) {
-          //do something
+          statusList.splice(0,1);
+          updateStatus(xhttp.responseText,1,0);
       }
     }
     xhttp.open("GET", "turnOffAll", true);
@@ -182,18 +229,16 @@
   }
 
   function getStatus() {
-
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
-      statusList.push("No sensor connected");
+      statusList=["No sensor connected"];
       if (xhttp.readyState == 4 && xhttp.status == 200) {
           statusList.splice(0,1);
-          stringParse(xhttp.responseText);
+          updateStatus(xhttp.responseText,0,1);
       }
     }
     xhttp.open("GET", "getStatus", true);
     xhttp.send();
-
   }
 
   function detectmob() {
@@ -255,12 +300,11 @@
 
     $("#checkButton").click(function(){
       getStatus();
-      addIdTag();
       $( "#idTag" ).toggle( "slow" );
     });
 
+    setInterval(getStatus, 5000); //update every 5 secs
   });
-
   </script>
 
     <div class="head">
@@ -281,6 +325,6 @@
       </div>
     </div>
     <div id="idTag"></div>
-
+    <div id="msg"></div>
   </body>
 </html>

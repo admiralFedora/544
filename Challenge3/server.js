@@ -89,7 +89,7 @@ function turnOffLights(sensor_num, count, res, msg){
   .then(function(f){
     sen.counter.num--;
     console.log("command received correctly");
-    sen.message.msg += "sensor " + sen.id + " turned off;";
+    sen.message.msg += "Sensor " + sen.id + " turned off;";
     if(sen.counter.num == 0){
       res.json({"msg":sen.message.msg});
     }
@@ -98,7 +98,7 @@ function turnOffLights(sensor_num, count, res, msg){
     sen.counter.num--;
     // remove dead sensor
     console.log("Removing dead sensor", sen.id);
-    sen.message.msg += "sensor " + sen.id + " has died;";
+    sen.message.msg += "Sensor " + sen.id + " has died;";
     if(sen.counter.num == 0 && sensor.length > 0){
       res.json({"msg":sen.message.msg});
     } else {
@@ -130,7 +130,7 @@ function turnOnLights(sensor_num, count, res, msg){
   .then(function(f){
     sen.counter.num--;
     console.log("command received correctly");
-    sen.message.msg += "sensor " + sen.id + " turned on;";
+    sen.message.msg += "Sensor " + sen.id + " turned on;";
     if(sen.counter.num == 0){
       res.json({"msg":sen.message.msg});
     }
@@ -139,7 +139,7 @@ function turnOnLights(sensor_num, count, res, msg){
     sen.counter.num--;
     // remove dead sensor
     console.log("Removing dead sensor", sen.id);
-    sen.message.msg += "sensor " + sen.id + " has died;";
+    sen.message.msg += "Sensor " + sen.id + " has died;";
     if(sen.counter.num == 0 && sensor.length > 0){
       res.json({"msg":sen.message.msg});
     } else {
@@ -176,7 +176,7 @@ function sendStatusCheck(sensor_num, count, res, msg){
     sen.counter.num--;
     // remove dead sensor
     console.log("Removing dead sensor", sen.id);
-    sen.message.msg += "sensor " + sen.id + " has died;";
+    sen.message.msg += "Sensor " + sen.id + " has died;";
     sensors.splice(sensor_num, 1);
   });
 }
@@ -191,10 +191,10 @@ function getStatus(frame){
       sen.counter.num--;
       switch(data){
         case 0x0:
-          sen.message.msg += "sensor " + sen.id + " is off;";
+          sen.message.msg += "Sensor " + sen.id + " is off;";
           break;
         case 0x1:
-          sen.message.msg += "sensor " + sen.id + " is on;";
+          sen.message.msg += "Sensor " + sen.id + " is on;";
           break;
       }
 
