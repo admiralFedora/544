@@ -128,7 +128,7 @@
  	color: White;
  	font-size: 13px;
  	font-weight: bold;
- 	border-radius: 8px;
+ 	border-radius: 50%;
  	text-align: center;
  	position: relative;
  }
@@ -142,7 +142,7 @@
 
     .panel{width:600px;height:50%;margin-top:10px;}
 
-    #light{width:100%; height:50%;margin-top: 30px}
+    #light{width:100%; height:50%;margin-top: 50px}
 
     #turnOn{display:block; margin-right: auto;margin-left: auto;margin-top:23%;-webkit-appearance: none;
       -moz-appearance: none; appearance: none; box-shadow: 0 1px gray;border: 12px solid #f5f5f5;font-size: 3em;}
@@ -150,7 +150,7 @@
     .submit{line-height:50px;width:280px;height:280px;border-radius:50%;
     }
 
-    #checkButton{position:fixed; left:30%; bottom: -120px; font-size:2em; padding-bottom: 10px;}
+    #checkButton{position:fixed; left:35px; top: 40px; font-size:3em;margin-left:0px;}
     #mobileInfo{display:block;}
   }
 
@@ -176,6 +176,22 @@
     $("#idTag").css({"position":"absolute","left":"65px","top":"210px"});
     if(flag == 1){sendMessage(statusList)};
 
+    if(flagUpdate == 1){ //update light and button
+      if(checkAll(statusList) && statusList[0].substring(statusList[0].length-2,statusList[0].length) == "ff"){//updated status is off
+        $("#turnOn").val("Turn On");
+        if(detectmob()){
+          $("body").css({"background-image": "none","background-color": "#373737"});
+          $("#mobileInfo").css({"color": "#ffffff"});
+        };
+        $("#light").attr("src", "http://hhao.hostei.com/doc/files/CDN/lightOff.png");
+      };
+      if(checkAll(statusList) && statusList[0].substring(statusList[0].length-2,statusList[0].length) == "on"){//updated status is on
+        $("#turnOn").val("Turn Off");
+        if(detectmob()){$("#mobileInfo").css({"color": "#646464"});$("body").css({"background-image": "url(\"http://hhao.hostei.com/doc/hao_hu_601termproject/img/bg.png\")","background-repeat": "repeat"})};
+        $("#light").attr("src", "http://hhao.hostei.com/doc/files/CDN/lightOn.png");
+      };
+    };
+
     function checkAll(Gstatus){
       var check ="";
       for(i =0; i< Gstatus.length;i++){
@@ -193,14 +209,17 @@
           htmlString = "<p class = \"idList\">&nbsp;&nbsp;<span class=\"attention2\">!</span>&nbsp;&nbsp;One or more sensor have problem</p>";
       }
       $("#msg").html(htmlString);
-      $("#msg").css({"position":"absolute","width":"20%","left":"40%","top":"40px"});
-    	$("#msg").fadeIn( 1000 ).fadeOut( 2000 );
+      if(detectmob()){
+        $("#msg").css({"position":"absolute","width":"100%","left":"0px","top":"0px","height":"10%"});
+        $("#msg").fadeIn( 1000 ).fadeOut( 2000 );
+        $("#msg p").css({"font-size":"4em","margin-top":"5%"});
+        $("#msg span").css({"height":"4em","width":"4em","line-height":"5em"});
+      }else{
+        $("#msg").css({"position":"absolute","width":"20%","left":"40%","top":"40px"});
+        $("#msg").fadeIn( 1000 ).fadeOut( 2000 );
+      };
+    };
     }
-
-  }
-
-
-
 
   function turnOnAll() {
     var xhttp = new XMLHttpRequest();
@@ -299,11 +318,13 @@
     });
 
     $("#checkButton").click(function(){
-      getStatus();
-      $( "#idTag" ).toggle( "slow" );
+      if(!detectmob()){
+        getStatus();
+        $( "#idTag" ).toggle( "slow" );
+      }
     });
 
-    setInterval(getStatus, 5000); //update every 5 secs
+    setInterval(getStatus, 6000); //update every 5 secs
   });
   </script>
 
