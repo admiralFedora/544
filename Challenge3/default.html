@@ -152,6 +152,16 @@
 
     #checkButton{position:fixed; left:35px; top: 40px; font-size:3em;margin-left:0px;}
     #mobileInfo{display:block;}
+
+    #idTag{
+      width:86%;
+      border-radius: 5px;
+      font-size: 2em;
+      opacity:0.8;
+    }
+    #idTag p:nth-child(odd) {font-size:2em;}
+    #idTag p:nth-child(even) {font-size:2em;}
+    #idTag p{padding:20px  50px ;}
   }
 
   </style>
@@ -318,10 +328,12 @@
     });
 
     $("#checkButton").click(function(){
-      if(!detectmob()){
         getStatus();
         $( "#idTag" ).toggle( "slow" );
-      }
+    });
+
+    $("#idTag").click(function(){
+      if(detectmob()){$(this).css("display","none");}
     });
 
     setInterval(getStatus, 6000); //update every 5 secs
