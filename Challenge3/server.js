@@ -222,7 +222,7 @@ app.get('/sensors', function(req, res){
 
 app.get('/turnOnAll', function(req, res){
   if(sensors.length == 0){
-    res.status(400).json({"msg":"No sensors to turn on"});
+    res.json({"msg":"No sensors to turn on"});
   } else {
     var count = new counter(sensors.length);
     var msg = new message("");
@@ -234,7 +234,7 @@ app.get('/turnOnAll', function(req, res){
 
 app.get('/turnOffAll', function(req, res){
   if(sensors.length == 0){
-    res.status(400).json({"msg":"No sensors to turn off"});
+    res.json({"msg":"No sensors to turn off"});
   } else {
     var count = new counter(sensors.length);
     var msg = new message("");
@@ -246,7 +246,7 @@ app.get('/turnOffAll', function(req, res){
 
 app.get('/getStatus', function(req, res){
   if(sensors.length == 0){
-    res.status(400).json({"msg":"No sensors to get status"});
+    res.json({"msg":"No sensors to get status"});
   } else {
     var count = new counter(sensors.length);
     var msg = new message("");
