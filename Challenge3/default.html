@@ -116,7 +116,7 @@
 
  #idTag p{margin: 0px;padding: 6px 10px;}
  #msg p{margin: 0px;padding: 6px 10px;}
- #msg {color:#ffffff;border: #38b1c2 solid 1px;background-color:  #38b1c2; text-align: center}
+ #msg {color:#ffffff;border: #38b1c2 solid 1px;background-color:  #38b1c2; text-align: center; opacity:0.9}
  #msg:hover{opacity:0.5}
 
  span.attention1, span.attention2{
@@ -333,7 +333,7 @@
     });
 
     $("#idTag").click(function(){
-      if(detectmob()){$(this).css("display","none");}
+      if(detectmob()){$(this).fadeOut( 1000 );}
     });
 
     setInterval(getStatus, 6000); //update every 5 secs
