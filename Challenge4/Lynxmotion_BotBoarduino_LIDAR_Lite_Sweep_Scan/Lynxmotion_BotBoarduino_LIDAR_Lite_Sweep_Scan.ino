@@ -30,6 +30,9 @@
 #define    MeasureValue        0x04          // Value to initiate ranging.
 #define    RegisterHighLowB    0x8f          // Register to get both High and Low bytes in 1 call.
 
+#define LIDAR_FRONT 2
+#define LIDAR_BACK 3
+
 #include <Servo.h>
 
 Servo myservo;
@@ -43,11 +46,14 @@ void setup()
   Serial.begin(9600);
   Serial.println("< START >");
   
-  // Servo control
-  myservo.attach(5);
-  
   // LIDAR control
   Wire.begin(); // join i2c bus
+
+  pinMode(2, OUTPUT);
+  pinMode(3, OUTPUT);
+
+  digitalWrite(2, LOW);
+  digitalWrite(3, LOW);
 }
 
 // Get a measurement from the LIDAR Lite
@@ -80,29 +86,30 @@ int lidarGetRange(void)
   return val;
 }
 
-void serialPrintRange(int pos, int distance)
+void serialPrintRange(int distance)
 {
-    Serial.print("Position (deg): ");
-    Serial.print(pos);
-    Serial.print("\t\tDistance (cm): ");
+    Serial.print("Distance (cm): ");
     Serial.println(distance);
+}
+
+int getLidarDistance(int sensor){
+  digitalWrite(LIDAR_FRONT, LOW);
+  digitalWrite(LIDAR_BACK, LOW);
+
+  digitalWrite(sensor, HIGH);
+  delay(5); // delay for turning on sensor
+
+  return lidarGetRange();
 }
 
 void loop()
 {
-  for(pos = 0; pos <= 180; pos += 1)
-  {
-    myservo.write(pos);
-    distance = lidarGetRange();
-    serialPrintRange(pos, distance);
-    delay(20);
-  }
-  for(pos = 180; pos>=0; pos-=1)
-  {
-    myservo.write(pos);
-    distance = lidarGetRange();
-    serialPrintRange(pos, distance);
-    delay(20);
-  }
+  Serial.print("Sensor 1:");
+  serialPrintRange(getLidarDistance(LIDAR_FRONT));
+
+  Serial.print("Sensor 2:");
+  serialPrintRange(getLidarDistance(LIDAR_BACK));
+
+  delay(1000);
 }
 
