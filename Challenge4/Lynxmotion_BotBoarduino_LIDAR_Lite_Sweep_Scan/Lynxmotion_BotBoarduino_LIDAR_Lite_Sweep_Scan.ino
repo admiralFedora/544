@@ -1,9 +1,4 @@
-/***********************************************************************************************************
-/* Lynxmotion BotBoarduino LIDAR Lite Sweep Scan
-/* Version: 1.0.0
-/* By: scharette
-/* Date: 2015-03-31
-/* 
+/*
 /* Short example based on the Servo library example "Sweep" example and the Pulsed Light 3D examples.
 /* The servo motor* is attached to pin 5 and rotates from 0-180 degrees continuously by 1 degree increments.
 /* The LIDAR lite is attached to VCC (+5 V DC), GND, SDA and SCL.
@@ -20,8 +15,7 @@
 /* Bracket to hold the servo motor: http://www.robotshop.com/en/lynxmotion-aluminum-multi-purpose-servo.html?product-code=RB-Lyn-81
 /*
 /* *: Please note that while we used a HS-645MG in our example, the HS-422 and almost any other standard RC servo motor could perform this task.
-/*
-/**********************************************************************************************************/
+*/
 
 #include <Wire.h>
 
