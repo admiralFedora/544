@@ -18,6 +18,7 @@ double maxSpeedOffset = 45; // maximum speed magnitude, in servo 'degrees'
 double maxWheelOffset = 85; // maximum wheel turn magnitude, in servo 'degrees'
 int frontDist = 0; 
 int backDist = 0;
+int intialDist;
 
 // wheel angle > 90 turns left (facing forward)
 // wheel angle < 90 turns right (facing forward)
@@ -51,7 +52,16 @@ void setup()
 
   frontDist = getLidarDistance(LIDAR_FRONT);
   backDist = getLidarDistance(LIDAR_BACK);
+
+  int sumDist = 0;
+  for (int i=1; i<10; i++)
+  {
+   sumDist = sumDist + getLidarDistance(LIDAR_BACK);
+   delay(50);
+  }
+  intialDist = sumDist/10;
 }
+
 
 /* Calibrate the ESC by sending a high signal, then a low, then middle.*/
 void calibrateESC()
@@ -112,19 +122,19 @@ void driveStraight()
 {
   esc.write(90 + 10);
   
-  if (frontDist > backDist + 6)
+  if (backDist < intialDist - 6)
   {
     wheels.write(90 + 50);
     delay(50);
   }
-  else if (frontDist < backDist - 6)
+  else if (backDist > intialDist + 6)
   {
     wheels.write(90 - 50);
     delay(50);
   }
   else
   {
-    wheels.write(90);
+    wheels.write(83);
     delay(50);
   }
   frontDist = getLidarDistance(LIDAR_FRONT);
