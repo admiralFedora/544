@@ -6,6 +6,9 @@
 #define    MeasureValue        0x04          // Value to initiate ranging.
 #define    RegisterHighLowB    0x8f          // Register to get both High and Low bytes in 1 call.
 
+//Pins
+#define LIDAR_FRONT 2
+#define LIDAR_BACK 3
 
 Servo wheels; // servo for turning the wheels
 Servo esc; // not actually a servo, but controlled like one!
@@ -17,7 +20,7 @@ int frontDist = 0;
 int backDist = 0;
 
 int centerpoint = 90; //CALIBRATED CENTER
-int Drive = 50; //OUTPUT
+int output = 50; //OUTPUT
 
 // wheel angle > 90 turns left (facing forward)
 // wheel angle < 90 turns right (facing forward)
@@ -29,6 +32,8 @@ void setup()
 {
   Serial.begin(9600);
   pinMode(2, INPUT);
+  Serial.println("< START >");
+
   
   wheels.attach(8); // initialize wheel servo to Digital IO Pin #8
   esc.attach(9); // initialize ESC to Digital IO Pin #9
@@ -37,33 +42,22 @@ void setup()
    */
   calibrateESC();
 
-  pinMode(5, OUTPUT); // set up lidar sensor 1 (front)
-  pinMode(6, OUTPUT); // set up lidar sensor 2 (back)
-
-  digitalWrite(5, LOW);
-  digitalWrite(6, LOW);  
-
   // LIDAR control
   Wire.begin(); // join i2c bus
+  
+  pinMode(2, OUTPUT);
+  pinMode(3, OUTPUT);
 
-  frontDist = lidarGetRange(1);
-  backDist = lidarGetRange(2);
+  digitalWrite(2, LOW);
+  digitalWrite(3, LOW);
+
+  frontDist = getLidarDistance(LIDAR_FRONT);
+  backDist = getLidarDistance(LIDAR_BACK);
 }
 
 // Get a measurement from the LIDAR Lite
-int lidarGetRange(int sensor)
-{
-  digitalWrite(6, LOW);
-  digitalWrite(5, LOW);
-  switch(sensor)
-  {
-    case 1:
-      digitalWrite(5, HIGH);
-    case 2:
-      digitalWrite(6, HIGH);
-  }
-  delay(1);
-  
+int lidarGetRange(void)
+{  
   int val = -1;
   
   Wire.beginTransmission((int)LIDARLite_ADDRESS); // transmit to LIDAR-Lite
@@ -91,14 +85,15 @@ int lidarGetRange(int sensor)
   return val;
 }
 
-/* Convert degree value to radians */
-double degToRad(double degrees){
-  return (degrees * 71) / 4068;
-}
+int getLidarDistance(int sensor)
+{
+  digitalWrite(LIDAR_FRONT, LOW);
+  digitalWrite(LIDAR_BACK, LOW);
 
-/* Convert radian value to degrees */
-double radToDeg(double radians){
-  return (radians * 4068) / 71;
+  digitalWrite(sensor, HIGH);
+  delay(10); // delay for turning on sensor
+
+  return lidarGetRange();
 }
 
 /* Calibrate the ESC by sending a high signal, then a low, then middle.*/
@@ -113,10 +108,21 @@ void calibrateESC()
     esc.write(90); // reset the ESC to neutral (non-moving) value
     wheels.write(82); // offset the trim of the wheels
 }
+/* 
+//Convert degree value to radians 
+double degToRad(double degrees){
+  return (degrees * 71) / 4068;
+}
 
-/* Oscillate between various servo/ESC states, using a sine wave to gradually 
+// Convert radian value to degrees 
+double radToDeg(double radians){
+  return (radians * 4068) / 71;
+}
+
+//Oscillate between various servo/ESC states, using a sine wave to gradually 
  *  change speed and turn values.
  */
+ /*
 void oscillate()
 {
   for (int i =0; i < 360; i++){
@@ -128,19 +134,20 @@ void oscillate()
     delay(50);
   }
 }
+*/
 
 void driveStraight()
 {
   esc.write(90 + 10);
   
-  if (frontDist > backDist + 3)
+  if (frontDist > backDist + 6)
   {
-    wheels.write(centerpoint + Drive);
+    wheels.write(centerpoint + output);
     delay(50);
   }
-  else if (frontDist < backDist - 3)
+  else if (frontDist < backDist - 6)
   {
-    wheels.write(centerpoint - Drive);
+    wheels.write(centerpoint - output);
     delay(50);
   }
   else
@@ -148,8 +155,10 @@ void driveStraight()
     wheels.write(90);
     delay(50);
   }
-  frontDist = lidarGetRange(1);
-  backDist = lidarGetRange(2);
+  frontDist = getLidarDistance(LIDAR_FRONT);
+  backDist =  getLidarDistance(LIDAR_BACK);
+
+  
   Serial.print("\nFront:");
   Serial.print(frontDist);
   Serial.print("\nBack:");
@@ -163,13 +172,15 @@ void loop()
    {
     driveStraight();
    }
+   /*
    else if (lidarGetRange(1)<3 || lidarGetRange(2)<3) 
    {
     startup = false;
     esc.write(90);
    }
+   */
 
-   delay(500);
+   delay(100);
 }
 
 
