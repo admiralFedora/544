@@ -33,6 +33,9 @@ int distanceActual;
 int Error;
 int maxError;
 int minError;
+int PTerm;
+int ITerm;
+int DTerm;
 
 int lengthbetweensensors = 30;//in centimeters, must be the same unit as getLidarDistance 
 
@@ -124,34 +127,29 @@ int getLidarDistance(int sensor)
   return lidarGetRange();
 }
 
-int thetaActual()
+void getActual()
 {
   thetaActual = atan ( (frontDist-backDist)/lengthbetweensensors);
+  distanceActual = cos (thetaActual) * frontDist;
 }
 
-int distanceActual()
-{
-  distanceActual = cos thetaActual * frontDist;
-}
-
-/*
 void distanceError(int distanceActual, int distanceDesired)
 {
   Error = distanceDesired - distanceActual;
   if (Error >= maxError)
   {
-    preoutput = 45; //steer right all the way!
+    output = 45; //steer right all the way!
   }
   else if (Error <= minError)
   {
-    preoutput = -45; //steer left all the way!
+    output = -45; //steer left all the way!
   }
   else
   {
-    preoutput = thetaActual + ( 45 * (Error/maxError) ); //softer steer dependent on how large the Error is
+    output = thetaActual + ( 45 * (Error/maxError) ); //softer steer dependent on how large the Error is
   }
 }
-
+/*
 void thataError(int thetaAcutal, int preoutput) //THIS WILL GIVE YOU 'OUTPUT' TO THE DRIVESTRAIGHT FUNCTION
 {
   
@@ -190,27 +188,11 @@ void driveStraight()
 void loop()
 {
    // oscillate();
-   
-   int thetaActual = thetaActual();
-   int distanceActual = distanceActual();
-
-   Error = distanceDesired - distanceActual;
-   
-   if (Error >= maxError)
-    {
-      output = 45; //steer right all the way!
-    }
-   else if (Error <= minError)
-    {
-      output = -45; //steer left all the way!
-    }
-  else
-    {
-      output = thetaActual + ( 45 * (Error/maxError) ); //softer steer dependent on how large the Error is
-    }
+   getActual();
    
    if (startup)
    {
+    distanceError(distanceActual, distanceDesired);
     driveStraight();
    }
    /*
