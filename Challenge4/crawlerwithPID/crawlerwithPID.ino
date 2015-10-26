@@ -1,5 +1,6 @@
 #include <Servo.h>
 #include <Wire.h>
+#include <math.h>
 
 #define    LIDARLite_ADDRESS   0x62          // Default I2C Address of LIDAR-Lite.
 #define    RegisterMeasure     0x00          // Register to write to initiate ranging.
@@ -19,8 +20,21 @@ double maxWheelOffset = 85; // maximum wheel turn magnitude, in servo 'degrees'
 int frontDist = 0; 
 int backDist = 0;
 
+//PID Initializations
 int centerpoint = 90; //CALIBRATED CENTER
 int output = 50; //OUTPUT
+int preoutput = 50; //PRELIMINARY OUTPUT BEFORE SECOND FUNCTION INVOLVING THETA
+
+int thetaDesired = 0;//Zero degree being straight down the hallway, left = -45, right 45
+int thetaActual;
+int distanceDesired;
+int distanceActual;
+
+int Error;
+int maxError;
+int minError;
+
+int lengthbetweensensors = 30;//in centimeters, must be the same unit as getLidarDistance 
 
 // wheel angle > 90 turns left (facing forward)
 // wheel angle < 90 turns right (facing forward)
@@ -55,6 +69,19 @@ void setup()
   backDist = getLidarDistance(LIDAR_BACK);
 }
 
+/* Calibrate the ESC by sending a high signal, then a low, then middle.*/
+void calibrateESC()
+{
+    esc.write(180); // full backwards
+    delay(startupDelay);
+    esc.write(0); // full forwards
+    delay(startupDelay);
+    esc.write(90); // neutral
+    delay(startupDelay);
+    esc.write(90); // reset the ESC to neutral (non-moving) value
+    wheels.write(82); // offset the trim of the wheels
+}
+
 // Get a measurement from the LIDAR Lite
 int lidarGetRange(void)
 {  
@@ -85,6 +112,7 @@ int lidarGetRange(void)
   return val;
 }
 
+//WE CALL THIS INSTEAD
 int getLidarDistance(int sensor)
 {
   digitalWrite(LIDAR_FRONT, LOW);
@@ -96,43 +124,37 @@ int getLidarDistance(int sensor)
   return lidarGetRange();
 }
 
-/* Calibrate the ESC by sending a high signal, then a low, then middle.*/
-void calibrateESC()
+int thetaActual()
 {
-    esc.write(180); // full backwards
-    delay(startupDelay);
-    esc.write(0); // full forwards
-    delay(startupDelay);
-    esc.write(90); // neutral
-    delay(startupDelay);
-    esc.write(90); // reset the ESC to neutral (non-moving) value
-    wheels.write(82); // offset the trim of the wheels
-}
-/* 
-//Convert degree value to radians 
-double degToRad(double degrees){
-  return (degrees * 71) / 4068;
+  thetaActual = atan ( (frontDist-backDist)/lengthbetweensensors);
 }
 
-// Convert radian value to degrees 
-double radToDeg(double radians){
-  return (radians * 4068) / 71;
+int distanceActual()
+{
+  distanceActual = cos thetaActual * frontDist;
 }
 
-//Oscillate between various servo/ESC states, using a sine wave to gradually 
- *  change speed and turn values.
- */
- /*
-void oscillate()
+/*
+void distanceError(int distanceActual, int distanceDesired)
 {
-  for (int i =0; i < 360; i++){
-    double rad = degToRad(i);
-    double speedOffset = sin(rad) * maxSpeedOffset;
-    double wheelOffset = sin(rad) * maxWheelOffset;
-    esc.write(90 + speedOffset);
-    wheels.write(90 + wheelOffset);
-    delay(50);
+  Error = distanceDesired - distanceActual;
+  if (Error >= maxError)
+  {
+    preoutput = 45; //steer right all the way!
   }
+  else if (Error <= minError)
+  {
+    preoutput = -45; //steer left all the way!
+  }
+  else
+  {
+    preoutput = thetaActual + ( 45 * (Error/maxError) ); //softer steer dependent on how large the Error is
+  }
+}
+
+void thataError(int thetaAcutal, int preoutput) //THIS WILL GIVE YOU 'OUTPUT' TO THE DRIVESTRAIGHT FUNCTION
+{
+  
 }
 */
 
@@ -168,6 +190,25 @@ void driveStraight()
 void loop()
 {
    // oscillate();
+   
+   int thetaActual = thetaActual();
+   int distanceActual = distanceActual();
+
+   Error = distanceDesired - distanceActual;
+   
+   if (Error >= maxError)
+    {
+      output = 45; //steer right all the way!
+    }
+   else if (Error <= minError)
+    {
+      output = -45; //steer left all the way!
+    }
+  else
+    {
+      output = thetaActual + ( 45 * (Error/maxError) ); //softer steer dependent on how large the Error is
+    }
+   
    if (startup)
    {
     driveStraight();
@@ -179,8 +220,33 @@ void loop()
     esc.write(90);
    }
    */
-
    delay(100);
 }
 
+/* 
+//Convert degree value to radians 
+double degToRad(double degrees){
+  return (degrees * 71) / 4068;
+}
 
+// Convert radian value to degrees 
+double radToDeg(double radians){
+  return (radians * 4068) / 71;
+}
+
+//Oscillate between various servo/ESC states, using a sine wave to gradually 
+ *  change speed and turn values.
+ */
+ /*
+void oscillate()
+{
+  for (int i =0; i < 360; i++){
+    double rad = degToRad(i);
+    double speedOffset = sin(rad) * maxSpeedOffset;
+    double wheelOffset = sin(rad) * maxWheelOffset;
+    esc.write(90 + speedOffset);
+    wheels.write(90 + wheelOffset);
+    delay(50);
+  }
+}
+*/
