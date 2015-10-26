@@ -29,15 +29,23 @@ int thetaDesired = 0;//Zero degree being straight down the hallway, left = -45, 
 int thetaActual;
 int distanceDesired;
 int distanceActual;
+int thetaTurn;
+int thetaMax = 45;
 
 int Error;
+int pError;
+int distanceError;
+int thetaError;
 int maxError;
 int minError;
-int PTerm;
-int ITerm;
-int DTerm;
+int PTerm = 1;
+int ITerm = 1;
+int DTerm = 1;
+int Integral;
+int Derivative;
+int dt = 210;
 
-int lengthbetweensensors = 30;//in centimeters, must be the same unit as getLidarDistance 
+int lengthbetweensensors = 20;//in centimeters, must be the same unit as getLidarDistance 
 
 // wheel angle > 90 turns left (facing forward)
 // wheel angle < 90 turns right (facing forward)
@@ -70,6 +78,10 @@ void setup()
 
   frontDist = getLidarDistance(LIDAR_FRONT);
   backDist = getLidarDistance(LIDAR_BACK);
+
+  distanceDesired = getLidarDistance(LIDAR_FRONT);
+  maxError = 0.6 * distanceDesired;
+  minError = -(0.6 * distanceDesired);
 }
 
 /* Calibrate the ESC by sending a high signal, then a low, then middle.*/
@@ -130,31 +142,36 @@ int getLidarDistance(int sensor)
 void getActual()
 {
   thetaActual = atan ( (frontDist-backDist)/lengthbetweensensors);
-  distanceActual = cos (thetaActual) * frontDist;
+  distanceActual = frontDist * cos (thetaActual);
 }
 
-void distanceError(int distanceActual, int distanceDesired)
+void getError()
 {
-  Error = distanceDesired - distanceActual;
-  if (Error >= maxError)
+  distanceError = distanceDesired - distanceActual;
+  thetaTurn = thetaMax * (distanceError/maxError);
+  if (distanceError >= maxError)
   {
-    output = 45; //steer right all the way!
+    thetaTurn = 45; //steer right all the way!
   }
-  else if (Error <= minError)
+  else if (distanceError <= minError)
   {
-    output = -45; //steer left all the way!
+    thetaTurn = -45; //steer left all the way!
   }
   else
   {
-    output = thetaActual + ( 45 * (Error/maxError) ); //softer steer dependent on how large the Error is
+    thetaTurn = thetaMax * (distanceError/maxError);
   }
-}
-/*
-void thataError(int thetaAcutal, int preoutput) //THIS WILL GIVE YOU 'OUTPUT' TO THE DRIVESTRAIGHT FUNCTION
-{
   
+  Error = thetaActual - thetaTurn; //softer steer dependent on how large the Error is
 }
-*/
+
+void PID() //THIS WILL GIVE YOU 'OUTPUT' TO THE DRIVESTRAIGHT FUNCTION
+{
+  Integral = Integral + (Error*dt);
+  Derivative = (Error - pError)/dt;
+  output = (PTerm * Error) + (ITerm * Integral) + (DTerm * Derivative);
+  pError = Error;
+}
 
 void driveStraight()
 {
@@ -188,11 +205,13 @@ void driveStraight()
 void loop()
 {
    // oscillate();
-   getActual();
    
    if (startup)
    {
-    distanceError(distanceActual, distanceDesired);
+    getActual();
+    getError();
+    PID(); 
+   
     driveStraight();
    }
    /*
