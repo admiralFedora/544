@@ -9,7 +9,7 @@ int sensorVal;  // variable to store the value coming from the sensor
 volatile int count = 0;
 int pin = 2;
 int distance;
-int perimeter = 10;
+int perimeter = 59.69;//p=pi*19 cm
 
 void setup() {
   Serial.begin (9600);
@@ -24,13 +24,15 @@ void loop() {
   //Serial.println(sensorVal);
   
   sensorVal = digitalRead(pin);
-  Serial.println(sensorVal);
-  delay(100);
+  //Serial.println(sensorVal);
+  //delay(100);
 
-  //delay(500);
+  delay(500);
   distance = perimeter*count/24;
   Serial.print("count:");
   Serial.println(count);
+  Serial.print("distance:");
+  Serial.print(distance);
   count = 0;
 }
 
