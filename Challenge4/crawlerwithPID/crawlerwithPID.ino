@@ -1,6 +1,7 @@
 #include <Servo.h>
 #include <Wire.h>
 #include <math.h>
+#include "Fifo.h"
 
 #define    LIDARLite_ADDRESS   0x62          // Default I2C Address of LIDAR-Lite.
 #define    RegisterMeasure     0x00          // Register to write to initiate ranging.
@@ -23,9 +24,9 @@ int deltaFrontBack = 0;
 int motorSpeed = -15;
 
 //PID Initializations
-int centerpoint = 90; //CALIBRATED CENTER
-int Output = 90; //OUTPUT
-int pOutput = 90; // PREVIOUS OUTPUT
+int centerpoint = 82; //CALIBRATED CENTER
+int Output = 82; //OUTPUT
+int pOutput = 82; // PREVIOUS OUTPUT
 
 int thetaDesired = 0;//Zero degree being straight down the hallway, left = -45, right 45
 float thetaActual;
@@ -34,20 +35,22 @@ float distanceActual;
 float thetaTurn;
 float thetaMax = pi/16;
 
-float Error;
-float pError;
+float Error = 0.0;
+float pError = 0.0;
 float distanceError;
 float thetaError;
 float maxError;
 float minError;
-float K_p = 0.5;
-float K_i = .5;
-float K_d = 0.1;
+float K_p = 2;
+float K_i = 0;
+float K_d = 0.5;
 float Integral;
 float Derivative;
-float dt = 160;
+float dt = 0.160;
 
 float lengthbetweensensors = 20.0;//in centimeters, must be the same unit as getLidarDistance 
+
+Fifo *front, *back;
 
 // wheel angle > 90 turns left (facing forward)
 // wheel angle < 90 turns right (facing forward)
@@ -60,7 +63,6 @@ void setup()
   Serial.begin(9600);
   pinMode(2, INPUT);
   Serial.println("< START >");
-
   
   wheels.attach(8); // initialize wheel servo to Digital IO Pin #8
   esc.attach(9); // initialize ESC to Digital IO Pin #9
@@ -78,35 +80,65 @@ void setup()
   digitalWrite(2, LOW);
   digitalWrite(3, LOW);
 
+  initReadings(LIDAR_FRONT, &front);
+  initReadings(LIDAR_BACK, &back);
+
   deltaFrontBack_calc();
     
 
   //distanceDesired = getLidarDistance(LIDAR_FRONT);
-  distanceDesired = 60.0;
+  distanceDesired = 50.0;
   
   maxError = 1.0 * distanceDesired;
   minError = -1.0 * distanceDesired;
 }
 
+void initReadings(int sensor, Fifo **fifo){
+  int i;
+  Fifo *temp;
+  *fifo = (Fifo*) malloc(sizeof(Fifo));
+  (*fifo)->value = 0;
+  (*fifo)->next = NULL;
+  for(i = 0; i < 4; i++){
+    temp = (Fifo*) malloc(sizeof(Fifo));
+    temp->value = i + 1;
+    temp->next = *fifo;
+    *fifo = temp;
+  }
+}
+
 void deltaFrontBack_calc()
 {
-  frontDist = getLidarDistance(LIDAR_FRONT);
-  backDist = getLidarDistance(LIDAR_BACK);
-  if (abs(frontDist - backDist) <= 10)
+  // get one new reading and remove the oldest
+  Fifo *newFront = (Fifo*) malloc(sizeof(Fifo));
+  newFront->value = getLidarDistance(LIDAR_FRONT);
+  insertAndPop(newFront, &front);
+
+  Fifo *newBack = (Fifo*) malloc(sizeof(Fifo));
+  newBack->value = getLidarDistance(LIDAR_BACK);
+  insertAndPop(newBack, &back);
+
+  // average the readings
+  frontDist = returnAverage(front);
+  backDist = returnAverage(back);
+  
+  /*if (abs(frontDist - backDist) <= 3)
   {
     deltaFrontBack = 0;
   }
   else
   {
-    if (frontDist - backDist <=-10)
+    if (frontDist - backDist <=-3)
     {
-      deltaFrontBack = frontDist - backDist + 10;
+      deltaFrontBack = frontDist - backDist + 3;
     }
     else
     {
-      deltaFrontBack = frontDist - backDist - 10;
+      deltaFrontBack = frontDist - backDist - 3;
     }
-   }
+   }*/
+
+   deltaFrontBack = frontDist - backDist;
 }
 
 /* Calibrate the ESC by sending a high signal, then a low, then middle.*/
@@ -220,6 +252,7 @@ void getError()
 
 void PID() //THIS WILL GIVE YOU 'OUTPUT' TO THE DRIVESTRAIGHT FUNCTION
 {
+  //Error = Error - pError;
   Integral = Integral + (Error*dt);
   Derivative = (Error - pError)/dt;
   Output = radToDeg((K_p * Error) + (K_i * Integral) + (K_d * Derivative));
@@ -231,13 +264,13 @@ void driveStraight()
 {
   esc.write(90 + motorSpeed);
 
-  if (pOutput+Output > 135) 
+  if (pOutput+Output > 127) 
   {
-    pOutput = 135;
+    pOutput = 127;
   }
-  else if (pOutput+Output < 45)
+  else if (pOutput+Output < 37)
   {
-    pOutput = 45; 
+    pOutput = 37; 
   }
   else
   {
@@ -257,6 +290,9 @@ void driveStraight()
   Serial.print(Output);
   Serial.print("\nPID pOutput:");
   Serial.print(pOutput);
+
+  Serial.print("\n Count:");
+  Serial.print(getCount(front));
 }
  
 void loop()
