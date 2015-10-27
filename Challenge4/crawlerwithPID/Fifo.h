@@ -1,4 +1,4 @@
-typedef struct Fifo fifo;
+typedef struct Fifo Fifo;
 
 struct Fifo{
   float value;
