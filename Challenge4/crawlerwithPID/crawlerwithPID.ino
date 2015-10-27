@@ -6,7 +6,7 @@
 #define    RegisterMeasure     0x00          // Register to write to initiate ranging.
 #define    MeasureValue        0x04          // Value to initiate ranging.
 #define    RegisterHighLowB    0x8f          // Register to get both High and Low bytes in 1 call.
-
+#define    pi 3.1459
 //Pins
 #define LIDAR_FRONT 2
 #define LIDAR_BACK 3
@@ -19,33 +19,35 @@ double maxSpeedOffset = 45; // maximum speed magnitude, in servo 'degrees'
 double maxWheelOffset = 85; // maximum wheel turn magnitude, in servo 'degrees'
 int frontDist = 0; 
 int backDist = 0;
+int deltaFrontBack = 0;
+int motorSpeed = -15;
 
 //PID Initializations
 int centerpoint = 90; //CALIBRATED CENTER
-int output = 50; //OUTPUT
-int preoutput = 50; //PRELIMINARY OUTPUT BEFORE SECOND FUNCTION INVOLVING THETA
+int Output = 90; //OUTPUT
+int pOutput = 90; // PREVIOUS OUTPUT
 
 int thetaDesired = 0;//Zero degree being straight down the hallway, left = -45, right 45
-int thetaActual;
-int distanceDesired;
-int distanceActual;
-int thetaTurn;
-int thetaMax = 45;
+float thetaActual;
+float distanceDesired;
+float distanceActual;
+float thetaTurn;
+float thetaMax = pi/16;
 
-int Error;
-int pError;
-int distanceError;
-int thetaError;
-int maxError;
-int minError;
-int PTerm = 1;
-int ITerm = 1;
-int DTerm = 1;
-int Integral;
-int Derivative;
-int dt = 210;
+float Error;
+float pError;
+float distanceError;
+float thetaError;
+float maxError;
+float minError;
+float K_p = 0.5;
+float K_i = .5;
+float K_d = 0.1;
+float Integral;
+float Derivative;
+float dt = 160;
 
-int lengthbetweensensors = 20;//in centimeters, must be the same unit as getLidarDistance 
+float lengthbetweensensors = 20.0;//in centimeters, must be the same unit as getLidarDistance 
 
 // wheel angle > 90 turns left (facing forward)
 // wheel angle < 90 turns right (facing forward)
@@ -76,12 +78,35 @@ void setup()
   digitalWrite(2, LOW);
   digitalWrite(3, LOW);
 
+  deltaFrontBack_calc();
+    
+
+  //distanceDesired = getLidarDistance(LIDAR_FRONT);
+  distanceDesired = 60.0;
+  
+  maxError = 1.0 * distanceDesired;
+  minError = -1.0 * distanceDesired;
+}
+
+void deltaFrontBack_calc()
+{
   frontDist = getLidarDistance(LIDAR_FRONT);
   backDist = getLidarDistance(LIDAR_BACK);
-
-  distanceDesired = getLidarDistance(LIDAR_FRONT);
-  maxError = 0.6 * distanceDesired;
-  minError = -(0.6 * distanceDesired);
+  if (abs(frontDist - backDist) <= 10)
+  {
+    deltaFrontBack = 0;
+  }
+  else
+  {
+    if (frontDist - backDist <=-10)
+    {
+      deltaFrontBack = frontDist - backDist + 10;
+    }
+    else
+    {
+      deltaFrontBack = frontDist - backDist - 10;
+    }
+   }
 }
 
 /* Calibrate the ESC by sending a high signal, then a low, then middle.*/
@@ -139,67 +164,99 @@ int getLidarDistance(int sensor)
   return lidarGetRange();
 }
 
+/* Convert degree value to radians */
+double degToRad(double degrees){
+  return (degrees * 71) / 4068;
+}
+
+/* Convert radian value to degrees */
+double radToDeg(double radians){
+  return (radians * 4068) / 71;
+}
+
 void getActual()
 {
-  thetaActual = atan ( (frontDist-backDist)/lengthbetweensensors);
+  thetaActual = atan ( (deltaFrontBack)/lengthbetweensensors);
   distanceActual = frontDist * cos (thetaActual);
+
+
+  Serial.print("\n\nfrontDist-backDist/20: ");
+  Serial.print((frontDist-backDist)/lengthbetweensensors);
+  
+  Serial.print("\n\nTheta Actual: ");
+  Serial.print(thetaActual);
+
+  Serial.print("\n\nDistance Actual: ");
+  Serial.print(distanceActual);
+  
 }
 
 void getError()
 {
   distanceError = distanceDesired - distanceActual;
-  thetaTurn = thetaMax * (distanceError/maxError);
+  //thetaTurn = thetaMax * (distanceError/maxError);
   if (distanceError >= maxError)
   {
-    thetaTurn = 45; //steer right all the way!
+    thetaTurn = -pi/16; //steer right all the way!
   }
   else if (distanceError <= minError)
   {
-    thetaTurn = -45; //steer left all the way!
+    thetaTurn = pi/16; //steer left all the way!
   }
   else
   {
-    thetaTurn = thetaMax * (distanceError/maxError);
+    thetaTurn = -1*thetaMax * (distanceError/maxError);
   }
   
-  Error = thetaActual - thetaTurn; //softer steer dependent on how large the Error is
+  Error = thetaActual + thetaTurn; //softer steer dependent on how large the Error is
+ 
+
+  Serial.print("\n\nThetaTurn: ");
+  Serial.print(thetaTurn);
+  
+  Serial.print("\n\nError: ");
+  Serial.print(Error);
 }
 
 void PID() //THIS WILL GIVE YOU 'OUTPUT' TO THE DRIVESTRAIGHT FUNCTION
 {
   Integral = Integral + (Error*dt);
   Derivative = (Error - pError)/dt;
-  output = (PTerm * Error) + (ITerm * Integral) + (DTerm * Derivative);
+  Output = radToDeg((K_p * Error) + (K_i * Integral) + (K_d * Derivative));
   pError = Error;
+  
 }
 
 void driveStraight()
 {
-  esc.write(90 + 10);
-  
-  if (frontDist > backDist + 6)
+  esc.write(90 + motorSpeed);
+
+  if (pOutput+Output > 135) 
   {
-    wheels.write(centerpoint + output);
-    delay(50);
+    pOutput = 135;
   }
-  else if (frontDist < backDist - 6)
+  else if (pOutput+Output < 45)
   {
-    wheels.write(centerpoint - output);
-    delay(50);
+    pOutput = 45; 
   }
   else
   {
-    wheels.write(90);
-    delay(50);
+    pOutput += Output;
   }
-  frontDist = getLidarDistance(LIDAR_FRONT);
-  backDist =  getLidarDistance(LIDAR_BACK);
+  wheels.write(pOutput);
 
   
-  Serial.print("\nFront:");
+  
+  deltaFrontBack_calc();
+  
+  Serial.print("\nnFront:");
   Serial.print(frontDist);
   Serial.print("\nBack:");
   Serial.print(backDist);
+  Serial.print("\n\n\nPID Output:");
+  Serial.print(Output);
+  Serial.print("\nPID pOutput:");
+  Serial.print(pOutput);
 }
  
 void loop()
@@ -214,40 +271,6 @@ void loop()
    
     driveStraight();
    }
-   /*
-   else if (lidarGetRange(1)<3 || lidarGetRange(2)<3) 
-   {
-    startup = false;
-    esc.write(90);
-   }
-   */
-   delay(100);
+   delay(50);
 }
 
-/* 
-//Convert degree value to radians 
-double degToRad(double degrees){
-  return (degrees * 71) / 4068;
-}
-
-// Convert radian value to degrees 
-double radToDeg(double radians){
-  return (radians * 4068) / 71;
-}
-
-//Oscillate between various servo/ESC states, using a sine wave to gradually 
- *  change speed and turn values.
- */
- /*
-void oscillate()
-{
-  for (int i =0; i < 360; i++){
-    double rad = degToRad(i);
-    double speedOffset = sin(rad) * maxSpeedOffset;
-    double wheelOffset = sin(rad) * maxWheelOffset;
-    esc.write(90 + speedOffset);
-    wheels.write(90 + wheelOffset);
-    delay(50);
-  }
-}
-*/
