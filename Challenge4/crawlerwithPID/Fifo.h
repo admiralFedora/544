@@ -22,9 +22,9 @@ void insertAndPop(Fifo* node, Fifo **head){
 
 float returnAverage(Fifo *head){
   Fifo *temp = head;
-  int count = 1;
+  int count = 0;
   float avg = 0.0;
-  while(temp->next){
+  while(temp){
     avg += temp->value;
     temp = temp->next;
     count++;
@@ -35,8 +35,8 @@ float returnAverage(Fifo *head){
 
 int getCount(Fifo *head){
   Fifo *temp = head;
-  int count = 1;
-  while(temp->next){
+  int count = 0;
+  while(temp){
     temp = temp->next;
     count++;
   }
