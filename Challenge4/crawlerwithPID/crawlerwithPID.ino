@@ -7,7 +7,7 @@
 #define    RegisterMeasure     0x00          // Register to write to initiate ranging.
 #define    MeasureValue        0x04          // Value to initiate ranging.
 #define    RegisterHighLowB    0x8f          // Register to get both High and Low bytes in 1 call.
-#define    pi 3.1459
+#define    pi 3.14159
 //Pins
 #define LIDAR_FRONT 2
 #define LIDAR_BACK 3
