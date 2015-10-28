@@ -1,3 +1,6 @@
+#include <Printers.h>
+#include <XBee.h>
+
 #include <XBee.h>
 #include <SoftwareSerial.h>
 

@@ -1,6 +1,8 @@
 #include <Servo.h>
 #include <Wire.h>
 #include <math.h>
+#include <XBee.h>
+#include <SoftwareSerial.h>
 #include "Fifo.h"
 
 #define    LIDARLite_ADDRESS   0x62          // Default I2C Address of LIDAR-Lite.
@@ -12,9 +14,17 @@
 #define LIDAR_FRONT 2
 #define LIDAR_BACK 3
 
+XBee xbee = XBee();
+XBeeResponse response = XBeeResponse();
+SoftwareSerial XBee(2, 3); // Rx, Tx
+
+// create reusable response objects for responses we expect to handle 
+ZBRxResponse rx = ZBRxResponse();
+ModemStatusResponse msr = ModemStatusResponse();
+
 Servo wheels; // servo for turning the wheels
 Servo esc; // not actually a servo, but controlled like one!
-bool startup = true; // used to ensure startup only happens once
+bool startup = false; // used to ensure startup only happens once
 int startupDelay = 1000; // time to pause at each calibration step
 double maxSpeedOffset = 45; // maximum speed magnitude, in servo 'degrees'
 double maxWheelOffset = 85; // maximum wheel turn magnitude, in servo 'degrees'
@@ -63,6 +73,9 @@ void setup()
   Serial.begin(9600);
   pinMode(2, INPUT);
   Serial.println("< START >");
+
+  XBee.begin(9600);
+  xbee.begin(XBee);
   
   wheels.attach(8); // initialize wheel servo to Digital IO Pin #8
   esc.attach(9); // initialize ESC to Digital IO Pin #9
@@ -262,7 +275,7 @@ void PID() //THIS WILL GIVE YOU 'OUTPUT' TO THE DRIVESTRAIGHT FUNCTION
 
 void driveStraight()
 {
-  esc.write(90 + motorSpeed);
+  esc.write(centerpoint + motorSpeed);
 
   if (pOutput+Output > 127) 
   {
@@ -306,6 +319,28 @@ void loop()
     PID(); 
    
     driveStraight();
+   }
+
+   xbee.readPacket();
+   if(xbee.getResponse().isAvailable())
+   {
+      if(xbee.getResponse().getApiId() == ZB_RX_RESPONSE)
+      {
+          xbee.getResponse().getZBRxResponse(rx);
+
+          if(rx.getOption() == ZB_PACKET_ACKNOWLEDGED)
+          {
+             switch(rx.getData(0))
+             {
+              case 0:
+                startup = false; 
+                break;
+              case 1:
+                startup = true;
+                break;
+             }
+          }
+      }
    }
    delay(50);
 }
