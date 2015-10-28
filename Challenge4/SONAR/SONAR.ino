@@ -11,6 +11,7 @@ int rangevalue[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0};
 long pulse;
 int modE; //AVERAGE DISTANCE
 int STOP = 0; //STOP COMMAND SENT IF 1
+bool startup;
 void setup() {
 
   //Open up a serial connection
@@ -39,14 +40,19 @@ void loop() {
   Serial.print(modE);
   Serial.print(" Centimeter");
   Serial.println();
+  //////////////////////////////////////////
   //COLLISION DETECTION
   //MINIMUM MEASURED DISTANCE 14 CENTIMETERS
   //MAXIMUM MEASURED DISTANCE 642 CENTIMETERS
   if(modE <= 50) //IF THE FRONT OF THE CAR GOT CLOSER THAN 50 CENTIMETERS, TERMINATE DRIVING
   {
-    STOP = 1; //SEND 'STOP" COMMAND TO THE WHEEL
+    startup = false; //SEND 'STOP" COMMAND TO THE WHEEL
     Serial.println("BEWARE OF PEDESTRIAN, STOPPPPPP!!!!!!");
     Serial.println();
+  }
+  else 
+  {
+    startup = true;
   }
   delay(1000);
 }
