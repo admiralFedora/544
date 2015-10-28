@@ -9,7 +9,8 @@ int arraysize = 9; //quantity of values to find the median (sample size). Needs 
 //declare an array to store the samples. not necessary to zero the array values here, it just makes the code clearer
 int rangevalue[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0};
 long pulse;
-int modE;
+int modE; //AVERAGE DISTANCE
+int STOP = 0; //STOP COMMAND SENT IF 1
 void setup() {
 
   //Open up a serial connection
@@ -38,6 +39,15 @@ void loop() {
   Serial.print(modE);
   Serial.print(" Centimeter");
   Serial.println();
+  //COLLISION DETECTION
+  //MINIMUM MEASURED DISTANCE 14 CENTIMETERS
+  //MAXIMUM MEASURED DISTANCE 642 CENTIMETERS
+  if(modE <= 50) //IF THE FRONT OF THE CAR GOT CLOSER THAN 50 CENTIMETERS, TERMINATE DRIVING
+  {
+    STOP = 1; //SEND 'STOP" COMMAND TO THE WHEEL
+    Serial.println("BEWARE OF PEDESTRIAN, STOPPPPPP!!!!!!");
+    Serial.println();
+  }
   delay(1000);
 }
 
@@ -100,4 +110,10 @@ int mode(int *x,int n){
     }
     return mode;
   }
+
 }
+
+
+
+
+
