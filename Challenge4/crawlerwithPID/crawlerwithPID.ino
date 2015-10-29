@@ -17,7 +17,7 @@
 
 #define K_p 2.0
 #define K_i 0.0
-#define K_d 1.85
+#define K_d 3.7
 #define dt 0.160
 #define lengthbetweensensors 20.0 //in centimeters, must be the same unit as getLidarDistance
 #define centerpoint 82 //CALIBRATED CENTER
@@ -90,7 +90,7 @@ void setup()
     
 
   //distanceDesired = getLidarDistance(LIDAR_FRONT);
-  distanceDesired = 30.0;
+  distanceDesired = 90.0;
   
   maxError = 1.0 * distanceDesired;
   minError = -1.0 * distanceDesired;
@@ -144,19 +144,19 @@ void deltaFrontBack_calc()
   frontDist = returnAverage(front);
   backDist = returnAverage(back);
   
-  /*if (abs(frontDist - backDist) <= 3)
+  /*if (abs(frontDist - backDist) <= 10)
   {
     deltaFrontBack = 0;
   }
   else
   {
-    if (frontDist - backDist <=-3)
+    if (frontDist - backDist <=-10)
     {
-      deltaFrontBack = frontDist - backDist + 3;
+      deltaFrontBack = frontDist - backDist + 10;
     }
     else
     {
-      deltaFrontBack = frontDist - backDist - 3;
+      deltaFrontBack = frontDist - backDist - 10;
     }
    }*/
 
@@ -231,7 +231,7 @@ double radToDeg(double radians){
 
 void getActual()
 {
-  thetaActual = atan ( (deltaFrontBack)/lengthbetweensensors);
+  thetaActual = atan ( (deltaFrontBack)/lengthbetweensensors) * (deltaFrontBack/lengthbetweensensors);
   distanceActual = frontDist * cos (thetaActual);
 
 
@@ -248,9 +248,19 @@ void getActual()
 
 void getError()
 {
+  float distanceRatio = distanceActual/distanceDesired;
   distanceError = distanceDesired - distanceActual;
   //thetaTurn = thetaMax * (distanceError/maxError);
-  if (distanceError >= maxError)
+  float triangleTheta = atan(distanceDesired/distanceError);
+  if(triangleTheta < 0){
+    thetaTurn = -1 * (-(pi/2) - triangleTheta);
+  } else if (triangleTheta > 0) {
+    thetaTurn = -1 * ((pi/2) - triangleTheta);
+  } else {
+    thetaTurn = 0;
+  }
+  //thetaTurn = -1 * (90 - atan(distanceDesired/distanceError));
+  /*if (distanceError >= maxError)
   {
     thetaTurn = -thetaMax; //steer right all the way!
   }
@@ -260,13 +270,20 @@ void getError()
   }
   else
   {
-    thetaTurn = -1*thetaMax * (distanceError/maxError);
-  }
+    thetaTurn = -(1/distanceRatio)*thetaMax * (distanceError/maxError);
+  }*/
 
   //thetaTurn = -1*thetaMax * (distanceError/maxError);
+
+  if(distanceRatio < 1){
+    Error = (.1 * thetaActual) + (1/distanceRatio) * thetaTurn; //softer steer dependent on how large the Error is
+  } else {
+    Error = (.1 * thetaActual) + (distanceRatio) * thetaTurn; //softer steer dependent on how large the Error is
+  }
   
-  Error = thetaActual + thetaTurn; //softer steer dependent on how large the Error is
  
+  Serial.print("\n\nDistanceRatio:");
+  Serial.print(distanceRatio);
 
   Serial.print("\n\nThetaTurn: ");
   Serial.print(thetaTurn);
@@ -294,13 +311,13 @@ void driveStraight()
 {
   esc.write(centerpoint + motorSpeed);
 
-  if ((pOutput+Output) >= 117) 
+  if ((pOutput+Output) >= 107) 
   {
-    pOutput = 117;
+    pOutput = 107;
   }
-  else if ((pOutput+Output) <= 37)
+  else if ((pOutput+Output) <= 50)
   {
-    pOutput = 37; 
+    pOutput = 50; 
   }
   else
   {
