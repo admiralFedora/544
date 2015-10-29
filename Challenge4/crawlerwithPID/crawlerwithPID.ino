@@ -54,7 +54,7 @@ float maxError;
 float minError;
 float K_p = 2;
 float K_i = 0.0;
-float K_d = 0.6;
+float K_d = 1.8;
 float Integral;
 float Derivative;
 float dt = 0.160;
@@ -64,8 +64,6 @@ float lengthbetweensensors = 20.0;//in centimeters, must be the same unit as get
 Fifo *front, *back, *bError;
 
 SimpleTimer timer;
-
-float thetaStraight;
 
 // wheel angle > 90 turns left (facing forward)
 // wheel angle < 90 turns right (facing forward)
@@ -113,9 +111,6 @@ void setup()
   minError = -1.0 * distanceDesired;
 
   //timer.setInterval(50, driveCar);
-
-  getActual();
-  thetaStraight = thetaActual;
 }
 
 void initReadings(int sensor, Fifo **fifo){
@@ -288,7 +283,7 @@ void getError()
 
   //thetaTurn = -1*thetaMax * (distanceError/maxError);
   
-  Error = thetaActual + thetaTurn - thetaStraight; //softer steer dependent on how large the Error is
+  Error = thetaActual + thetaTurn; //softer steer dependent on how large the Error is
  
 
   Serial.print("\n\nThetaTurn: ");
@@ -354,6 +349,8 @@ void driveCar()
     PID(); 
    
     driveStraight();
+   } else {
+    esc.write(90);
    }
 }
  
@@ -381,7 +378,7 @@ void loop()
       }
    }*/
    driveCar();
-   startup = shouldRun();
+   //startup = shouldRun();
    //timer.run();
    delay(50);
 }
