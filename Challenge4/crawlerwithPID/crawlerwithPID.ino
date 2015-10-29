@@ -1,6 +1,4 @@
 #include <SimpleTimer.h>
-#include <Average.h>
-
 #include <Servo.h>
 #include <Wire.h>
 #include <math.h>
@@ -16,7 +14,7 @@
 //Pins
 #define LIDAR_FRONT 5
 #define LIDAR_BACK 6
-#define pwPin 7
+#define SONAR_PIN 7
 
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
@@ -65,16 +63,6 @@ float lengthbetweensensors = 20.0;//in centimeters, must be the same unit as get
 
 Fifo *front, *back, *bError;
 
-//AVERAGING
-//variables needed to store values
-int arraysize = 9; //quantity of values to find the median (sample size). Needs to be an odd number
-
-//declare an array to store the samples. not necessary to zero the array values here, it just makes the code clearer
-Average <int> avg(9);
-long pulse;
-int modE; //AVERAGE DISTANCE
-int STOP = 0; //STOP COMMAND SENT IF 1
-
 SimpleTimer timer;
 
 float thetaStraight;
@@ -106,6 +94,7 @@ void setup()
   
   pinMode(LIDAR_FRONT, OUTPUT);
   pinMode(LIDAR_BACK, OUTPUT);
+  pinMode(SONAR_PIN, INPUT);
 
   digitalWrite(LIDAR_FRONT, LOW);
   digitalWrite(LIDAR_BACK, LOW);
@@ -155,27 +144,12 @@ void initError(Fifo **fifo){
 }
 
 bool shouldRun(){
-  pinMode(pwPin, INPUT);
-  for(int i = 0; i < arraysize; i++)
-  {                    
-    pulse = pulseIn(pwPin, HIGH);
-    avg.push(pulse/58);
-    //delay(10);
-  }
-  //OUTPUT FOR COLLISION DETECTION
-  modE = avg.mode();
-  //COLLISION DETECTION
-  //MINIMUM MEASURED DISTANCE 14 CENTIMETERS
-  //MAXIMUM MEASURED DISTANCE 642 CENTIMETERS
-
-   Serial.print("Ultra Sonic sensor distance:");
-   Serial.println(modE);
-  if(modE <= 20) //IF THE FRONT OF THE CAR GOT CLOSER THAN 50 CENTIMETERS, TERMINATE DRIVING
-  {
+  if(digitalRead(SONAR_PIN) == LOW){
+    Serial.println("stopped");
     return false;
+  } else {
+    return true;
   }
-
-  return true;
 }
 
 void deltaFrontBack_calc()
@@ -407,7 +381,7 @@ void loop()
       }
    }*/
    driveCar();
-   //startup = shouldRun();
+   startup = shouldRun();
    //timer.run();
    delay(50);
 }
