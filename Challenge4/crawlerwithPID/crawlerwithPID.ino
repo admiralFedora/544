@@ -1,4 +1,5 @@
 #include <SimpleTimer.h>
+#include <Average.h>
 
 #include <Servo.h>
 #include <Wire.h>
@@ -15,6 +16,7 @@
 //Pins
 #define LIDAR_FRONT 5
 #define LIDAR_BACK 6
+#define pwPin 7
 
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
@@ -26,7 +28,7 @@ ModemStatusResponse msr = ModemStatusResponse();
 
 Servo wheels; // servo for turning the wheels
 Servo esc; // not actually a servo, but controlled like one!
-bool startup = false; // used to ensure startup only happens once
+bool startup = true; // used to ensure startup only happens once
 float maxSpeedOffset = 45; // maximum speed magnitude, in servo 'degrees'
 float maxWheelOffset = 85; // maximum wheel turn magnitude, in servo 'degrees'
 int frontDist = 0; 
@@ -63,7 +65,17 @@ float lengthbetweensensors = 20.0;//in centimeters, must be the same unit as get
 
 Fifo *front, *back, *bError;
 
-//SimpleTimer timer;
+//AVERAGING
+//variables needed to store values
+int arraysize = 9; //quantity of values to find the median (sample size). Needs to be an odd number
+
+//declare an array to store the samples. not necessary to zero the array values here, it just makes the code clearer
+Average <int> avg(9);
+long pulse;
+int modE; //AVERAGE DISTANCE
+int STOP = 0; //STOP COMMAND SENT IF 1
+
+SimpleTimer timer;
 
 // wheel angle > 90 turns left (facing forward)
 // wheel angle < 90 turns right (facing forward)
@@ -135,6 +147,30 @@ void initError(Fifo **fifo){
     temp->value = 0.0;
     insert(temp, fifo);
   }
+}
+
+bool shouldRun(){
+  pinMode(pwPin, INPUT);
+  for(int i = 0; i < arraysize; i++)
+  {                    
+    pulse = pulseIn(pwPin, HIGH);
+    avg.push(pulse/58);
+    //delay(10);
+  }
+  //OUTPUT FOR COLLISION DETECTION
+  modE = avg.mode();
+  //COLLISION DETECTION
+  //MINIMUM MEASURED DISTANCE 14 CENTIMETERS
+  //MAXIMUM MEASURED DISTANCE 642 CENTIMETERS
+
+   Serial.print("Ultra Sonic sensor distance:");
+   Serial.println(modE);
+  if(modE <= 20) //IF THE FRONT OF THE CAR GOT CLOSER THAN 50 CENTIMETERS, TERMINATE DRIVING
+  {
+    return false;
+  }
+
+  return true;
 }
 
 void deltaFrontBack_calc()
@@ -332,7 +368,7 @@ void driveStraight()
 
 void driveCar()
 {
-   if (true)
+   if (startup)
    {
     getActual();
     getError();
@@ -344,7 +380,7 @@ void driveCar()
  
 void loop()
 {
-   /*xbee.readPacket();
+  /* xbee.readPacket();
    if(xbee.getResponse().isAvailable())
    {
       if(xbee.getResponse().getApiId() == ZB_RX_RESPONSE)
@@ -366,6 +402,8 @@ void loop()
       }
    }*/
    driveCar();
+   startup = shouldRun();
+   //timer.run();
    delay(50);
 }
 
