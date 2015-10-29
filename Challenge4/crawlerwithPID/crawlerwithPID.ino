@@ -77,6 +77,8 @@ int STOP = 0; //STOP COMMAND SENT IF 1
 
 SimpleTimer timer;
 
+float thetaStraight;
+
 // wheel angle > 90 turns left (facing forward)
 // wheel angle < 90 turns right (facing forward)
 
@@ -122,6 +124,9 @@ void setup()
   minError = -1.0 * distanceDesired;
 
   //timer.setInterval(50, driveCar);
+
+  getActual();
+  thetaStraight = thetaActual;
 }
 
 void initReadings(int sensor, Fifo **fifo){
@@ -309,7 +314,7 @@ void getError()
 
   //thetaTurn = -1*thetaMax * (distanceError/maxError);
   
-  Error = thetaActual + thetaTurn; //softer steer dependent on how large the Error is
+  Error = thetaActual + thetaTurn - thetaStraight; //softer steer dependent on how large the Error is
  
 
   Serial.print("\n\nThetaTurn: ");
@@ -402,7 +407,7 @@ void loop()
       }
    }*/
    driveCar();
-   startup = shouldRun();
+   //startup = shouldRun();
    //timer.run();
    delay(50);
 }
