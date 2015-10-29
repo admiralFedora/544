@@ -2,8 +2,6 @@
 #include <Servo.h>
 #include <Wire.h>
 #include <math.h>
-#include <XBee.h>
-#include <SoftwareSerial.h>
 #include "Fifo.h"
 
 #define    LIDARLite_ADDRESS   0x62          // Default I2C Address of LIDAR-Lite.
@@ -15,6 +13,7 @@
 #define LIDAR_FRONT 5
 #define LIDAR_BACK 6
 #define SONAR_PIN 7
+#define XBEE_PIN 4
 
 #define K_p 2.0
 #define K_i 0.0
@@ -23,12 +22,6 @@
 #define lengthbetweensensors 20.0 //in centimeters, must be the same unit as getLidarDistance
 #define centerpoint 82 //CALIBRATED CENTER
 #define motorSpeed -10
-
-XBee xbee = XBee();
-SoftwareSerial XBee(2, 3); // Rx, Tx
-
-// create reusable response objects for responses we expect to handle 
-ZBRxResponse rx = ZBRxResponse();
 
 Servo wheels; // servo for turning the wheels
 Servo esc; // not actually a servo, but controlled like one!
@@ -71,9 +64,6 @@ void setup()
   Serial.begin(9600);
   //pinMode(2, INPUT);
   Serial.println("< START >");
-
-  XBee.begin(9600);
-  xbee.begin(XBee);
   
   wheels.attach(8); // initialize wheel servo to Digital IO Pin #8
   esc.attach(9); // initialize ESC to Digital IO Pin #9
@@ -88,6 +78,7 @@ void setup()
   pinMode(LIDAR_FRONT, OUTPUT);
   pinMode(LIDAR_BACK, OUTPUT);
   pinMode(SONAR_PIN, INPUT_PULLUP);
+  pinMode(XBEE_PIN, INPUT_PULLUP);
 
   digitalWrite(LIDAR_FRONT, LOW);
   digitalWrite(LIDAR_BACK, LOW);
@@ -124,6 +115,14 @@ void initReadings(int sensor, Fifo **fifo){
 bool shouldRun(){
   if(digitalRead(SONAR_PIN) == LOW){
     Serial.println("stopped");
+    return false;
+  } else {
+    return true;
+  }
+}
+
+bool shouldStart(){
+  if(digitalRead(XBEE_PIN) == LOW){
     return false;
   } else {
     return true;
@@ -339,29 +338,9 @@ void driveCar()
  
 void loop()
 {
-   /*xbee.readPacket();
-   if(xbee.getResponse().isAvailable())
-   {
-      if(xbee.getResponse().getApiId() == ZB_RX_RESPONSE)
-      {
-          xbee.getResponse().getZBRxResponse(rx);
-
-          if(rx.getOption() == ZB_PACKET_ACKNOWLEDGED)
-          {
-             switch(rx.getData(0))
-             {
-              case 0:
-                startRun = false; 
-                break;
-              case 1:
-                startRun = true;
-                break;
-             }
-          }
-      }
-   }*/
    //driveCar();
-   startup = shouldRun();
+   startRun = shouldStart();
+   //startup = shouldRun();
    //delay(50);
    timer.run();
 }
