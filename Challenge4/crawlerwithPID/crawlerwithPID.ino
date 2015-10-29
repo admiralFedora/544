@@ -11,36 +11,36 @@
 #define    MeasureValue        0x04          // Value to initiate ranging.
 #define    RegisterHighLowB    0x8f          // Register to get both High and Low bytes in 1 call.
 #define    pi 3.14159
-//Pins
+
 #define LIDAR_FRONT 5
 #define LIDAR_BACK 6
 #define SONAR_PIN 7
 
+#define K_p 2.0
+#define K_i 0.0
+#define K_d 1.85
+#define dt 0.160
+#define lengthbetweensensors 20.0 //in centimeters, must be the same unit as getLidarDistance
+#define centerpoint 82 //CALIBRATED CENTER
+#define motorSpeed -10
+
 XBee xbee = XBee();
-XBeeResponse response = XBeeResponse();
 SoftwareSerial XBee(2, 3); // Rx, Tx
 
 // create reusable response objects for responses we expect to handle 
 ZBRxResponse rx = ZBRxResponse();
-ModemStatusResponse msr = ModemStatusResponse();
 
 Servo wheels; // servo for turning the wheels
 Servo esc; // not actually a servo, but controlled like one!
-bool startup = false; // used to ensure startup only happens once
-bool startRun = false;
-float maxSpeedOffset = 45; // maximum speed magnitude, in servo 'degrees'
-float maxWheelOffset = 85; // maximum wheel turn magnitude, in servo 'degrees'
+volatile bool startup = true; // used to ensure startup only happens once
+volatile bool startRun = true;
 int frontDist = 0; 
 int backDist = 0;
 int deltaFrontBack = 0;
-int motorSpeed = -10;
 
-//PID Initializations
-int centerpoint = 82; //CALIBRATED CENTER
 int Output = 82; //OUTPUT
 int pOutput = 82; // PREVIOUS OUTPUT
 
-int thetaDesired = 0;//Zero degree being straight down the hallway, left = -45, right 45
 float thetaActual;
 float distanceDesired;
 float distanceActual;
@@ -53,16 +53,10 @@ float distanceError;
 float thetaError;
 float maxError;
 float minError;
-float K_p = 2;
-float K_i = 0.0;
-float K_d = 1.85;
 float Integral;
 float Derivative;
-float dt = 0.160;
 
-float lengthbetweensensors = 20.0;//in centimeters, must be the same unit as getLidarDistance 
-
-Fifo *front, *back, *bError;
+Fifo *front, *back;
 
 SimpleTimer timer;
 
@@ -100,7 +94,6 @@ void setup()
 
   initReadings(LIDAR_FRONT, &front);
   initReadings(LIDAR_BACK, &back);
-  //initError(&bError);
 
   deltaFrontBack_calc();
     
@@ -125,17 +118,6 @@ void initReadings(int sensor, Fifo **fifo){
     temp->value = getLidarDistance(sensor);
     temp->next = *fifo;
     *fifo = temp;
-  }
-}
-
-void initError(Fifo **fifo){
-  Fifo *temp;
-  *fifo = (Fifo*) malloc(sizeof(Fifo));
-  (*fifo)->value = 0.0;
-  for(int i = 0; i < 4; i++){
-    temp = (Fifo*) malloc(sizeof(Fifo));
-    temp->value = 0.0;
-    insert(temp, fifo);
   }
 }
 
@@ -357,7 +339,7 @@ void driveCar()
  
 void loop()
 {
-   xbee.readPacket();
+   /*xbee.readPacket();
    if(xbee.getResponse().isAvailable())
    {
       if(xbee.getResponse().getApiId() == ZB_RX_RESPONSE)
@@ -377,10 +359,10 @@ void loop()
              }
           }
       }
-   }
+   }*/
    //driveCar();
    startup = shouldRun();
+   //delay(50);
    timer.run();
-   delay(50);
 }
 
