@@ -26,7 +26,8 @@ ModemStatusResponse msr = ModemStatusResponse();
 
 Servo wheels; // servo for turning the wheels
 Servo esc; // not actually a servo, but controlled like one!
-bool startup = true; // used to ensure startup only happens once
+bool startup = false; // used to ensure startup only happens once
+bool startRun = false;
 float maxSpeedOffset = 45; // maximum speed magnitude, in servo 'degrees'
 float maxWheelOffset = 85; // maximum wheel turn magnitude, in servo 'degrees'
 int frontDist = 0; 
@@ -54,7 +55,7 @@ float maxError;
 float minError;
 float K_p = 2;
 float K_i = 0.0;
-float K_d = 1.8;
+float K_d = 1.85;
 float Integral;
 float Derivative;
 float dt = 0.160;
@@ -92,7 +93,7 @@ void setup()
   
   pinMode(LIDAR_FRONT, OUTPUT);
   pinMode(LIDAR_BACK, OUTPUT);
-  pinMode(SONAR_PIN, INPUT);
+  pinMode(SONAR_PIN, INPUT_PULLUP);
 
   digitalWrite(LIDAR_FRONT, LOW);
   digitalWrite(LIDAR_BACK, LOW);
@@ -110,7 +111,7 @@ void setup()
   maxError = 1.0 * distanceDesired;
   minError = -1.0 * distanceDesired;
 
-  //timer.setInterval(50, driveCar);
+  timer.setInterval(50, driveCar);
 }
 
 void initReadings(int sensor, Fifo **fifo){
@@ -342,7 +343,7 @@ void driveStraight()
 
 void driveCar()
 {
-   if (startup)
+   if (startRun && startup)
    {
     getActual();
     getError();
@@ -356,7 +357,7 @@ void driveCar()
  
 void loop()
 {
-  /* xbee.readPacket();
+   xbee.readPacket();
    if(xbee.getResponse().isAvailable())
    {
       if(xbee.getResponse().getApiId() == ZB_RX_RESPONSE)
@@ -368,18 +369,18 @@ void loop()
              switch(rx.getData(0))
              {
               case 0:
-                startup = false; 
+                startRun = false; 
                 break;
               case 1:
-                startup = true;
+                startRun = true;
                 break;
              }
           }
       }
-   }*/
-   driveCar();
-   //startup = shouldRun();
-   //timer.run();
+   }
+   //driveCar();
+   startup = shouldRun();
+   timer.run();
    delay(50);
 }
 
