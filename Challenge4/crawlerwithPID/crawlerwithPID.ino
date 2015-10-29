@@ -1,3 +1,5 @@
+#include <SimpleTimer.h>
+
 #include <Servo.h>
 #include <Wire.h>
 #include <math.h>
@@ -11,8 +13,8 @@
 #define    RegisterHighLowB    0x8f          // Register to get both High and Low bytes in 1 call.
 #define    pi 3.14159
 //Pins
-#define LIDAR_FRONT 2
-#define LIDAR_BACK 3
+#define LIDAR_FRONT 5
+#define LIDAR_BACK 6
 
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
@@ -25,13 +27,12 @@ ModemStatusResponse msr = ModemStatusResponse();
 Servo wheels; // servo for turning the wheels
 Servo esc; // not actually a servo, but controlled like one!
 bool startup = false; // used to ensure startup only happens once
-int startupDelay = 1000; // time to pause at each calibration step
-double maxSpeedOffset = 45; // maximum speed magnitude, in servo 'degrees'
-double maxWheelOffset = 85; // maximum wheel turn magnitude, in servo 'degrees'
+float maxSpeedOffset = 45; // maximum speed magnitude, in servo 'degrees'
+float maxWheelOffset = 85; // maximum wheel turn magnitude, in servo 'degrees'
 int frontDist = 0; 
 int backDist = 0;
 int deltaFrontBack = 0;
-int motorSpeed = -15;
+int motorSpeed = -10;
 
 //PID Initializations
 int centerpoint = 82; //CALIBRATED CENTER
@@ -43,7 +44,7 @@ float thetaActual;
 float distanceDesired;
 float distanceActual;
 float thetaTurn;
-float thetaMax = pi/16;
+float thetaMax = pi/32;
 
 float Error = 0.0;
 float pError = 0.0;
@@ -52,15 +53,17 @@ float thetaError;
 float maxError;
 float minError;
 float K_p = 2;
-float K_i = 0;
-float K_d = 0.5;
+float K_i = 0.0;
+float K_d = 0.6;
 float Integral;
 float Derivative;
 float dt = 0.160;
 
 float lengthbetweensensors = 20.0;//in centimeters, must be the same unit as getLidarDistance 
 
-Fifo *front, *back;
+Fifo *front, *back, *bError;
+
+//SimpleTimer timer;
 
 // wheel angle > 90 turns left (facing forward)
 // wheel angle < 90 turns right (facing forward)
@@ -71,7 +74,7 @@ Fifo *front, *back;
 void setup()
 {
   Serial.begin(9600);
-  pinMode(2, INPUT);
+  //pinMode(2, INPUT);
   Serial.println("< START >");
 
   XBee.begin(9600);
@@ -87,36 +90,50 @@ void setup()
   // LIDAR control
   Wire.begin(); // join i2c bus
   
-  pinMode(2, OUTPUT);
-  pinMode(3, OUTPUT);
+  pinMode(LIDAR_FRONT, OUTPUT);
+  pinMode(LIDAR_BACK, OUTPUT);
 
-  digitalWrite(2, LOW);
-  digitalWrite(3, LOW);
+  digitalWrite(LIDAR_FRONT, LOW);
+  digitalWrite(LIDAR_BACK, LOW);
 
   initReadings(LIDAR_FRONT, &front);
   initReadings(LIDAR_BACK, &back);
+  //initError(&bError);
 
   deltaFrontBack_calc();
     
 
   //distanceDesired = getLidarDistance(LIDAR_FRONT);
-  distanceDesired = 50.0;
+  distanceDesired = 30.0;
   
   maxError = 1.0 * distanceDesired;
   minError = -1.0 * distanceDesired;
+
+  //timer.setInterval(50, driveCar);
 }
 
 void initReadings(int sensor, Fifo **fifo){
   int i;
   Fifo *temp;
   *fifo = (Fifo*) malloc(sizeof(Fifo));
-  (*fifo)->value = 0;
+  (*fifo)->value = getLidarDistance(sensor);
   (*fifo)->next = NULL;
   for(i = 0; i < 4; i++){
     temp = (Fifo*) malloc(sizeof(Fifo));
-    temp->value = i + 1;
+    temp->value = getLidarDistance(sensor);
     temp->next = *fifo;
     *fifo = temp;
+  }
+}
+
+void initError(Fifo **fifo){
+  Fifo *temp;
+  *fifo = (Fifo*) malloc(sizeof(Fifo));
+  (*fifo)->value = 0.0;
+  for(int i = 0; i < 4; i++){
+    temp = (Fifo*) malloc(sizeof(Fifo));
+    temp->value = 0.0;
+    insert(temp, fifo);
   }
 }
 
@@ -157,6 +174,7 @@ void deltaFrontBack_calc()
 /* Calibrate the ESC by sending a high signal, then a low, then middle.*/
 void calibrateESC()
 {
+  int startupDelay = 1000; // time to pause at each calibration step
     esc.write(180); // full backwards
     delay(startupDelay);
     esc.write(0); // full forwards
@@ -242,16 +260,18 @@ void getError()
   //thetaTurn = thetaMax * (distanceError/maxError);
   if (distanceError >= maxError)
   {
-    thetaTurn = -pi/16; //steer right all the way!
+    thetaTurn = -thetaMax; //steer right all the way!
   }
   else if (distanceError <= minError)
   {
-    thetaTurn = pi/16; //steer left all the way!
+    thetaTurn = thetaMax; //steer left all the way!
   }
   else
   {
     thetaTurn = -1*thetaMax * (distanceError/maxError);
   }
+
+  //thetaTurn = -1*thetaMax * (distanceError/maxError);
   
   Error = thetaActual + thetaTurn; //softer steer dependent on how large the Error is
  
@@ -268,8 +288,13 @@ void PID() //THIS WILL GIVE YOU 'OUTPUT' TO THE DRIVESTRAIGHT FUNCTION
   //Error = Error - pError;
   Integral = Integral + (Error*dt);
   Derivative = (Error - pError)/dt;
+  //Derivative = (Error - returnAverage(bError))/dt;
   Output = radToDeg((K_p * Error) + (K_i * Integral) + (K_d * Derivative));
   pError = Error;
+
+  /*Fifo *newError = (Fifo*) malloc(sizeof(Fifo));
+  newError->value = Error;
+  insertAndPop(newError, &bError);*/
   
 }
 
@@ -277,11 +302,11 @@ void driveStraight()
 {
   esc.write(centerpoint + motorSpeed);
 
-  if (pOutput+Output > 127) 
+  if ((pOutput+Output) >= 117) 
   {
-    pOutput = 127;
+    pOutput = 117;
   }
-  else if (pOutput+Output < 37)
+  else if ((pOutput+Output) <= 37)
   {
     pOutput = 37; 
   }
@@ -303,16 +328,11 @@ void driveStraight()
   Serial.print(Output);
   Serial.print("\nPID pOutput:");
   Serial.print(pOutput);
-
-  Serial.print("\n Count:");
-  Serial.print(getCount(front));
 }
- 
-void loop()
+
+void driveCar()
 {
-   // oscillate();
-   
-   if (startup)
+   if (true)
    {
     getActual();
     getError();
@@ -320,8 +340,11 @@ void loop()
    
     driveStraight();
    }
-
-   xbee.readPacket();
+}
+ 
+void loop()
+{
+   /*xbee.readPacket();
    if(xbee.getResponse().isAvailable())
    {
       if(xbee.getResponse().getApiId() == ZB_RX_RESPONSE)
@@ -341,7 +364,8 @@ void loop()
              }
           }
       }
-   }
+   }*/
+   driveCar();
    delay(50);
 }
 

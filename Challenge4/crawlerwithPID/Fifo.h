@@ -20,6 +20,11 @@ void insertAndPop(Fifo* node, Fifo **head){
   *head = node; // move head to the new node
 }
 
+void insert(Fifo* node, Fifo **head){
+  node->next = *head;
+  *head = node;
+}
+
 float returnAverage(Fifo *head){
   Fifo *temp = head;
   int count = 0;
