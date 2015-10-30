@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include <math.h>
 #include "Fifo.h"
-#include "SimpleTimer.h"
+#include <SimpleTimer.h>
 
 #define    LIDARLite_ADDRESS   0x62          // Default I2C Address of LIDAR-Lite.
 #define    RegisterMeasure     0x00          // Register to write to initiate ranging.
@@ -312,7 +312,7 @@ void driveStraight()
 {
   esc.write(centerpoint + motorSpeed);
 
-  if ((pOutput+Output) >= 107) 
+  /*if ((pOutput+Output) >= 107) 
   {
     pOutput = 107;
   }
@@ -323,7 +323,9 @@ void driveStraight()
   else
   {
     pOutput += Output;
-  }
+  }*/
+
+  pOutput += Output;
   wheels.write(pOutput);
   
   deltaFrontBack_calc();
