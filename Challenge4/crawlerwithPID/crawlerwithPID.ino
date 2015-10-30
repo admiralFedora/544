@@ -231,7 +231,7 @@ double radToDeg(double radians){
 
 void getActual()
 {
-  thetaActual = atan ( (deltaFrontBack)/lengthbetweensensors) * (deltaFrontBack/lengthbetweensensors);
+  thetaActual = atan ( (deltaFrontBack)/lengthbetweensensors);
   distanceActual = frontDist * cos (thetaActual);
 
   Serial.print("\n\nFront:");
@@ -250,14 +250,14 @@ void getError()
 {
   float distanceRatio = distanceActual/distanceDesired;
   distanceError = distanceDesired - distanceActual;
-  float triangleTheta = atan(distanceDesired/distanceError);
-  if(triangleTheta < 0){
+  float triangleTheta = -1 * atan(distanceError/distanceDesired);
+  /*if(triangleTheta < 0){
     thetaTurn = -1 * (-(pi/2) - triangleTheta);
   } else if (triangleTheta > 0) {
     thetaTurn = -1 * ((pi/2) - triangleTheta);
   } else {
     thetaTurn = 0;
-  }
+  }*/
   //thetaTurn = -1 * (90 - atan(distanceDesired/distanceError));
   /*if (distanceError >= maxError)
   {
