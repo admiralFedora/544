@@ -52,6 +52,7 @@ float Derivative;
 Fifo *front, *back;
 
 SimpleTimer timer;
+int counter = 0;
 
 // wheel angle > 90 turns left (facing forward)
 // wheel angle < 90 turns right (facing forward)
@@ -234,7 +235,10 @@ void getActual()
   thetaActual = atan ( (deltaFrontBack)/lengthbetweensensors);
   distanceActual = frontDist * cos (thetaActual);
 
-  Serial.print("\n\nFront:");
+  Serial.print("\n\nTime:");
+  Serial.print(counter);
+
+  Serial.print("\nFront:");
   Serial.print(frontDist);
   Serial.print("\nBack:");
   Serial.print(backDist);
@@ -345,6 +349,7 @@ void driveCar()
     PID(); 
    
     driveStraight();
+    counter++;
    } else {
     esc.write(90);
    }
