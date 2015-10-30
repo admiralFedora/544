@@ -14,11 +14,12 @@
 #define LIDAR_BACK 6
 #define SONAR_PIN 7
 #define XBEE_PIN 4
+#define WARNING_PIN 12
 
-#define K_p 2.0
+#define K_p .2
 #define K_i 0.0
-#define K_d 3.7
-#define dt 0.160
+#define K_d 0
+#define dt 160
 #define lengthbetweensensors 20.0 //in centimeters, must be the same unit as getLidarDistance
 #define centerpoint 82 //CALIBRATED CENTER
 #define motorSpeed -10
@@ -78,11 +79,14 @@ void setup()
   
   pinMode(LIDAR_FRONT, OUTPUT);
   pinMode(LIDAR_BACK, OUTPUT);
+  pinMode(WARNING_PIN, OUTPUT);
   pinMode(SONAR_PIN, INPUT_PULLUP);
   pinMode(XBEE_PIN, INPUT_PULLUP);
 
   digitalWrite(LIDAR_FRONT, LOW);
   digitalWrite(LIDAR_BACK, LOW);
+
+  distanceDesired = 45.0;
 
   initReadings(LIDAR_FRONT, &front);
   initReadings(LIDAR_BACK, &back);
@@ -91,7 +95,6 @@ void setup()
     
 
   //distanceDesired = getLidarDistance(LIDAR_FRONT);
-  distanceDesired = 90.0;
   
   maxError = 1.0 * distanceDesired;
   minError = -1.0 * distanceDesired;
@@ -103,11 +106,11 @@ void initReadings(int sensor, Fifo **fifo){
   int i;
   Fifo *temp;
   *fifo = (Fifo*) malloc(sizeof(Fifo));
-  (*fifo)->value = getLidarDistance(sensor);
+  (*fifo)->value = distanceDesired;
   (*fifo)->next = NULL;
   for(i = 0; i < 4; i++){
     temp = (Fifo*) malloc(sizeof(Fifo));
-    temp->value = getLidarDistance(sensor);
+    temp->value = distanceDesired;
     temp->next = *fifo;
     *fifo = temp;
   }
@@ -135,11 +138,15 @@ void deltaFrontBack_calc()
   // get one new reading and remove the oldest
   Fifo *newFront = (Fifo*) malloc(sizeof(Fifo));
   newFront->value = getLidarDistance(LIDAR_FRONT);
-  insertAndPop(newFront, &front);
+  if(newFront->value <= (2*returnAverage(front))){
+    insertAndPop(newFront, &front);
+  }
 
   Fifo *newBack = (Fifo*) malloc(sizeof(Fifo));
   newBack->value = getLidarDistance(LIDAR_BACK);
-  insertAndPop(newBack, &back);
+  if(newBack->value <= (2*returnAverage(back))){
+    insertAndPop(newBack, &back);
+  }
 
   // average the readings
   frontDist = returnAverage(front);
@@ -255,6 +262,7 @@ void getError()
   float distanceRatio = distanceActual/distanceDesired;
   distanceError = distanceDesired - distanceActual;
   float triangleTheta = -1 * atan(distanceError/distanceDesired);
+  thetaTurn = triangleTheta;
   /*if(triangleTheta < 0){
     thetaTurn = -1 * (-(pi/2) - triangleTheta);
   } else if (triangleTheta > 0) {
@@ -316,20 +324,21 @@ void driveStraight()
 {
   esc.write(centerpoint + motorSpeed);
 
-  /*if ((pOutput+Output) >= 107) 
+  pOutput = centerpoint + Output;
+  if ((pOutput) >= 135) 
   {
-    pOutput = 107;
+    pOutput = 135;
+    digitalWrite(WARNING_PIN, HIGH);
   }
-  else if ((pOutput+Output) <= 50)
+  else if ((pOutput) <= 45)
   {
-    pOutput = 50; 
+    pOutput = 45;
+    digitalWrite(WARNING_PIN, HIGH);
+  } else {
+    digitalWrite(WARNING_PIN, LOW);
   }
-  else
-  {
-    pOutput += Output;
-  }*/
 
-  pOutput += Output;
+  //pOutput += Output;
   wheels.write(pOutput);
   
   deltaFrontBack_calc();
@@ -358,7 +367,7 @@ void driveCar()
 void loop()
 {
    //driveCar();
-   startRun = shouldStart();
+   //startRun = shouldStart();
    //startup = shouldRun();
    //delay(50);
    timer.run();
