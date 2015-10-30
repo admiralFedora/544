@@ -234,23 +234,22 @@ void getActual()
   thetaActual = atan ( (deltaFrontBack)/lengthbetweensensors) * (deltaFrontBack/lengthbetweensensors);
   distanceActual = frontDist * cos (thetaActual);
 
+  Serial.print("\n\nFront:");
+  Serial.print(frontDist);
+  Serial.print("\nBack:");
+  Serial.print(backDist);
 
-  Serial.print("\n\nfrontDist-backDist/20: ");
-  Serial.print((frontDist-backDist)/lengthbetweensensors);
-  
-  Serial.print("\n\nTheta Actual: ");
+  Serial.print("\nTheta Actual: ");
   Serial.print(thetaActual);
 
-  Serial.print("\n\nDistance Actual: ");
-  Serial.print(distanceActual);
-  
+  Serial.print("\nDistance Actual: ");
+  Serial.print(distanceActual); 
 }
 
 void getError()
 {
   float distanceRatio = distanceActual/distanceDesired;
   distanceError = distanceDesired - distanceActual;
-  //thetaTurn = thetaMax * (distanceError/maxError);
   float triangleTheta = atan(distanceDesired/distanceError);
   if(triangleTheta < 0){
     thetaTurn = -1 * (-(pi/2) - triangleTheta);
@@ -280,15 +279,17 @@ void getError()
   } else {
     Error = (.1 * thetaActual) + (distanceRatio) * thetaTurn; //softer steer dependent on how large the Error is
   }
-  
- 
-  Serial.print("\n\nDistanceRatio:");
+   
+  Serial.print("\nDistanceRatio:");
   Serial.print(distanceRatio);
+  
+  Serial.print("\nDistanceError:");
+  Serial.print(distanceError);
 
-  Serial.print("\n\nThetaTurn: ");
+  Serial.print("\nThetaTurn: ");
   Serial.print(thetaTurn);
   
-  Serial.print("\n\nError: ");
+  Serial.print("\nError: ");
   Serial.print(Error);
 }
 
@@ -324,16 +325,10 @@ void driveStraight()
     pOutput += Output;
   }
   wheels.write(pOutput);
-
-  
   
   deltaFrontBack_calc();
-  
-  Serial.print("\nnFront:");
-  Serial.print(frontDist);
-  Serial.print("\nBack:");
-  Serial.print(backDist);
-  Serial.print("\n\n\nPID Output:");
+
+  Serial.print("\nPID Output:");
   Serial.print(Output);
   Serial.print("\nPID pOutput:");
   Serial.print(pOutput);
