@@ -16,9 +16,9 @@
 #define XBEE_PIN 4
 #define WARNING_PIN 12
 
-#define K_p .2
+#define K_p .8
 #define K_i 0.0
-#define K_d 0
+#define K_d 525.2
 #define dt 160
 #define lengthbetweensensors 20.0 //in centimeters, must be the same unit as getLidarDistance
 #define centerpoint 82 //CALIBRATED CENTER
@@ -86,7 +86,7 @@ void setup()
   digitalWrite(LIDAR_FRONT, LOW);
   digitalWrite(LIDAR_BACK, LOW);
 
-  distanceDesired = 45.0;
+  distanceDesired = 60.0;
 
   initReadings(LIDAR_FRONT, &front);
   initReadings(LIDAR_BACK, &back);
@@ -138,13 +138,13 @@ void deltaFrontBack_calc()
   // get one new reading and remove the oldest
   Fifo *newFront = (Fifo*) malloc(sizeof(Fifo));
   newFront->value = getLidarDistance(LIDAR_FRONT);
-  if(newFront->value <= (2*returnAverage(front))){
+  if(newFront->value <= (returnAverage(front)+150)){
     insertAndPop(newFront, &front);
   }
 
   Fifo *newBack = (Fifo*) malloc(sizeof(Fifo));
   newBack->value = getLidarDistance(LIDAR_BACK);
-  if(newBack->value <= (2*returnAverage(back))){
+  if(newBack->value <= (returnAverage(back)+150)){
     insertAndPop(newBack, &back);
   }
 
