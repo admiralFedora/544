@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Challenge5 - Group1</title>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+  </head>
+  <body>
+  <style>
+
+
+  body{
+   background-image: url("http://hhao.hostei.com/doc/hao_hu_601termproject/img/bg.png");
+   background-repeat: repeat;
+  }
+
+  #mobileInfo{display:none;font-size: 3em;margin-top:5px;margin-left:25px;}
+
+  p.red{
+    color:#cc0000;
+    font-family:sans-serif;
+    font-weight:bold;
+    margin-left:60px;
+    font-size:22px;
+    margin-bottom:15px;
+    margin-top:50px;
+  }
+
+  p.gray{	color:#646464; margin-left:60px;	margin-top:3px;margin-bottom:3px}
+
+  #info{display:block;}
+
+ @media only screen and (max-device-width : 667px) {
+ }
+  </style>
+
+
+  <script>
+  function updateGraph(){}
+
+  function detectmob() {
+   if( navigator.userAgent.match(/Android/i)
+   || navigator.userAgent.match(/webOS/i)
+   || navigator.userAgent.match(/iPhone/i)
+   || navigator.userAgent.match(/iPod/i)
+   || navigator.userAgent.match(/BlackBerry/i)
+   || navigator.userAgent.match(/Windows Phone/i)
+   ){
+      return true;
+    }
+   else {
+      return false;
+    }
+  }
+
+  $( document ).ready(function() {
+
+  });
+  </script>
+
+    <div class="head">
+      <div id = "info">
+      <p class="red" >Boston University</p>
+      <p class="gray" >Challenge 5</p>
+      <p class="gray" >GROUP 1, ENG EC544</p>
+      <p class="gray" >Pete, Carlos, Hao, Avi, Ying</p>
+      <br/>
+      </div>
+      <canvas id="myCanvas"  width="1000px" height="400px"style="margin-left:62px; border:1px solid #d3d3d3;">
+        Your browser does not support the HTML5 canvas tag.</canvas>
+      <div class="canvas">
+
+      </div>
+    </div>
+
+  </body>
+</html>
