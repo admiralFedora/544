@@ -8,7 +8,7 @@ XBee xbee = XBee();
 uint8_t payload[] = { 0, 0 };
 
 
-XBeeAddress64 addr64 = XBeeAddress64(0x00000000, 0x0000ffff);
+XBeeAddress64 addr64 = XBeeAddress64(0x00000000, 0x0000ffff);//TRY THIS
 ZBTxRequest zbTx = ZBTxRequest(addr64, payload, sizeof(payload));
 ZBTxStatusResponse txStatus = ZBTxStatusResponse();
 
