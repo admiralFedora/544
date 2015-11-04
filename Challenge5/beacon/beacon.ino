@@ -5,14 +5,14 @@
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
 
-uint8_t payload[] = { 0 }; //Payload Packet
+uint8_t payload[] = { 0, 0 }; //Payload Packet
 
 // create reusable response objects for responses we expect to handle 
 ZBRxResponse rx = ZBRxResponse();
 ModemStatusResponse msr = ModemStatusResponse();
 
 //Sending Status of the LED
-XBeeAddress64 addr64 = XBeeAddress64();
+XBeeAddress64 addr64 = XBeeAddress64(0x00000000, 0x0000ffff);
 ZBTxRequest zbTx;
 
 SoftwareSerial XBee(2, 3); // Rx, Tx
@@ -35,9 +35,10 @@ void loop()
     
     if (xbee.getResponse().isAvailable()) //Packet received
     {
+      Serial.println("Packet Received");
       if(xbee.getResponse().getApiId() == ZB_IO_NODE_IDENTIFIER_RESPONSE)
       {
-        addr64 = rx.getRemoteAddress64();
+        //addr64 = rx.getRemoteAddress64();
         zbTx = ZBTxRequest(addr64, payload, sizeof(payload));
 
         startSending = true;        
