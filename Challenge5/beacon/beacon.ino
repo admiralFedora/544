@@ -1,3 +1,4 @@
+//SENDING
 #include <Printers.h>
 #include <XBee.h>
 #include <SoftwareSerial.h>
@@ -66,9 +67,12 @@ void loop()
         xbee.getResponse().getZBRxResponse(rx);
         addr64 = rx.getRemoteAddress64();
         
+        Serial.println(addr64.getMsb(), HEX);
+        
         if(rx.getData(0) == 8){
           Serial.println("Sending data");
           payload[1] = readDB() & 0xff;
+          zbTx = ZBTxRequest(addr64, payload, sizeof(payload));
           xbee.send(zbTx);
         }
       }
