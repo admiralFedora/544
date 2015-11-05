@@ -20,6 +20,8 @@ ZBTxRequest zbTx = ZBTxRequest(addr64, payload, sizeof(payload));
 
 SoftwareSerial XBee(2, 3); // Rx, Tx
 
+bool keepReading = true;
+
 void setup() 
 { 
   // start serial
@@ -35,22 +37,25 @@ void loop()
 {
     xbee.send(zbTx);
 
-    if(xbee.readPacket(5000)){
-      if (xbee.getResponse().isAvailable()) //Packet received
-      {
-        Serial.println("Packet Received!");
-        Serial.print("packet type:");
-        Serial.println(xbee.getResponse().getApiId(), HEX);
-        if(xbee.getResponse().getApiId() == ZB_RX_RESPONSE)
+    for(int i = 0; i < 2; i++){
+      if(xbee.readPacket(5000)){
+        if (xbee.getResponse().isAvailable()) //Packet received
         {
-          xbee.getResponse().getZBRxResponse(rx);
-
-          if(rx.getData(0) == 9){
-            Serial.println("I got the data!");
-            Serial.print("Rssi: ");
-            Serial.println(rx.getData(1), HEX);
+          Serial.println("Packet Received!");
+          Serial.print("packet type:");
+          Serial.println(xbee.getResponse().getApiId(), HEX);
+          if(xbee.getResponse().getApiId() == ZB_RX_RESPONSE)
+          {
+            xbee.getResponse().getZBRxResponse(rx);
+  
+            if(rx.getData(0) == 9){
+              Serial.println("I got the data!");
+              Serial.print("Rssi: ");
+              Serial.println(rx.getData(1), HEX);
+            }
           }
         }
       }
-  }
+    }
+    
 }
