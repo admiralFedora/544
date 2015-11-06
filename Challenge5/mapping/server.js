@@ -43,7 +43,6 @@ function sensor(id, idLong){
 
 function mapData(loc){
   this.loc = loc;
-  var beacon1;
 }
 
 // function for adding a sensors
@@ -125,10 +124,11 @@ function getData(frame){
   for(var i = 0; i < sensors.length; i++){
     sen = sensors[i];
     if(idLong == sen.idLong){
-      sen.counter.num--;
       var dataItem = new mapData(curLocation);
-      mapData.beacon1 = data;
-
+	  for(var i = 0; i < frame.data.length; i += 2){
+		  mapData.set('beacon'+frame.data[i], frame.data[i+1]);
+	  }
+	  
       mapDatas.push(dataItem);
       break;
     }
@@ -143,12 +143,12 @@ app.get('/startMapping', function(req, res){
   if(sensors.length == 0){
     res.json("msg":"No sensors to start mapping with");
   } else {
-    var count = new counter(sensors.length);
+    /*var count = new counter(sensors.length);
     var msg = new message("");
     curLocation = req.query.loc;
     for(var i = 0; i < sensors.length; i++){
       startMapping(i, count, res, msg);
-    }
+    }*/
     run = 1;
   }
 });
@@ -190,7 +190,10 @@ xbeeAPI.on("frame_object", function(frame){
   } else if (frame.type == xbeeConst.FRAME_TYPE.ZIGBEE_RECEIVE_PACKET){
     if(run == 1){
       console.log("received mapping data");
-      getData(frame);
+	  if(frame.data[0] == 2)
+	  {
+		  getData(frame);
+	  }
     }
   }
 });
