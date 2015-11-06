@@ -11,7 +11,7 @@ XBeeResponse response = XBeeResponse();
 
 uint8_t dbCmd[] = {'D','B'};
 uint8_t payload[] = { 0 }; //Payload Packet\
-uint8_t toSend*;
+uint8_t *toSend;
 
 // create reusable response objects for responses we expect to handle 
 ZBRxResponse rx = ZBRxResponse();
@@ -27,6 +27,7 @@ ZBTxRequest sendRRSIs;
 SoftwareSerial XBee(2, 3); // Rx, Tx
 
 bool keepReading = true;
+bool startSending = false;
 
 void getAndSendRSSI()
 {
@@ -48,8 +49,10 @@ void getAndSendRSSI()
 				if(rx.getData(0) == 9)
 				{
 				  Serial.println("I got the data!");
-				  Serial.print("Rssi: ");
-				  Serial.println(rx.getData(1), HEX);
+				  Serial.print("Beacon: ");
+				  Serial.print(rx.getData(1), HEX);
+          Serial.print(" RSSI: ");
+          Serial.print(rx.getData(2), HEX);
 				  toSend[i] = rx.getData(1) & 0xff;
 				  toSend[i+1] = rx.getData(2) & 0xff;
 				  i += 2;
@@ -63,7 +66,7 @@ void getAndSendRSSI()
 	}
 	
 	sendRRSIs = ZBTxRequest(addr64, toSend, sizeof(toSend));
-	xbee.send(sendRSSIs);
+	xbee.send(sendRRSIs);
 }
 
 void setup() 
@@ -81,20 +84,26 @@ void setup()
 // looks for an xbee that just joined the network and starts sending to the last one that joined
 void loop() 
 {
-	xbee.readPacket();
-	if(xbee.getResponse().isAvailable())
-	{
-		if(xbee.getResponse().getApiId() == ZB_RX_RESPONSE)
-		{
-			xbee.getResponse().getZBRxResponse(rx);
-			addr64 = rx.getRemoteAddress64();
-			
-			if(rx.getData(0) == 1)
-			{
-				xbee.send(requestRSSI);
-				getAndSendRSSI();
-			}
-		}
-	}
-    
+  /*if(!startSending)
+  {
+    xbee.readPacket();
+    if(xbee.getResponse().isAvailable())
+    {
+      if(xbee.getResponse().getApiId() == ZB_RX_RESPONSE)
+      {
+        xbee.getResponse().getZBRxResponse(rx);
+        addr64 = rx.getRemoteAddress64();
+        
+        if(rx.getData(0) == 1)
+        {
+          startSending = true;
+        }
+      }
+    }
+  }*/
+  keepReading = true;
+	xbee.send(requestRSSI);
+  getAndSendRSSI();
+
+  delay(500);
 }
