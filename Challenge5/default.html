@@ -5,7 +5,6 @@
     <title>Challenge5 - Group1</title>
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
-    <script src="test.js"></script>
   </head>
   <body>
   <style>
@@ -53,6 +52,14 @@
    else {
       return false;
     }
+  }
+
+  window.onload = function() {
+    var c = document.getElementById("myCanvas");
+    var chart = c.getContext("2d");
+    var img = document.getElementById("layout");
+    chart.drawImage(img, 0, 0); //draw layout
+    chart.fillText("hello", 45, 32);
   }
 
   $( document ).ready(function() {
