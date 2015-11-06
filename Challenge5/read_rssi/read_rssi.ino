@@ -49,12 +49,12 @@ void getAndSendRSSI()
 				if(rx.getData(0) == 9)
 				{
 				  Serial.println("I got the data!");
-				  Serial.print("Beacon: ");
-				  Serial.print(rx.getData(1), HEX);
-          Serial.print(" RSSI: ");
-          Serial.print(rx.getData(2), HEX);
 				  toSend[i] = rx.getData(1) & 0xff;
 				  toSend[i+1] = rx.getData(2) & 0xff;
+          Serial.print("Beacon: ");
+          Serial.print(toSend[i], HEX);
+          Serial.print(" RSSI: ");
+          Serial.print(toSend[i+1], HEX);
 				  i += 2;
 				}
 			  }
@@ -64,8 +64,8 @@ void getAndSendRSSI()
 			keepReading = false;
 		}
 	}
-	
-	sendRRSIs = ZBTxRequest(addr64, toSend, sizeof(toSend));
+
+	sendRRSIs = ZBTxRequest(addr64, toSend, (BEACONS * 2 + 1));
 	xbee.send(sendRRSIs);
 }
 
@@ -78,13 +78,13 @@ void setup()
 
   payload[0] = 8 & 0xff;
   
-  toSend = (uint8_t*) malloc(BEACONS * 2 + 1);
+  toSend = (uint8_t*) malloc((BEACONS * 2 + 1));
 }
 
 // looks for an xbee that just joined the network and starts sending to the last one that joined
 void loop() 
 {
-  /*if(!startSending)
+  if(!startSending)
   {
     xbee.readPacket();
     if(xbee.getResponse().isAvailable())
@@ -100,10 +100,12 @@ void loop()
         }
       }
     }
-  }*/
-  keepReading = true;
-	xbee.send(requestRSSI);
-  getAndSendRSSI();
-
-  delay(500);
+  } else {
+    keepReading = true;
+    xbee.send(requestRSSI);
+    getAndSendRSSI();
+  
+    delay(500);
+  }
+  
 }
