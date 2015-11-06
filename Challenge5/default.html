@@ -15,8 +15,6 @@
    background-repeat: repeat;
   }
 
-  #mobileInfo{display:none;font-size: 3em;margin-top:5px;margin-left:25px;}
-
   p.red{
     color:#cc0000;
     font-family:sans-serif;
@@ -29,6 +27,8 @@
 
   p.gray{	color:#646464; margin-left:60px;	margin-top:3px;margin-bottom:3px}
 
+  .ins{color:#646464; margin-left:60px;}
+  #pos{vertical-align: bottom;}
   #info{display:block;}
 
  @media only screen and (max-device-width : 667px) {
@@ -58,7 +58,9 @@
     var c = document.getElementById("myCanvas");
     var chart = c.getContext("2d");
     var img = document.getElementById("layout");
+    var pos = document.getElementById("pos");
     chart.drawImage(img, 0, 0); //draw layout
+    chart.drawImage(pos, 30, 25); //draw layout
     chart.fillText("hello", 45, 32);
   }
 
@@ -80,7 +82,7 @@
         Your browser does not support the HTML5 canvas tag.</canvas>
 
       <div class="canvas">
-
+      <p class="ins">Current position: <img id="pos" src="http://hhao.hostei.com/doc/files/CDN/star.png"/></p>
       </div>
       <img id="layout" src="http://hhao.hostei.com/doc/files/CDN/layout.png" style="display:none;"/>
     </div>
