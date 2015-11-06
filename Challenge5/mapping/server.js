@@ -125,10 +125,11 @@ function getData(frame){
     sen = sensors[i];
     if(idLong == sen.idLong){
       var dataItem = new mapData(curLocation);
-	  for(var i = 0; i < frame.data.length; i += 2){
-		  mapData.set('beacon'+frame.data[i], frame.data[i+1]);
-	  }
-	  
+  	  for(var i = 1; i < (frame.data.length - 2); i += 2){
+        dataItem['beacon'+frame.data[i]] = frame.data[i+1];
+  		  //mapData.set('beacon'+frame.data[i], frame.data[i+1]);
+  	  }
+      console.log(dataItem);
       mapDatas.push(dataItem);
       break;
     }
@@ -141,21 +142,21 @@ var server = app.listen(3000, '0.0.0.0', function(){
 
 app.get('/startMapping', function(req, res){
   if(sensors.length == 0){
-    res.json("msg":"No sensors to start mapping with");
+    res.json({"msg":"No sensors to start mapping with;"});
   } else {
-    /*var count = new counter(sensors.length);
+    var count = new counter(sensors.length);
     var msg = new message("");
     curLocation = req.query.loc;
     for(var i = 0; i < sensors.length; i++){
       startMapping(i, count, res, msg);
-    }*/
+    }
     run = 1;
   }
 });
 
 app.get('/mapLoc', function(req, res){
   if(sensors.length == 0){
-    res.json("msg":"No sensors to map with");
+    res.json({"msg":"No sensors to map with;"});
   } else {
     curLocation = req.query.loc;
     run = 1;
@@ -168,13 +169,13 @@ app.get('/pauseMapping', function(req, res){
 
 app.get('/dumpData', function(req, res){
   if(mapData.length == 0){
-    res.json("msg":"Nothing to write");
+    res.json({"msg":"Nothing to write"});
   } else {
     fs.writeFile(req.query.fileName, JSON.stringify(mapDatas), function(err){
       if(err){
-        res.json("msg":"error writing to file!!");
+        res.json({"msg":"error writing to file!!"});
       } else {
-        res.json("msg":"Data was written sucessfully");
+        res.json({"msg":"Data was written sucessfully"});
       }
     });
   }
@@ -190,10 +191,11 @@ xbeeAPI.on("frame_object", function(frame){
   } else if (frame.type == xbeeConst.FRAME_TYPE.ZIGBEE_RECEIVE_PACKET){
     if(run == 1){
       console.log("received mapping data");
-	  if(frame.data[0] == 2)
-	  {
-		  getData(frame);
-	  }
+      console.log(frame.data);
+  	  if(frame.data[0] == 2)
+  	  {
+  		  getData(frame);
+  	  }
     }
   }
 });
