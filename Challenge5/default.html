@@ -37,7 +37,9 @@
 
 
   <script>
-  function updateGraph(){}
+  function updateGraph(){}//auto scal
+
+
 
   function detectmob() {
    if( navigator.userAgent.match(/Android/i)
@@ -59,9 +61,20 @@
     var chart = c.getContext("2d");
     var img = document.getElementById("layout");
     var pos = document.getElementById("pos");
-    chart.drawImage(img, 0, 0); //draw layout
-    chart.drawImage(pos, 30, 25); //draw layout
-    chart.fillText("hello", 45, 32);
+    //chart.drawImage(img, 0, 0); //draw layout, not sure about the place
+    var cen = document.getElementById("cen");
+    var cenX = Math.ceil(cen.width / 2 - pos.width/2);
+    var cenY = Math.ceil(cen.height / 2 - pos.height/2);
+    var picD = document.getElementById("picD");
+    var picU = document.getElementById("picU");
+    var picL = document.getElementById("picL");
+    var picR = document.getElementById("picR");
+    chart.drawImage(cen, 100, 100); //draw pos
+    chart.drawImage(pos, 100+cenX, 100+cenY); //draw pos
+    chart.drawImage(picL, 0, 20);
+    chart.drawImage(picU, 0, 0);
+    chart.drawImage(picR, 850,-40 );
+    chart.drawImage(picD, 0, 390);
   }
 
   $( document ).ready(function() {
@@ -85,6 +98,11 @@
       <p class="ins">Current position: <img id="pos" src="http://hhao.hostei.com/doc/files/CDN/star.png"/></p>
       </div>
       <img id="layout" src="http://hhao.hostei.com/doc/files/CDN/layout.png" style="display:none;"/>
+      <img id="cen" src="http://hhao.hostei.com/doc/files/CDN/cen.png" style="display:none;"/>
+      <img id="picD" src="http://hhao.hostei.com/doc/files/CDN/D.png" style="display:none;"/>
+      <img id="picU" src="http://hhao.hostei.com/doc/files/CDN/U.png" style="display:none;"/>
+      <img id="picL" src="http://hhao.hostei.com/doc/files/CDN/L.png" style="display:none;"/>
+      <img id="picR" src="http://hhao.hostei.com/doc/files/CDN/R.png" style="display:none;"/>
     </div>
 
   </body>
