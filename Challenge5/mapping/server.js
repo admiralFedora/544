@@ -147,9 +147,9 @@ app.get('/startMapping', function(req, res){
     var count = new counter(sensors.length);
     var msg = new message("");
     curLocation = req.query.loc;
-    for(var i = 0; i < sensors.length; i++){
+    /*for(var i = 0; i < sensors.length; i++){
       startMapping(i, count, res, msg);
-    }
+    }*/
     run = 1;
   }
 });
