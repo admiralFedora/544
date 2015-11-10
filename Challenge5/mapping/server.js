@@ -13,7 +13,8 @@ var sp = new SerialPort.SerialPort(process.argv[2], {
   parser: xbeeAPI.rawParser()
 });
 
-var curLocation;
+var curLocationx;
+var curLocationy;
 var run;
 
 var sensors = [];
@@ -41,8 +42,9 @@ function sensor(id, idLong){
   this.idLong = idLong;
 }
 
-function mapData(loc){
-  this.loc = loc;
+function mapData(locx, locy){
+  this.locx = locx;
+  this.locy = locy;
 }
 
 // function for adding a sensors
@@ -124,8 +126,8 @@ function getData(frame){
   for(var i = 0; i < sensors.length; i++){
     sen = sensors[i];
     if(idLong == sen.idLong){
-      var dataItem = new mapData(curLocation);
-  	  for(var i = 1; i < (frame.data.length - 2); i += 2){
+      var dataItem = new mapData(curLocationx, curLocationy);
+  	  for(var i = 1; i < (frame.data.length); i += 2){
         dataItem['beacon'+frame.data[i]] = frame.data[i+1];
   		  //mapData.set('beacon'+frame.data[i], frame.data[i+1]);
   	  }
@@ -146,7 +148,8 @@ app.get('/startMapping', function(req, res){
   } else {
     var count = new counter(sensors.length);
     var msg = new message("");
-    curLocation = req.query.loc;
+    curLocationx = req.query.locx;
+    curLocationy = req.query.locy;
     for(var i = 0; i < sensors.length; i++){
       startMapping(i, count, res, msg);
     }
@@ -158,13 +161,16 @@ app.get('/mapLoc', function(req, res){
   if(sensors.length == 0){
     res.json({"msg":"No sensors to map with;"});
   } else {
-    curLocation = req.query.loc;
+    curLocationx = req.query.locx;
+    curLocationy = req.query.locy;
     run = 1;
+    res.json({"msg":"started to map loc" + curLocation + ";"})
   }
 });
 
 app.get('/pauseMapping', function(req, res){
   run = 0;
+  res.json({"msg":"paused mapping;"})
 });
 
 app.get('/dumpData', function(req, res){
