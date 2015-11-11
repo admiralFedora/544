@@ -1,10 +1,10 @@
 //SENDING
 #include "EEPROMAnything.h"
-#include <Printers.h>
+// # include <Printers.h>
 #include <XBee.h>
 #include <SoftwareSerial.h>
 
-#define ID 2
+#define ID 3
 
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
