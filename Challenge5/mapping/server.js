@@ -164,7 +164,7 @@ app.get('/mapLoc', function(req, res){
     curLocationx = req.query.locx;
     curLocationy = req.query.locy;
     run = 1;
-    res.json({"msg":"started to map loc" + curLocation + ";"})
+    res.json({"msg":"started to map loc " + curLocationx + ", " +curLocationy + ";"})
   }
 });
 
