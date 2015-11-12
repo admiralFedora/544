@@ -8,29 +8,45 @@
   </head>
   <body>
   <style>
+    body{
+      background-image: url("http://hhao.hostei.com/doc/hao_hu_601termproject/img/bg.png");
+      background-repeat: repeat;
+    }
 
+    p.red{
+      color:#cc0000;
+      font-family:sans-serif;
+      font-weight:bold;
+      margin-left:60px;
+      font-size:22px;
+      margin-bottom:15px;
+      margin-top:10px;
+    }
 
-  body{
-   background-image: url("http://hhao.hostei.com/doc/hao_hu_601termproject/img/bg.png");
-   background-repeat: repeat;
-  }
+    .submit{
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      font-family:Calibri;
+      font-size:14px;
+      padding:6px 18px;
+      color: #ffffff;
+      background-color:#19a5c8;
+      border: #19a5c8 solid 1px;
+      border-radius:4px;
+      width:160px;
+      box-shadow: 0 1px gray;
+      margin-top:5px;
+      align-items: center;
+    }
 
-  p.red{
-    color:#cc0000;
-    font-family:sans-serif;
-    font-weight:bold;
-    margin-left:60px;
-    font-size:22px;
-    margin-bottom:15px;
-    margin-top:10px;
-  }
+    .submit:hover{cursor:pointer; opacity:0.6;}
+    .input-text{ border:#9f9f9f solid 1px; width:90px;color:#19a5c8; padding: 6px 18px;margin:8px 6px;}
+    p.gray{	color:#646464; margin-left:60px;	margin-top:3px;margin-bottom:3px}
 
-  p.gray{	color:#646464; margin-left:60px;	margin-top:3px;margin-bottom:3px}
-
-  .ins{color:#646464; margin-left:60px;}
-  #pos{vertical-align: bottom;}
-  #info{display:block;}
-  #msg{color:#636363; margin-left:60px;}
+    .ins{color:#646464; margin-left:60px;}
+    #info{display:block;}
+    #msg{color:#636363; margin-left:60px;}
   </style>
 
 
@@ -38,12 +54,15 @@
   /*len & hei are the drawing square inside the canvas*/
   var len = 848-45; // values are hard coded
   var hei = 392-30; // values are hard coded
-  var hor = 5;
-  var ver = 12;
+  var hor = $("#x").val();
+  var ver = $("#y").val();
   var grid = hei/hor;
   var posData = [{"X":"0","Y":"0"},{"X":"1","Y":"0"},{"X":"2","Y":"0"},{"X":"2","Y":"1"},{"X":"2","Y":"2"},{"X":"2","Y":"3"}];
 
   function updateGraph(){
+    hor = $("#x").val();
+    ver = $("#y").val();
+    grid = hei/hor;
     /*clear*/
     var canvas = document.getElementById("myCanvas");
     var chart = canvas.getContext("2d");
@@ -181,14 +200,11 @@
     ).then(function() {
       var newData = cleanData(rawData);
       if(posData.length < 100){ //only keep most 100 data
-          if(posData.length > 0 && (posData[posData.length-1].X!= newData.X && posData[posData.length-1].Y!= newData.Y)) // do not save same position data
-          {posData.push(newData);}
-          else if(posData.length = 0) {posData.push(newData);}
+          posData.push(newData);
           updateGraph();
       }else{
           posData.splice(0,1);
-          if(posData[posData.length-1].X!= newData.X && posData[posData.length-1].Y!= newData.Y)
-          {posData.push(newData);}
+          posData.push(newData);
           updateGraph();
       }
     });
@@ -218,20 +234,24 @@
       <br/><br/><br/>
       </div>
       <p id="msg"></p>
-      <input id="dump" class="submit" type="submit" value="Dump File"><br/>
       <canvas id="myCanvas"  width="900px" height="420px"style="margin-left:62px; border:1px solid #d3d3d3;">
         Your browser does not support the HTML5 canvas tag.</canvas>
 
       <div class="canvas">
-      <p class="ins">Current position: <img id="pos" src="http://hhao.hostei.com/doc/files/CDN/star.png"/></p>
+      <p class="ins">Current position: <img id="pos" src="http://hhao.hostei.com/doc/files/CDN/star.png"/>&nbsp;
+        X:<input id="x" class="input-text" type="text" value="5">&nbsp;
+        Y:<input id="y" class="input-text" type="text" value="12">&nbsp;
+      <input id="dump" class="submit" type="submit" value="Dump File"></p>
       </div>
+
+
       <img id="layout" src="http://hhao.hostei.com/doc/files/CDN/layout.png" style="display:none;"/>
       <img id="cen" src="http://hhao.hostei.com/doc/files/CDN/cen.png" style="display:none;"/>
       <img id="picD" src="http://hhao.hostei.com/doc/files/CDN/D.png" style="display:none;"/>
       <img id="picU" src="http://hhao.hostei.com/doc/files/CDN/U.png" style="display:none;"/>
       <img id="picL" src="http://hhao.hostei.com/doc/files/CDN/L.png" style="display:none;"/>
       <img id="picR" src="http://hhao.hostei.com/doc/files/CDN/R.png" style="display:none;"/>
-      </div>
+    </div>
 
   </body>
 </html>
