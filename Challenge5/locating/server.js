@@ -153,6 +153,10 @@ var server = app.listen(3000, '0.0.0.0', function(){
   console.log("listening on *:3000");
 });
 
+app.get('/', function(req, res){
+  res.sendfile("default.html"); //return the mapping page
+});
+
 app.get('/startMapping', function(req, res){
   if(sensors.length == 0){
     res.json({"msg":"No sensors to start mapping with;"});
