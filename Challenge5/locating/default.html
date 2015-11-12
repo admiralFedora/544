@@ -108,12 +108,16 @@
     var chart = canvas.getContext("2d");
 
     /*Draw Ver line*/
+    chart.fillStyle="#636363";
     chart.strokeStyle = "rgba(163,212,214,0.6)";
     chart.lineWidth=1;
     chart.beginPath();
+    chart.fillText("Y->:",42,15);
     for(i = 0; i * d < len; i++){
       chart.moveTo(i*d+45,30);
       chart.lineTo(i*d+45,30+hei);
+      chart.fillText(i,i*d+42,25);
+      chart.fillText(i,i*d+42,405);
     }
     chart.stroke();
 
@@ -121,9 +125,11 @@
     chart.strokeStyle="rgba(70,70,70,0.2)";
     chart.lineWidth=1;
     chart.beginPath();
+    chart.fillText("X:",25,33);
     for(i = 0; i < ver; i++){
       chart.moveTo(45,i*d+30);
       chart.lineTo(45+len,i*d+30);
+      chart.fillText(i,35,i*d+33);
     }
     chart.stroke();
   }
