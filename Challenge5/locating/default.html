@@ -109,10 +109,10 @@
 
     /*Draw Ver line*/
     chart.fillStyle="#636363";
-    chart.strokeStyle = "rgba(163,212,214,0.6)";
+    chart.strokeStyle = "rgba(163,212,214,0.2)";
     chart.lineWidth=1;
     chart.beginPath();
-    chart.fillText("Y->:",42,15);
+    chart.fillText("Y--->:",42,15);
     for(i = 0; i * d < len; i++){
       chart.moveTo(i*d+45,30);
       chart.lineTo(i*d+45,30+hei);
@@ -122,7 +122,7 @@
     chart.stroke();
 
     //Draw Hor line
-    chart.strokeStyle="rgba(70,70,70,0.2)";
+    chart.strokeStyle="rgba(70,70,70,0.1)";
     chart.lineWidth=1;
     chart.beginPath();
     chart.fillText("X:",25,33);
@@ -207,10 +207,12 @@
       var newData = cleanData(rawData);
       if(posData.length < 100){ //only keep most 100 data
           posData.push(newData);
+          console.log("Get pos X:"+newData.X + ", Y:" + newData.Y);
           updateGraph();
       }else{
           posData.splice(0,1);
           posData.push(newData);
+          console.log("Get pos X:"+newData.X + ", Y:" + newData.Y);
           updateGraph();
       }
     });
@@ -223,10 +225,7 @@
   }
 
   $( document ).ready(function() {
-
-    $("#dump").click(function(){
-      getData();
-    });
+     setInterval(getData, 12000); //update every 12 secs
 
   });
   </script>
@@ -242,12 +241,11 @@
       <p id="msg"></p>
       <canvas id="myCanvas"  width="900px" height="420px"style="margin-left:62px; border:1px solid #d3d3d3;">
         Your browser does not support the HTML5 canvas tag.</canvas>
-
       <div class="canvas">
       <p class="ins">Current position: <img id="pos" src="http://hhao.hostei.com/doc/files/CDN/star.png"/>&nbsp;
         X:<input id="x" class="input-text" type="text" value="5">&nbsp;
         Y:<input id="y" class="input-text" type="text" value="12">&nbsp;
-      <input id="dump" class="submit" type="submit" value="Dump File"></p>
+      </p>
       </div>
 
 
