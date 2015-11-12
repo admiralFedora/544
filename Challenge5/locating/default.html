@@ -57,7 +57,7 @@
   var hor = $("#x").val();
   var ver = $("#y").val();
   var grid = hei/hor;
-  var posData = [{"X":"0","Y":"0"},{"X":"1","Y":"0"},{"X":"2","Y":"0"},{"X":"2","Y":"1"},{"X":"2","Y":"2"},{"X":"2","Y":"3"}];
+  var posData = [];
 
   function updateGraph(){
     hor = $("#x").val();
@@ -92,15 +92,40 @@
     //chart.drawImage(img, 0, 0); //draw layout, not sure about the place
     var pos = document.getElementById("pos");
     var cen = document.getElementById("cen");
-
     if(posData.length > 0){
       var curX = Math.ceil((parseFloat(posData[posData.length-1].Y) + 0.5) * grid + 45); //convert to canvas value
       var curY = Math.ceil((parseFloat(posData[posData.length-1].X) + 0.5) * grid + 30); //convert to canvas value
       chart.drawImage(cen, curX - cen.width/2, curY - cen.height/2); //draw pos
       chart.drawImage(pos, curX - pos.width/2, curY - pos.height/2 - 10); //draw pos
     }
-
   }
+  /*  if(posData.length = 1){
+      var curX = Math.ceil((parseFloat(posData[posData.length-1].Y) + 0.5) * grid + 45); //convert to canvas value
+      var curY = Math.ceil((parseFloat(posData[posData.length-1].X) + 0.5) * grid + 30); //convert to canvas value
+      chart.drawImage(cen, curX - cen.width/2, curY - cen.height/2); //draw pos
+      chart.drawImage(pos, curX - pos.width/2, curY - pos.height/2 - 10); //draw pos
+    }else if(posData.length > 1){
+        draw();
+        console.log("yes");
+    }
+
+
+    function draw(){
+        chart.save();
+        var lenX = parseFloat(posData[posData.length-1].X) - parseFloat(posData[posData.length-2].X);
+        var lenY = parseFloat(posData[posData.length-1].Y) - parseFloat(posData[posData.length-2].Y);
+        var cot =  lenX/lenY;
+        var shortX = (lenX/10 * (time.getMilliseconds() % 10 + 1)).toFixed(2);
+        var shortY = (shortX / cot).toFixed(2);
+        var curJson = {"X":parseFloat(posData[posData.length-2].X) + shortX,"Y":parseFloat(posData[posData.length-2].Y) + shortY};
+        drawPath(posData[posData.length-2],curJson);
+        var curX = Math.ceil((parseFloat(curJson.Y) + 0.5) * grid + 45); //convert to canvas value
+        var curY = Math.ceil((parseFloat(curJson.X) + 0.5) * grid + 30); //convert to canvas value
+        chart.drawImage(cen, curX - cen.width/2, curY - cen.height/2); //draw pos
+        chart.drawImage(pos, curX - pos.width/2, curY - pos.height/2 - 10); //draw pos
+        window.requestAnimationFrame(draw);
+    }
+  }*/
 
   function drawGrid(hor,ver,d){
     /*Relative value for diff resolution*/
@@ -233,8 +258,7 @@
     <div class="head">
       <div id = "info">
       <p class="red" >Boston University</p>
-      <p class="gray" >Challenge 5</p>
-      <p class="gray" >GROUP 1, ENG EC544</p>
+      <p class="gray" >GROUP 1, Challenge 5</p>
       <p class="gray" >Pete, Carlos, Hao, Avi, Ying</p>
       <br/><br/><br/>
       </div>
