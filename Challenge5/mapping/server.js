@@ -154,6 +154,7 @@ app.get('/startMapping', function(req, res){
     var msg = new message("");
     curLocationx = req.query.locx;
     curLocationy = req.query.locy;
+    console.log("Location y: " + req.query.locy);
     for(var i = 0; i < sensors.length; i++){
       startMapping(i, count, res, msg);
     }
