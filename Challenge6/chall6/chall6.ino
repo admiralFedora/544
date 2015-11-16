@@ -3,15 +3,15 @@
 #include <TimerOne.h>
 #include "LinkedList.h"
 
-#define BEACONS 3
+#define HELLO 0x11
+#define LEADER 0x12
+#define NODE 0x13
+#define INFECT 0x14
+#define CLEAR 0x15
+#define ELECTION 0x16
+#define LEADER_HEARTBEAT 0x17
 
-#define HELLO 0x01
-#define LEADER 0x02
-#define NODE 0x03
-#define INFECT 0x04
-#define CLEAR 0x05
-#define ELECTION 0x06
-#define LEADER_HEARTBEAT 0x07
+#define HEARTBEAT_TIME 5000000
 
 #define ID 1
 
@@ -55,6 +55,7 @@ void sendInfection(){
 }
 
 void startElection(){
+  Serial.println("Starting election");
   Node* highest = getHighestNode(head);
   int curId = highest->id;
 
@@ -70,6 +71,26 @@ void startElection(){
     highest = getNextHighestNode(head, curId);
     curId = highest->id;
   }
+  Serial.println("Left election process");
+}
+
+void becomeLeader(){
+  Serial.println("I'm the leader");
+  isLeader = 1;
+  isInfected = false;
+  waitForNewLeader = true;
+  bidForLeader = false;
+  Timer1.stop();
+  Timer1.initialize(HEARTBEAT_TIME);
+  Timer1.detachInterrupt();
+  Timer1.attachInterrupt(sendHeartBeat);
+  
+  uint8_t* msg = (uint8_t*) malloc(2);
+  msg[0] = LEADER;
+  msg[1] = ID;
+  
+  ZBTxRequest leaderMsg = ZBTxRequest(broadcast64, msg, 2);
+  xbee.send(leaderMsg);
 }
 
 void setup() 
@@ -88,7 +109,7 @@ void setup()
   ZBTxRequest initHello = ZBTxRequest(broadcast64, msg, 2);
   xbee.send(initHello);
 
-  while(xbee.readPacket(5000)){
+  while(xbee.readPacket(4000)){
     if(xbee.getResponse().getApiId() == ZB_RX_RESPONSE){
       xbee.getResponse().getZBRxResponse(rx);
 
@@ -112,7 +133,7 @@ void setup()
   // didn't receive any info about someone being the leader, therefore you are the leader
   if(isLeader == 5){
     isLeader = 1;
-    Timer1.initialize(1500000);
+    Timer1.initialize(HEARTBEAT_TIME);
     Timer1.attachInterrupt(sendHeartBeat);
     waitForNewLeader = true;
     Serial.println("I am the one who leads.");
@@ -131,6 +152,7 @@ void loop()
     switch(rx.getData(0)){
       case HELLO:
       {
+        Serial.println("A new node has appeared");
         XBeeAddress64 addr64 = rx.getRemoteAddress64();
         Node* newNode = (Node*) malloc(sizeof(Node));
         newNode->id = rx.getData(1);
@@ -142,9 +164,9 @@ void loop()
         if(isLeader){
           msg[0] = LEADER;
         } else {
-          msg[1] = NODE;
+          msg[0] = NODE;
         }
-        msg[2] = ID;
+        msg[1] = ID;
 
         ZBTxRequest initReply = ZBTxRequest(addr64, msg, 2);
         xbee.send(initReply);
@@ -229,27 +251,20 @@ void loop()
   }
 
   if(!waitForNewLeader && ((millis() - timeSinceHeartBeat) > 2500)){
+    Serial.println("Leader died");
     bidForLeader = true;
     Node* deadLeader = findLeader(head);
     if(deadLeader){
-      removeNode(deadLeader, &head);
+      if(removeNode(deadLeader, &head)){
+        timeSinceBid = millis();
+        startElection();
+      } else {
+        becomeLeader();
+      }
     }
-    timeSinceBid = millis();
-    startElection();
   }
 
   if(bidForLeader && ((millis() - timeSinceBid) > 2500)){
-    isLeader = 1;
-    isInfected = false;
-    waitForNewLeader = true;
-    Timer1.detachInterrupt();
-    Timer1.attachInterrupt(sendHeartBeat);
-
-    uint8_t* msg = (uint8_t*) malloc(2);
-    msg[0] = LEADER;
-    msg[1] = ID;
-
-    ZBTxRequest leaderMsg = ZBTxRequest(broadcast64, msg, 2);
-    xbee.send(leaderMsg);
+    becomeLeader();
   }
 }

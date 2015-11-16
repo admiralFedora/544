@@ -93,13 +93,16 @@ static Node* findNodeById(int id, Node* head){
   return NULL;
 }
 
-static void removeNode(Node* toRemove, Node** head){
+static int removeNode(Node* toRemove, Node** head){
   toRemove->prev->next = toRemove->next;
   toRemove->next->prev = toRemove->prev;
 
   if(toRemove == (*head)){
     *head = toRemove->next;
+    free(toRemove);
+
+    return 0;
   }
 
-  free(toRemove);
+  return 1;
 }
