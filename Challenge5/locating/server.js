@@ -15,7 +15,7 @@ var sp = new SerialPort.SerialPort(process.argv[2], {
 });
 
 var options = {
-  k:1,
+  k:5,
   weights:{
     beacon1:0.33,
     beacon2:0.33,
@@ -87,6 +87,7 @@ function checkStatus(frame){
 // tells the sensor node to start sending back data to us
 function startMapping(sensor_num, count, res, msg){
   var sen = sensors[sensor_num];
+  sen.res = res;
   sen.message = msg;
   sen.counter = count;
   sen.deferred = Q.defer();
@@ -129,17 +130,19 @@ function getData(frame){
     if(idLong == sen.idLong){
       sen.counter.num--;
       var dataItem = new mapData();
-  	  for(var i = 1; i < (frame.data.length - 2); i += 2){
+  	  for(var i = 1; i < (frame.data.length); i += 2){
         dataItem['beacon'+frame.data[i]] = frame.data[i+1];
   		  //mapData.set('beacon'+frame.data[i], frame.data[i+1]);
   	  }
       console.log(dataItem);
       console.log(knn(dataItem, mapDatas, options));
 
+      var chosenData = knn(dataItem, mapDatas, options);
+
       sen.message.msg += JSON.stringify(dataItem);
       if(sen.counter.num == 0){
         console.log("about to send message");
-        sen.res.json({"msg":sen.message.msg});
+        sen.res.json(chosenData);
       }
       break;
     }
@@ -148,6 +151,10 @@ function getData(frame){
 
 var server = app.listen(3000, '0.0.0.0', function(){
   console.log("listening on *:3000");
+});
+
+app.get('/', function(req, res){
+  res.sendfile("default.html"); //return the mapping page
 });
 
 app.get('/startMapping', function(req, res){
@@ -183,4 +190,4 @@ sp.on("open",function(){
 });
 
 // load map data from our previous mapping activity
-mapDatas = JSON.parse(fs.readFile('john.txt', 'utf8'));
+mapDatas = JSON.parse(fs.readFileSync(process.argv[3], 'utf-8'));

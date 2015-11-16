@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Mapping Locations</title>
+</head>
+
+<body>
+	<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+	<script>
+			$( document ).ready(function() {
+
+				/*Start button*/
+				$("#start").click(function(){
+					$("#start").css({"background-color":"#f73333","border":"#f73333 solid 1px"});
+					$("#pause").css({"display":"flex"});
+					$("#mapLoc").css({"display":"flex"});
+					$("#dump").css({"display":"block"});
+					var URLString = "/startMapping?locx=" + $("#x").val() +"&locy="+ $("#y").val() ;
+					$.ajax({
+        		url: URLString,
+        		dataType: 'json',
+        		success: function(response) {
+            					jsonData = response;
+        						}
+						}).done(function(response) {
+						$("#msg").html(response.msg);
+					}).fail(function(response) {
+						$("#msg").html(response.msg);
+					});
+
+				});
+
+				/*Pause button*/
+				$("#pause").click(function(){
+					var URLString = "/pauseMapping" ;
+					$.ajax({
+						url: URLString,
+						dataType: 'json',
+						success: function(response) {
+											jsonData = response;
+										}
+						}).done(function(response) {
+						$("#msg").html(response.msg);
+					}).fail(function(response) {
+						$("#msg").html(response.msg);
+					});
+				});
+
+
+				/*Map Loc button*/
+				$("#mapLoc").click(function(){
+					var URLString = "/mapLoc?locx=" + $("#x").val() +"&locy="+ $("#y").val() ;
+					$.ajax({
+						url: URLString,
+						dataType: 'json',
+						success: function(response) {
+											jsonData = response;
+										}
+						}).done(function(response) {
+						$("#msg").html(response.msg);
+					}).fail(function(response) {
+						$("#msg").html(response.msg);
+					});
+				});
+
+				/*Dump button*/
+				$("#dump").click(function(){
+					var URLString = "/dumpData?fileName=" + $("#fileName").val() ;
+					$.ajax({
+						url: URLString,
+						dataType: 'json',
+						success: function(response) {
+											jsonData = response;
+										}
+						}).done(function(response) {
+						$("#msg").html(response.msg);
+					}).fail(function(response) {
+						$("#msg").html(response.msg);
+					});
+				});
+
+
+			});
+	</script>
+
+	<style>
+		body{ background-color: #d9d9d9;}
+		.submit{
+			-webkit-appearance: none;
+			-moz-appearance: none;
+			appearance: none;
+			font-family:Calibri;
+			font-size:14px;
+			padding:6px 18px;
+			color: #ffffff;
+			background-color:#19a5c8;
+			border: #19a5c8 solid 1px;
+			border-radius:4px;
+			width:160px;
+			box-shadow: 0 1px gray;
+			margin-top:5px;
+			align-items: center;
+		}
+
+		.submit:hover{cursor:pointer; opacity:0.6;}
+		.input-text{ border:#9f9f9f solid 1px; width:90px;color:#19a5c8; padding: 6px 18px;margin:8px 6px;}
+		#front{margin-top:10%; width:70%;margin-left:15%}
+		#pause{display:none;}
+		#mapLoc{display:none;}
+		#dump{display:none;}
+		#msg{color:#f73333;}
+	</style>
+
+<div id="front">
+	Massage from server: <p id ="msg"></p>
+	<input id="pause" class="submit" type="submit" value="Pause Mapping"><br/><br/>
+	X:<input id="x" class="input-text" type="text" value="0">&nbsp;
+	Y:<input id="y" class="input-text" type="text" value="0">&nbsp;
+	<input id="start" class="submit" type="submit" value="Start Mapping"></br>
+	<input id="mapLoc" class="submit" type="submit" value="Map Location"></br></br>
+	File name:<input id="fileName" class="input-text" type="text"  value="default.txt">&nbsp;
+	<input id="dump" class="submit" type="submit" value="Dump File">
+</div>
+
+</body>
+</html>
