@@ -44,8 +44,8 @@ static Node* getNextHighestNode(Node* head, int target){
   if(id >= target){
     id = 0;
   }
+  Node* highestNode = head;
   Node* temp = head->next;
-  Node* highestNode;
   while(temp != head){
     if((temp->id > id) && (temp->id < target)){
       id = temp->id;
@@ -93,7 +93,7 @@ static Node* findNodeById(int id, Node* head){
   return NULL;
 }
 
-static Node* removeNode(Node* toRemove, Node** head){
+static void removeNode(Node* toRemove, Node** head){
   toRemove->prev->next = toRemove->next;
   toRemove->next->prev = toRemove->prev;
 
@@ -103,4 +103,3 @@ static Node* removeNode(Node* toRemove, Node** head){
 
   free(toRemove);
 }
-
