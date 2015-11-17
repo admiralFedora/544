@@ -6,17 +6,18 @@
 #define HELLO 0x11
 #define LEADER 0x12
 #define NODE 0x13
-#define INFECT 0x14
-#define CLEAR 0x15
-#define ELECTION 0x16
-#define LEADER_HEARTBEAT 0x17
+#define INFECT 0x04
+#define CLEAR 0x05
+#define ELECTION 0x06
+#define LEADER_HEARTBEAT 0x07
 
 #define RedPin 7
-#define Bluepin 8
+#define BluePin 8
 #define GreenPin 9
 #define ButtonPin 10
 
 #define HEARTBEAT_TIME 5000000
+#define INFECTION_TIME 2000000
 
 #define ID 1
 
@@ -121,24 +122,36 @@ void setup()
   ZBTxRequest initHello = ZBTxRequest(broadcast64, msg, 2);
   xbee.send(initHello);
 
-  while(xbee.readPacket(4000)){
-    if(xbee.getResponse().getApiId() == ZB_RX_RESPONSE){
-      xbee.getResponse().getZBRxResponse(rx);
+  long startTime = millis();
+  while((millis() - startTime) < 3000){ // 3 second window to build out the network
+    xbee.readPacket();
+    if(xbee.getResponse().isAvailable()){
+        if(xbee.getResponse().getApiId() == ZB_RX_RESPONSE){
+        xbee.getResponse().getZBRxResponse(rx);
 
-      Node* newNode = (Node*) malloc(sizeof(Node));
-      newNode->addr64 = rx.getRemoteAddress64();
-      newNode->id = rx.getData(1);
-      switch(rx.getData(0)){
-        case NODE:
-          newNode->leader = false;
-          break;
-        case LEADER:
-          newNode->leader = true;
-          isLeader = 0;
-          break;
+        if(rx.getData(1) & 0x10){ // only build out the list if the message is HELLO, NODE, or LEADER
+          Node* newNode = (Node*) malloc(sizeof(Node));
+          newNode->addr64 = rx.getRemoteAddress64();
+          newNode->id = rx.getData(1);
+          insertNewNode(newNode, &head);
+
+          switch(rx.getData(0)){
+            case NODE:
+              newNode->leader = false;
+              Serial.println("Saw a node");
+              break;
+            case LEADER:
+              newNode->leader = true;
+              isLeader = 0;
+              Serial.println("Saw a leader");
+              break;
+            case HELLO:
+              newNode->leader = false;
+              Serial.println("Saw someone join at the sametime");
+              break;
+          }
+        }
       }
-      
-      insertNewNode(newNode, &head);
     }
   }
 
@@ -203,7 +216,7 @@ void loop()
           ZBTxRequest infectMsg = ZBTxRequest(broadcast64, msg2, 2);
           xbee.send(infectMsg);
 
-          Timer1.initialize(2000000);
+          Timer1.initialize(INFECTION_TIME);
           Timer1.attachInterrupt(sendInfection);
           Serial.println("Just got infected");
         }
@@ -271,11 +284,13 @@ void loop()
         timeSinceBid = millis();
         startElection();
       } else {
+        // automatically become leader since you're the only one left
         becomeLeader();
       }
     }
   }
 
+  // you're still in the race and it's been a while since the election started
   if(bidForLeader && ((millis() - timeSinceBid) > 2500)){
     becomeLeader();
   }
@@ -285,11 +300,11 @@ void loop()
   {
     if(isLeader){
       uint8_t* msg2 = (uint8_t*) malloc(2);
-      msg2[0] = CURE;
+      msg2[0] = CLEAR;
       msg2[1] = ID;
   
-      ZBTxRequest infectMsg = ZBTxRequest(broadcast64, msg2, 2);
-      xbee.send(infectMsg);
+      ZBTxRequest clearMsg = ZBTxRequest(broadcast64, msg2, 2);
+      xbee.send(clearMsg);
   
       Timer1.initialize(2000000);
       Timer1.attachInterrupt(sendInfection);
@@ -307,14 +322,11 @@ void loop()
       ZBTxRequest infectMsg = ZBTxRequest(broadcast64, msg2, 2);
       xbee.send(infectMsg);
   
-      Timer1.initialize(2000000);
+      Timer1.initialize(INFECTION_TIME);
       Timer1.attachInterrupt(sendInfection);
       Serial.println("Just got infected");
     }
 
   }
 
-
-
-  
 }

@@ -58,6 +58,10 @@ static Node* getNextHighestNode(Node* head, int target){
 }
 
 static Node* findLeader(Node* head){
+  if(head == NULL){
+    return NULL;
+  }
+  
   Node* temp = head->next;
 
   if(head->leader){
@@ -76,6 +80,9 @@ static Node* findLeader(Node* head){
 }
 
 static Node* findNodeById(int id, Node* head){
+  if(head == NULL){
+    return NULL;
+  }
   Node* temp = head->next;
 
   if(head->id == id){
@@ -93,16 +100,37 @@ static Node* findNodeById(int id, Node* head){
   return NULL;
 }
 
+static int listLength(Node* head){
+  if(head == NULL){
+    return 0;
+  }
+  
+  Node* temp = head->next;
+  int i = 1;
+  
+  while(temp != head){
+    i++;
+    temp = temp->next;
+  }
+  
+  return i;
+}
+
+// returns a 0 if the list is now empty, returns 1 otherwise
 static int removeNode(Node* toRemove, Node** head){
+  if(listLength(*head) == 1){
+    free(toRemove);
+    *head = NULL;
+    return 0;
+  }
+  
   toRemove->prev->next = toRemove->next;
   toRemove->next->prev = toRemove->prev;
 
   if(toRemove == (*head)){
     *head = toRemove->next;
-    free(toRemove);
-
-    return 0;
   }
 
+  free(toRemove);
   return 1;
 }
