@@ -60,6 +60,25 @@ void sendInfection(){
   Serial.println("Sent my infection");
 }
 
+void redON()
+{
+  digitalWrite(RedPin, HIGH);
+  digitalWrite(BluePin, LOW);
+  digitalWrite(GreenPin, LOW);
+}
+void blueON()
+{
+  digitalWrite(BluePin, HIGH);
+  digitalWrite(RedPin, LOW);
+  digitalWrite(GreenPin, LOW);
+}
+void greenON()
+{
+  digitalWrite(GreenPin, HIGH);
+  digitalWrite(RedPin, LOW);
+  digitalWrite(BluePin, LOW);
+}
+
 void setup() 
 { 
 
@@ -67,6 +86,11 @@ void setup()
   pinMode(BluePin, OUTPUT);
   pinMode(GreenPin, OUTPUT);
   pinMode(ButtonPin, INPUT);
+
+  
+  digitalWrite(RedPin, LOW);
+  digitalWrite(BluePin, LOW);
+  digitalWrite(GreenPin, LOW);
   
   // start serial
   Serial.begin(9600);
@@ -113,6 +137,8 @@ void loop()
             Timer1.initialize(INFECTION_TIME);
             Timer1.attachInterrupt(sendInfection);
             Serial.println("Just got infected");
+
+            redON();
           }
           break;
         }
@@ -132,6 +158,8 @@ void loop()
             xbee.send(clearMsg);
   
             Serial.println("Just got cleared");
+            
+            greenON();
           }
           break;
         }
@@ -179,10 +207,12 @@ void loop()
     isInfected = false;
     bidForLeader = false;
     Serial.println("I won the election");
+    
+    blueON();
   }
 
-  /*buttonState = digitalRead(ButtonPin);
-  if (buttonState == HIGH)
+  //buttonState = digitalRead(ButtonPin);
+  if (digitalRead(ButtonPin) == HIGH && buttonState == 0)
   {
     if(isLeader){
       uint8_t* msg2 = (uint8_t*) malloc(2);
@@ -195,6 +225,8 @@ void loop()
       Timer1.initialize(2000000);
       Timer1.attachInterrupt(sendInfection);
       Serial.println("Just got cured");
+      
+      greenON();
       
     } else if(isInfected){
       // you're already infected, don't do anything
@@ -211,8 +243,12 @@ void loop()
       Timer1.initialize(INFECTION_TIME);
       Timer1.attachInterrupt(sendInfection);
       Serial.println("Just got infected");
+      
+      redON();
     }
 
-  }*/
+  } else {
+    buttonState = 0;
+  }
 
 }
