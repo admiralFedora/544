@@ -18,7 +18,7 @@
 #define HEARTBEAT_TIME 3000000
 #define INFECTION_TIME 2000000
 
-#define ID 1
+#define ID 3
 
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
@@ -105,7 +105,10 @@ void setup()
   waitForNewLeader = true;
   Serial.println("I am the one who leads.");
   timeSinceHeartBeat = millis();
+  timeSinceBid = millis();
   Serial.println("Done with Setup!");
+  bidForLeader = true;
+  greenON();
 }
 
 // looks for an xbee that just joined the network and starts sending to the last one that joined
@@ -174,7 +177,7 @@ void loop()
             Timer1.stop();
             Timer1.detachInterrupt();
             Serial.println("I'm just a lowly follower");
-
+            greenON();
             if(isInfected){
               Timer1.setPeriod(INFECTION_TIME);
               Timer1.attachInterrupt(sendInfection);
