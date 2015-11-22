@@ -8,7 +8,8 @@
 #define INFECT 0x04
 #define CLEAR 0x05
 #define ELECTION 0x06
-#define LEADER_HEARTBEAT 0x07
+#define LEADER_HEARTBEAT_c 0x07
+#define LEADER_HEARTBEAT_i 0x08
 
 #define RedPin 7
 #define BluePin 8
@@ -16,9 +17,9 @@
 #define ButtonPin 10
 
 #define HEARTBEAT_TIME 2000000
-#define INFECTION_TIME 5000000
+#define INFECTION_TIME 3000000
 
-#define ID 2
+#define ID 8
 
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
@@ -35,6 +36,7 @@ int leaderId;
 int isLeader = 5;
 int timeSinceButton = 0;
 bool isInfected = false;
+bool spreadInfection = false;
 bool bidForLeader = false;
 bool waitForNewLeader = false;
 unsigned long timeSinceHeartBeat = 0;
@@ -45,13 +47,23 @@ unsigned long timeSinceCure = 0;
 
 void sendHeartBeat(){
   uint8_t* heartbeat = (uint8_t*) malloc(2);
-  heartbeat[0] = LEADER_HEARTBEAT;
-  heartbeat[1] = ID;
+  if (!isInfected) {
+    heartbeat[0] = LEADER_HEARTBEAT_c;
+    heartbeat[1] = ID;
 
-  ZBTxRequest heartbeatMsg = ZBTxRequest(broadcast64, heartbeat, 2);
-  xbee.send(heartbeatMsg);
+    ZBTxRequest heartbeatMsg = ZBTxRequest(broadcast64, heartbeat, 2);
+    xbee.send(heartbeatMsg);
   
-  Serial.println("Sent heartbeat");
+    Serial.println("Sent clean heartbeat");
+  } else {
+    heartbeat[0] = LEADER_HEARTBEAT_i;
+    heartbeat[1] = ID;
+
+    ZBTxRequest heartbeatMsg = ZBTxRequest(broadcast64, heartbeat, 2);
+    xbee.send(heartbeatMsg);
+  
+    Serial.println("Sent infected heartbeat");
+  }
 }
 
 void sendInfection(){
@@ -129,50 +141,50 @@ void loop()
         case INFECT:
         {
           if(isLeader){
-            // do nothing
-          } else if(isInfected){
-            // you're already infected, don't do anything
-          } else if ((millis() - timeSinceCure) > 3000) {
             isInfected = true;
-  
-            uint8_t* msg2 = (uint8_t*) malloc(2);
-            msg2[0] = INFECT;
-            msg2[1] = ID;
-  
-            ZBTxRequest infectMsg = ZBTxRequest(broadcast64, msg2, 2);
-            xbee.send(infectMsg);
-  
-            Timer1.initialize(INFECTION_TIME);
-            Timer1.attachInterrupt(sendInfection);
-            Serial.println("Just got infected");
-
+            // do nothing
+          } 
+          break;
+        }
+        case LEADER_HEARTBEAT_c:
+        {
+          if(!spreadInfection)
+          {
+            if(isInfected)
+            {
+              greenON();
+            }
+            isInfected = false;
+            timeSinceHeartBeat = millis();
+            if((rx.getData(1) > leaderId)){
+              waitForNewLeader = false;
+              isLeader = 0;
+              bidForLeader = false;
+              leaderId = rx.getData(1);
+              Timer1.stop();
+              Timer1.detachInterrupt();
+              Serial.println("I'm just a lowly follower");
+              greenON();
+            }
+          }
+          
+          Serial.println("Clean Leader is still alive");
+          break;
+        }
+        case LEADER_HEARTBEAT_i:
+        {
+          if(!isLeader && spreadInfection)
+          {
+            Timer1.stop();
+            Timer1.detachInterrupt();
+            Serial.println("I stopped spreading the infection");    
+            redON(); 
+          } else if (!isLeader && !spreadInfection && isInfected){
             redON();
           }
-          break;
-        }
-        case CLEAR:
-        {
-          if(isLeader){
-            // do nothing
-          } else {
-            Timer1.detachInterrupt();
-            isInfected = false;
-  
-            uint8_t* msg = (uint8_t*) malloc(2);
-            msg[0] = CLEAR;
-            msg[1] = ID;
-  
-            ZBTxRequest clearMsg = ZBTxRequest(broadcast64, msg, 2);
-            xbee.send(clearMsg);
-  
-            Serial.println("Just got cleared");
-            timeSinceCure = millis();
-            greenON();
-          }
-          break;
-        }
-        case LEADER_HEARTBEAT:
-        {
+          
+          isInfected = true;
+          spreadInfection = false;
           timeSinceHeartBeat = millis();
           if((rx.getData(1) > leaderId)){
             waitForNewLeader = false;
@@ -182,13 +194,9 @@ void loop()
             Timer1.stop();
             Timer1.detachInterrupt();
             Serial.println("I'm just a lowly follower");
-            greenON();
-            if(isInfected){
-              Timer1.setPeriod(INFECTION_TIME);
-              Timer1.attachInterrupt(sendInfection);
-            }
+            redON();
           }
-          Serial.println("Leader is still alive");
+          Serial.println("Infected Leader is still alive");
           break;
         }
       }
@@ -200,7 +208,8 @@ void loop()
   //Serial.println(millis() - timeSinceHeartBeat);
   
   //if(!waitForNewLeader && ((timeDiff) > (HEARTBEAT_TIME/1000) + 750)){
-  if(!isLeader && ((timeDiff) > 7000)){
+  if(!isLeader && ((timeDiff) > 7000))
+  {
 
     Serial.println("Leader died. I'm electing myself.");
     bidForLeader = true;
@@ -218,7 +227,7 @@ void loop()
   // you're still in the race and it's been a while since the election started
   if(bidForLeader && ((millis() - timeSinceBid) > 2500)){
     // clear the infection, you're the leader now
-    isInfected = false;
+    //isInfected = false;
     bidForLeader = false;
     Serial.println("I won the election");
     
@@ -228,29 +237,25 @@ void loop()
   if (digitalRead(ButtonPin) == HIGH && (millis() - timeSinceButton) > 250)
   {
     timeSinceButton = millis();
-    if(isLeader){
-      uint8_t* msg2 = (uint8_t*) malloc(2);
-      msg2[0] = CLEAR;
-      msg2[1] = ID;
-  
-      ZBTxRequest clearMsg = ZBTxRequest(broadcast64, msg2, 2);
-      xbee.send(clearMsg);
-  
-      Serial.println("Just got cured");
-      
+    if(isLeader)
+    {
+      isInfected = false;
+      spreadInfection = false;
       blueON();
-      
-    } else if(isInfected){
+    } else if(isInfected)
+    {
       // you're already infected, don't do anything
-    } else {
+    } else 
+    {
+      spreadInfection = true;
       isInfected = true;
   
-      /*uint8_t* msg2 = (uint8_t*) malloc(2);
+      uint8_t* msg2 = (uint8_t*) malloc(2);
       msg2[0] = INFECT;
       msg2[1] = ID;
   
       ZBTxRequest infectMsg = ZBTxRequest(broadcast64, msg2, 2);
-      xbee.send(infectMsg);*/
+      xbee.send(infectMsg);
   
       Timer1.setPeriod(INFECTION_TIME);
       Timer1.attachInterrupt(sendInfection);

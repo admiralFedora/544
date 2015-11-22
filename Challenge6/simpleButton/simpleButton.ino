@@ -5,6 +5,7 @@
 
 int buttonState = 0;
 int buttonCount = 0;
+int timeSinceButton = 0;
 
 void setup() 
 { 
@@ -27,10 +28,12 @@ void setup()
 // looks for an xbee that just joined the network and starts sending to the last one that joined
 void loop() 
 {
-  buttonState = digitalRead(ButtonPin);
-  if (buttonState == HIGH)
+  //buttonState = digitalRead(ButtonPin);
+  if (digitalRead(ButtonPin) && (millis() - timeSinceButton) > 250)
   {
-    delay(250);
+    //delay(250);
+    buttonState = 1;
+    timeSinceButton = millis();
     buttonCount++;
     Serial.println(buttonCount);
     if(buttonCount==1)
@@ -53,6 +56,8 @@ void loop()
       buttonCount=0;
     }
 
+  } else{
+    buttonState = 0;
   }
 
 
