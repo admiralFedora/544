@@ -19,7 +19,7 @@
 #define HEARTBEAT_TIME 2000000
 #define INFECTION_TIME 3000000
 
-#define ID 8
+#define ID 3
 
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
