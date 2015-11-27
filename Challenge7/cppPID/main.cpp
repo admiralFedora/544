@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "controller.h"
 
 void quit(int sig){
 	printf("SIGINT captured\n");

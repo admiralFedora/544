@@ -1,5 +1,10 @@
+#ifndef CONTROLLER
+#define CONTROLLER
+
 #include <pthread.h>
 #include <signal.h>
+#include "motor.h"
+#include "lidar.h"
 
 using namespace std;
 
@@ -32,3 +37,5 @@ private:
 	void initSys();
 	float radToDeg(rad);
 };
+
+#endif

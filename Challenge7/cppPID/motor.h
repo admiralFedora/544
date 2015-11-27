@@ -1,3 +1,6 @@
+#ifndef MOTOR
+#define MOTOR
+
 #include <wiringPi.h>
 
 using namespace std;
@@ -9,3 +12,5 @@ public:
 private:
 	int pin;
 };
+
+#endif

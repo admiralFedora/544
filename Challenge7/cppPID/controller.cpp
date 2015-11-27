@@ -62,6 +62,7 @@ void Controller::PID(void* arg){
 		esc.write(CENTERPOINT + MOTORSPEED);
 		output += CENTERPOINT;
 		wheel.write(output);
+		usleep(this->delay*1000);
 	}
 }
 
