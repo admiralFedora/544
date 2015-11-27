@@ -21,8 +21,12 @@ static void insertAndPop(Fifo* node, Fifo **head){
 }
 
 static void insert(Fifo* node, Fifo **head){
-  node->next = *head;
-  *head = node;
+  if(*head == NULL){
+    *head = node;
+  } else {
+    node->next = *head;
+    *head = node;
+  }
 }
 
 static float returnAverage(Fifo *head){
