@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include "controller.h"
 
+static Controller* controller;
+
 void quit(int sig){
 	printf("SIGINT captured\n");
-	raise(SIGUSR1);
+	controller->quit();
 }
 
 int main(int argc, char* argv[]){
@@ -12,10 +14,9 @@ int main(int argc, char* argv[]){
 		return -1;
 	}
 	
-	Controller* controller = new Controller(argv[1]);
+	controller = new Controller(argv[1]);
 	
-	signal(SIGINT, quit);
-	pthread_join(controller->run(), NULL);
+	controller->run()->join();
 	delete controller;
 	
 	printf("Quit was sucessful\n");

@@ -27,19 +27,16 @@ Controller::~Controller(){
 	delete lidar;
 }
 
-pthread_t Controller::run(){
-	pthread_t ret;
+thread* Controller::run(){
 	this->keepRunning = true;
-	pthread_create(&ret, NULL, (void*) &PID, NULL);
-	return ret;
+	return new thread(&Controller::PID, this);
 }
 
-void Controller::quit(int sig){
+void Controller::quit(){
 	this->keepRunning = false;
 }
 
-void Controller::PID(void* arg){
-	signal(SIGUSR1, Controller::quit);
+void Controller::PID(){
 	while(this->keepRunning){
 		float wallDistance = lidar->getWallDistance();
 		float distRatio = wallDistance / distanceDeisre;

@@ -1,7 +1,7 @@
 #ifndef CONTROLLER
 #define CONTROLLER
 
-#include <pthread.h>
+#include <thread>
 #include <signal.h>
 #include "motor.h"
 #include "lidar.h"
@@ -16,7 +16,8 @@ class Controller{
 public:
 	Controller(char* filename, int escPin = 15, int wheelPin = 16, float distanceDeisre = 70, float delay = 50, float kp = 0.8, float ki = 0.0, float kd = 525.2);
 	~Controller();
-	pthread_t run();
+	thread* run();
+	void quit();
 private:
 	Lidar* lidar;
 	Motor* esc;
@@ -32,8 +33,7 @@ private:
 	float derivative;
 	bool keepRunning;
 	
-	void quit(int sig);
-	void PID(void* arg);
+	void PID();
 	void initSys();
 	float radToDeg(rad);
 };
