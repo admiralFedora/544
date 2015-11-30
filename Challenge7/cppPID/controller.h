@@ -3,6 +3,8 @@
 
 #include <thread>
 #include <signal.h>
+#include <math.h>
+#include <unistd.h>
 #include "motor.h"
 #include "lidar.h"
 
@@ -35,7 +37,7 @@ private:
 	
 	void PID();
 	void initSys();
-	float radToDeg(rad);
+	float radToDeg(float rad);
 };
 
 #endif

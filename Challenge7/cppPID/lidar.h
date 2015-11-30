@@ -5,6 +5,8 @@
 #include <linux/i2c-dev.h>
 #include <wiringPi.h>
 #include <deque>
+#include <math.h>
+#include <unistd.h>
 
 #define LIDAR
 
@@ -41,8 +43,8 @@ public:
 	float getSensorDifference();
 	int getSensorDistance();
 private:
-	Deque<int> frontReadings;
-	Deque<int> backReadings; 
+	deque<int> frontReadings;
+	deque<int> backReadings; 
 	int front;
 	int back;
 	int sensorDistance = 20;

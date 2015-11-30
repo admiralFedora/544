@@ -5,7 +5,7 @@ Lidar::Lidar(char* filename, int front, int back){
 	this->back = back;
 	
 	this->file = open(filename, O_RDWR);
-	ioctl(this>file, I2C_SLAVE_FORCE, DEF_ADDR);
+	ioctl(this->file, I2C_SLAVE_FORCE, DEF_ADDR);
 	
 	pinMode(this->front, OUTPUT);
 	pinMode(this->back, OUTPUT);
@@ -14,9 +14,9 @@ Lidar::Lidar(char* filename, int front, int back){
 	digitalWrite(this->back, LOW);
 	
 	for(int i = 0; i < 5; i++){
-		swapSensor(FRONT);
+		swapSensors(FRONT);
 		frontReadings.push_front(getDistance());
-		swapSensor(BACK);
+		swapSensors(BACK);
 		backReadings.push_front(getDistance());
 	}
 }
@@ -43,7 +43,7 @@ float Lidar::getWallDistance(){
 	frontAverage /= (float) frontReadings.size();
 	backAverage /= (float) backReadings.size();
 	
-	float angleFromWall = atan((frontSensor - backSensor) / sensorDistance);
+	float angleFromWall = atan((frontAverage - backAverage) / sensorDistance);
 	
 	return frontAverage * cos(angleFromWall);
 }
@@ -70,10 +70,10 @@ int Lidar::getSensorDistance(){
 }
 
 void Lidar::getNewReadings(){
-	swapSensor(FRONT);
+	swapSensors(FRONT);
 	frontReadings.pop_back();
 	frontReadings.push_front(getDistance());
-	swapSensor(BACK);
+	swapSensors(BACK);
 	backReadings.pop_back();
 	backReadings.push_front(getDistance());
 }
@@ -87,7 +87,7 @@ int Lidar::getDistance(){
 	return (i2c_smbus_read_byte_data(file, AQUISIT_REG_MSB) << 8) | i2c_smbus_read_byte_data(file, AQUISIT_REG_LSB);
 }
 
-void Lidar::swapSensor(int sensor){
+void Lidar::swapSensors(int sensor){
 	if(FRONT){
 		digitalWrite(front, HIGH);
 		digitalWrite(back, LOW);

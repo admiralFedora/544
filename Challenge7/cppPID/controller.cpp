@@ -1,26 +1,26 @@
-#include "Controller.h"
+#include "controller.h"
 
 Controller::Controller(char* filename, int escPin, int wheelPin,float distanceDeisre, float delay, float kp, float ki, float kd){
-	this->distanceDeisre = distanceDesire;
+	this->distanceDesire = distanceDesire;
 	this->delay = delay;
-	this->pError = 0f;
-	this->pOutput = 0f;
-	this->integral = 0f;
-	this->derivative = 0f;
+	this->pError = 0;
+	this->pOutput = 0;
+	this->integral = 0;
+	this->derivative = 0;
 	this->kp = kp;
 	this->ki = ki;
 	this->kd = kd;
 	
 	this->lidar = new Lidar(filename);
 	this->esc = new Motor(escPin);
-	this->wheel = new Wheel(wheelPin);
+	this->wheel = new Motor(wheelPin);
 	
 	this->initSys();
 }
 
 Controller::~Controller(){
-	esc.write(STOP); // stop moving the car
-	wheel.write(CENTERPOINT);
+	esc->write(STOP); // stop moving the car
+	wheel->write(CENTERPOINT);
 	
 	delete esc;
 	delete wheel;
@@ -39,9 +39,9 @@ void Controller::quit(){
 void Controller::PID(){
 	while(this->keepRunning){
 		float wallDistance = lidar->getWallDistance();
-		float distRatio = wallDistance / distanceDeisre;
-		float distError = distanceDeisre - wallDistance;
-		float heading = atan(lidar->getSensorDifference / lidar->getSensorDistance);
+		float distRatio = wallDistance / distanceDesire;
+		float distError = distanceDesire - wallDistance;
+		float heading = atan(lidar->getSensorDifference() / lidar->getSensorDistance());
 		
 		float error = -1 * atan(distError/distanceDesire);
 		
@@ -56,24 +56,24 @@ void Controller::PID(){
 		
 		float output = radToDeg( (kp * error) + (ki * this->integral) + (kd * this->derivative));
 		
-		esc.write(CENTERPOINT + MOTORSPEED);
+		esc->write(CENTERPOINT + MOTORSPEED);
 		output += CENTERPOINT;
-		wheel.write(output);
+		wheel->write(output);
 		usleep(this->delay*1000);
 	}
 }
 
 void Controller::initSys(){
-	esc.write(180);
+	esc->write(180);
 	sleep(1);
-	esc.write(0);
+	esc->write(0);
 	sleep(1);
-	esc.write(STOP);
+	esc->write(STOP);
 	sleep(1);
 	
-	wheel.write(CENTERPOINT);
+	wheel->write(CENTERPOINT);
 }
 
-float Controller:radToDeg(float rad){
+float Controller::radToDeg(float rad){
 	return (rad * 4068) / 71;
 }
