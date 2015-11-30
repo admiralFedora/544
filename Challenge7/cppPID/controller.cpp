@@ -1,6 +1,6 @@
 #include "controller.h"
 
-Controller::Controller(char* filename, int escPin, int wheelPin,float distanceDeisre, float delay, float kp, float ki, float kd){
+Controller::Controller(char* filename, int escPin, int wheelPin,float distanceDesire, float delay, float kp, float ki, float kd){
 	this->distanceDesire = distanceDesire;
 	this->delay = delay;
 	this->pError = 0;
