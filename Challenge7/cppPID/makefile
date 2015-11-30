@@ -1,5 +1,6 @@
 GPP=g++
-PPFLAGS=-std=c++11 -lwiringPi -lpthread
+LIBS=-lwiringPi -lpthread
+PPFLAGS=-std=c++11 $(LIBS)
 
 all: main.o controller.o lidar.o motor.o
 	$(GPP) -s $^ $(PPFLAGS) -o straight
