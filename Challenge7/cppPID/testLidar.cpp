@@ -29,5 +29,7 @@ int main(int argc, char* argv[]){
 	lidar->quit();
 	lidarThread->join();
 	
+	delete Lidar;
+	
 	return 0;
 }
