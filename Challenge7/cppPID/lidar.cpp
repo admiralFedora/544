@@ -13,7 +13,6 @@ Lidar::Lidar(char* filename, int front, int back){
 	digitalWrite(this->front, LOW);
 	digitalWrite(this->back, LOW);
 	
-	wiringPiSetup();
 	for(int i = 0; i < boxCarLength; i++){
 		swapSensors(FRONT);
 		frontReadings.push_front(getDistance());
@@ -103,7 +102,7 @@ void Lidar::swapSensors(int sensor){
 		digitalWrite(this->back, HIGH);
 	}
 	
-	usleep(10000);
+	usleep(100000);
 }
 
 void Lidar::calculateAverages(float* frontAverage, float* backAverage){
