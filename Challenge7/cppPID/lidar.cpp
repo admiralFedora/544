@@ -73,7 +73,7 @@ void Lidar::getNewReadings(){
 	while(keepRunning){
 		swapSensors(FRONT);
 		int front = getDistance();
-		swapSensor(BACK);
+		swapSensors(BACK);
 		int back = getDistance();
 		
 		readings.lock();
