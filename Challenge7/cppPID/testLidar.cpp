@@ -3,7 +3,7 @@
 
 bool keeprunning = false;
 
-void quit(){
+void quit(int sig){
 	keeprunning = false;
 }
 
