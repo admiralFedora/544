@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
 #include "controller.h"
 
 static Controller* controller;
@@ -10,11 +11,12 @@ void quit(int sig){
 }
 
 int main(int argc, char* argv[]){
-	if(argc != 2){
+	if(argc < 2){
 		printf("Usage: %s <i2c file>\n", argv[0]);
 		return -1;
 	}
 	
+	signal(SIGINT, quit);
 	bool init = false;
 	if(argc > 2 && strcmp(argv[2], "-i")){
 		init = true;
