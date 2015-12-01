@@ -22,6 +22,7 @@ Lidar::Lidar(char* filename, int front, int back){
 	}
 	
 	this->keepRunning = false;
+	printf("Front: %d Back:%d\n", this->front, this->back);
 }
 
 Lidar::~Lidar(){

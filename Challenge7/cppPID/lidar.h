@@ -32,8 +32,8 @@
 #define INVALID_SIGNAL 0x08
 #define DEVICE_READY 0x01
 
-#define FRONT 9
-#define BACK 10
+#define FRONT 0
+#define BACK 1
 
 using namespace std;
 
