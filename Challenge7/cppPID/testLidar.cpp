@@ -23,7 +23,7 @@ int main(int argc, char* argv[]){
 	while(keeprunning){
 		lidar->calculateAverages(&tempf, &tempb);
 		printf("front: %f back: %f \n", tempf, tempb);
-		printf("Distance: %d\n", lidar->getDistance);
+		printf("Distance: %d\n", lidar->getDistance());
 		usleep(50000);
 	}
 	
