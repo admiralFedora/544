@@ -12,7 +12,7 @@ int main(int argc, char* argv[]){
 		printf("bad usaged\n");
 		return -1;
 	}
-	
+	wiringPiSetup();
 	signal(SIGINT, quit);
 	
 	Lidar* lidar = new Lidar(argv[1], 0, 1);
