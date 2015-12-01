@@ -55,7 +55,7 @@ private:
 	int back;
 	int sensorDistance = 20;
 	int file;
-	bool run;
+	bool keepRunning;
 	
 	const int boxCarLength = 5;
 	

@@ -20,7 +20,7 @@ Lidar::Lidar(char* filename, int front, int back){
 		backReadings.push_front(getDistance());
 	}
 	
-	this->run = false;
+	this->keepRunning = false;
 }
 
 Lidar::~Lidar(){
@@ -31,7 +31,7 @@ Lidar::~Lidar(){
 }
 
 thread* Lidar::run(){
-	this->run = true;
+	this->keepRunning = true;
 	return new thread(&Lidar::getNewReadings, this);
 }
 
@@ -70,7 +70,7 @@ int Lidar::getSensorDistance(){
 }
 
 void Lidar::getNewReadings(){
-	while(run){
+	while(keepRunning){
 		swapSensors(FRONT);
 		int front = getDistance();
 		swapSensor(BACK);
