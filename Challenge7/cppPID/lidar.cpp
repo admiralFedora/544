@@ -43,16 +43,7 @@ float Lidar::getWallDistance(){
 	float frontAverage;
 	float backAverage;
 	
-	readings.lock();
-	deque<int>::iterator frontIt = frontReadings.begin();
-	deque<int>::iterator backIt = backReadings.begin();
-	while(frontIt != frontReadings.end()){
-		frontAverage += *frontIt++;
-	}
-	while(backIt != backReadings.end()){
-		backAverage += *backIt++;
-	}
-	readings.unlock();
+	calculateAverages(&frontAverage, &backAverage);
 	
 	frontAverage /= (float) boxCarLength;
 	backAverage /= (float) boxCarLength;
@@ -66,16 +57,7 @@ float Lidar::getSensorDifference(){
 	float frontAverage;
 	float backAverage;
 	
-	readings.lock();
-	deque<int>::iterator frontIt = frontReadings.begin();
-	deque<int>::iterator backIt = backReadings.begin();
-	while(frontIt != frontReadings.end()){
-		frontAverage += *frontIt++;
-	}
-	while(backIt != backReadings.end()){
-		backAverage += *backIt++;
-	}
-	readings.unlock();
+	calculateAverages(&frontAverage, &backAverage);
 	
 	frontAverage /= (float) boxCarLength;
 	backAverage /= (float) boxCarLength;
@@ -122,4 +104,17 @@ void Lidar::swapSensors(int sensor){
 	}
 	
 	usleep(10000);
+}
+
+void Lidar::calculateAverages(float* frontAverage, float* backAverage){
+	readings.lock();
+	deque<int>::iterator frontIt = frontReadings.begin();
+	deque<int>::iterator backIt = backReadings.begin();
+	while(frontIt != frontReadings.end()){
+		*frontAverage += *frontIt++;
+	}
+	while(backIt != backReadings.end()){
+		*backAverage += *backIt++;
+	}
+	readings.unlock();
 }

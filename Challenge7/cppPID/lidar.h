@@ -62,6 +62,7 @@ private:
 	void getNewReadings();
 	int getDistance();
 	void swapSensors(int sensor);
+	void calculateAverages(float* frontAverage, float* backAverage);
 };
 
 #endif
