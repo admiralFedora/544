@@ -24,4 +24,4 @@ testLidar.o: testLidar.cpp
 	$(GPP) -c $^ $(PPFLAGS) -o $@
 	
 clean:
-	rm -rf *.o straight
+	rm -rf *.o straight testLidar

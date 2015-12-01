@@ -19,10 +19,11 @@ int main(int argc, char* argv[]){
 	thread* lidarThread = lidar->run();
 	
 	keeprunning = true;
-	float temp;
+	float tempf, tempb;
 	while(keeprunning){
-		temp = lidar->getSensorDifference();
-		printf("%f\n", temp);
+		lidar->calculateAverages(&tempf, &tempb);
+		printf("front: %f back: %f \n", tempf, tempb);
+		usleep(50000);
 	}
 	
 	lidar->quit();

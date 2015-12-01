@@ -46,6 +46,7 @@ public:
 	float getWallDistance();
 	float getSensorDifference();
 	int getSensorDistance();
+	void calculateAverages(float* frontAverage, float* backAverage);
 	
 	mutex readings;
 private:
@@ -62,7 +63,6 @@ private:
 	void getNewReadings();
 	int getDistance();
 	void swapSensors(int sensor);
-	void calculateAverages(float* frontAverage, float* backAverage);
 };
 
 #endif

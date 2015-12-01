@@ -77,10 +77,14 @@ void Lidar::getNewReadings(){
 		int back = getDistance();
 		
 		readings.lock();
-		frontReadings.pop_back();
-		frontReadings.push_front(front);
-		backReadings.pop_back();
-		backReadings.push_front(back);
+		if(front > 0){
+			frontReadings.pop_back();
+			frontReadings.push_front(front);
+		}
+		if(back > 0){
+			backReadings.pop_back();
+			backReadings.push_front(back);
+		}
 		readings.unlock();
 	}
 }
