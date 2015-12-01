@@ -15,14 +15,14 @@ int main(int argc, char* argv[]){
 	
 	signal(SIGINT, quit);
 	
-	Lidar* lidar = new Lidar(argv[1]);
+	Lidar* lidar = new Lidar(argv[1], 0, 1);
 	thread* lidarThread = lidar->run();
 	
 	keeprunning = true;
 	float temp;
 	while(keeprunning){
 		temp = lidar->getSensorDifference();
-		printf("%f", temp);
+		printf("%f\n", temp);
 	}
 	
 	lidar->quit();
