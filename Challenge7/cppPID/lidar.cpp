@@ -45,9 +45,6 @@ float Lidar::getWallDistance(){
 	
 	calculateAverages(&frontAverage, &backAverage);
 	
-	frontAverage /= (float) boxCarLength;
-	backAverage /= (float) boxCarLength;
-	
 	float angleFromWall = atan((frontAverage - backAverage) / sensorDistance);
 	
 	return frontAverage * cos(angleFromWall);
@@ -58,9 +55,6 @@ float Lidar::getSensorDifference(){
 	float backAverage;
 	
 	calculateAverages(&frontAverage, &backAverage);
-	
-	frontAverage /= (float) boxCarLength;
-	backAverage /= (float) boxCarLength;
 	
 	return frontAverage - backAverage;
 }
@@ -120,7 +114,7 @@ void Lidar::calculateAverages(float* frontAverage, float* backAverage){
 	while(backIt != backReadings.end()){
 		*backAverage += *backIt++;
 	}
-	*frontAverage /= carBoxLength;
-	*backAverage /= carBoxLength;
+	*frontAverage /= (float) boxCarLength;
+	*backAverage /= (float) boxCarLength;
 	readings.unlock();
 }
