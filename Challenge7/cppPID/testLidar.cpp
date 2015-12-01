@@ -30,7 +30,7 @@ int main(int argc, char* argv[]){
 	lidar->quit();
 	lidarThread->join();
 	
-	delete Lidar;
+	delete lidar;
 	
 	return 0;
 }
