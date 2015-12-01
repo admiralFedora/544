@@ -1,6 +1,6 @@
 #include "controller.h"
 
-Controller::Controller(char* filename, int escPin, int wheelPin,float distanceDesire, float delay, float kp, float ki, float kd){
+Controller::Controller(char* filename, bool runInit, int escPin, int wheelPin,float distanceDesire, float delay, float kp, float ki, float kd){
 	this->distanceDesire = distanceDesire;
 	this->delay = delay;
 	this->pError = 0;
@@ -15,12 +15,18 @@ Controller::Controller(char* filename, int escPin, int wheelPin,float distanceDe
 	this->esc = new Motor(escPin);
 	this->wheel = new Motor(wheelPin);
 	
-	this->initSys();
+	if(runInit){
+		this->initSys();
+	}
+	
+	this->lidarThread = this->lidar->run();
 }
 
 Controller::~Controller(){
 	esc->write(STOP); // stop moving the car
 	wheel->write(CENTERPOINT);
+	lidar->quit();
+	lidarThread->join();
 	
 	delete esc;
 	delete wheel;

@@ -24,6 +24,8 @@ private:
 	Lidar* lidar;
 	Motor* esc;
 	Motor* wheel;
+	
+	thread* lidarThread;
 	float distanceDesire;
 	float delay;
 	float kp;

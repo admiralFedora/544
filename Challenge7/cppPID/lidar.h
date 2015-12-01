@@ -7,6 +7,8 @@
 #include <deque>
 #include <math.h>
 #include <unistd.h>
+#include <mutex>
+#include <thread>
 
 #define LIDAR
 
@@ -39,9 +41,13 @@ class Lidar{
 public:
 	Lidar(char* filename, int front = 17, int back = 18);
 	~Lidar();
+	thread* run();
+	void quit();
 	float getWallDistance();
 	float getSensorDifference();
 	int getSensorDistance();
+	
+	mutex readings;
 private:
 	deque<int> frontReadings;
 	deque<int> backReadings; 
@@ -49,6 +55,9 @@ private:
 	int back;
 	int sensorDistance = 20;
 	int file;
+	bool run;
+	
+	const int boxCarLength = 5;
 	
 	void getNewReadings();
 	int getDistance();

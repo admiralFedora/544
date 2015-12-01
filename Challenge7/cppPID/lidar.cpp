@@ -13,12 +13,14 @@ Lidar::Lidar(char* filename, int front, int back){
 	digitalWrite(this->front, LOW);
 	digitalWrite(this->back, LOW);
 	
-	for(int i = 0; i < 5; i++){
+	for(int i = 0; i < boxCarLength; i++){
 		swapSensors(FRONT);
 		frontReadings.push_front(getDistance());
 		swapSensors(BACK);
 		backReadings.push_front(getDistance());
 	}
+	
+	this->run = false;
 }
 
 Lidar::~Lidar(){
@@ -28,10 +30,20 @@ Lidar::~Lidar(){
 	close(this->file);
 }
 
+thread* Lidar::run(){
+	this->run = true;
+	return new thread(&Lidar::getNewReadings, this);
+}
+
+void Lidar::quit(){
+	this->run = false;
+}
+
 float Lidar::getWallDistance(){
-	getNewReadings();
 	float frontAverage;
 	float backAverage;
+	
+	readings.lock();
 	deque<int>::iterator frontIt = frontReadings.begin();
 	deque<int>::iterator backIt = backReadings.begin();
 	while(frontIt != frontReadings.end()){
@@ -40,8 +52,10 @@ float Lidar::getWallDistance(){
 	while(backIt != backReadings.end()){
 		backAverage += *backIt++;
 	}
-	frontAverage /= (float) frontReadings.size();
-	backAverage /= (float) backReadings.size();
+	readings.unlock();
+	
+	frontAverage /= (float) boxCarLength;
+	backAverage /= (float) boxCarLength;
 	
 	float angleFromWall = atan((frontAverage - backAverage) / sensorDistance);
 	
@@ -51,6 +65,8 @@ float Lidar::getWallDistance(){
 float Lidar::getSensorDifference(){
 	float frontAverage;
 	float backAverage;
+	
+	readings.lock();
 	deque<int>::iterator frontIt = frontReadings.begin();
 	deque<int>::iterator backIt = backReadings.begin();
 	while(frontIt != frontReadings.end()){
@@ -59,8 +75,10 @@ float Lidar::getSensorDifference(){
 	while(backIt != backReadings.end()){
 		backAverage += *backIt++;
 	}
-	frontAverage /= (float) frontReadings.size();
-	backAverage /= (float) backReadings.size();
+	readings.unlock();
+	
+	frontAverage /= (float) boxCarLength;
+	backAverage /= (float) boxCarLength;
 	
 	return frontAverage - backAverage;
 }
@@ -70,12 +88,19 @@ int Lidar::getSensorDistance(){
 }
 
 void Lidar::getNewReadings(){
-	swapSensors(FRONT);
-	frontReadings.pop_back();
-	frontReadings.push_front(getDistance());
-	swapSensors(BACK);
-	backReadings.pop_back();
-	backReadings.push_front(getDistance());
+	while(run){
+		swapSensors(FRONT);
+		int front = getDistance();
+		swapSensor(BACK);
+		int back = getDistance();
+		
+		readings.lock();
+		frontReadings.pop_back();
+		frontReadings.push_front(front);
+		backReadings.pop_back();
+		backReadings.push_front(back);
+		readings.unlock();
+	}
 }
 
 int Lidar::getDistance(){
