@@ -14,6 +14,16 @@ using namespace std;
 #define CENTERPOINT 82
 #define MOTORSPEED -10
 
+/*
+	Some useful information...
+	
+	wheel angle > 90 turns left
+	wheel angle < 90 turns right
+	
+	speed > 90 is backwards
+	speed < 90 is forwards
+*/
+
 class Controller{
 public:
 	Controller(char* filename, int escPin = 15, int wheelPin = 16, float distanceDeisre = 70, float delay = 50, float kp = 0.8, float ki = 0.0, float kd = 525.2);

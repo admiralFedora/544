@@ -14,3 +14,7 @@ void Motor::write(int value){
 		pwmWrite(pin, value);
 	}
 }
+
+void Motor::writeNoSafe(int value){
+	pwmWrite(pin, value);
+}

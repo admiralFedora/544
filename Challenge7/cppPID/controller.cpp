@@ -70,11 +70,11 @@ void Controller::PID(){
 }
 
 void Controller::initSys(){
-	esc->write(180);
+	esc->writeNoSafe(180);
 	sleep(1);
-	esc->write(0);
+	esc->writeNoSafe(0);
 	sleep(1);
-	esc->write(STOP);
+	esc->writeNoSafe(STOP);
 	sleep(1);
 	
 	wheel->write(CENTERPOINT);
