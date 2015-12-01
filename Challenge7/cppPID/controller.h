@@ -26,7 +26,7 @@ using namespace std;
 
 class Controller{
 public:
-	Controller(char* filename, int escPin = 15, int wheelPin = 16, float distanceDeisre = 70, float delay = 50, float kp = 0.8, float ki = 0.0, float kd = 525.2);
+	Controller(char* filename, bool runInit, int escPin = 15, int wheelPin = 16, float distanceDeisre = 70, float delay = 50, float kp = 0.8, float ki = 0.0, float kd = 525.2);
 	~Controller();
 	thread* run();
 	void quit();
