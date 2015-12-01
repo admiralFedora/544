@@ -36,7 +36,7 @@ thread* Lidar::run(){
 }
 
 void Lidar::quit(){
-	this->run = false;
+	this->keepRunning = false;
 }
 
 float Lidar::getWallDistance(){
