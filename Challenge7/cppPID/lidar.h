@@ -47,7 +47,8 @@ public:
 	float getSensorDifference();
 	int getSensorDistance();
 	void calculateAverages(float* frontAverage, float* backAverage);
-	
+	int getDistance();
+		
 	mutex readings;
 private:
 	deque<int> frontReadings;
@@ -61,7 +62,6 @@ private:
 	const int boxCarLength = 5;
 	
 	void getNewReadings();
-	int getDistance();
 	void swapSensors(int sensor);
 };
 
