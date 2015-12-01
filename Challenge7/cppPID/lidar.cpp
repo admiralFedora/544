@@ -94,11 +94,11 @@ int Lidar::getDistance(){
 
 void Lidar::swapSensors(int sensor){
 	if(FRONT){
-		digitalWrite(front, HIGH);
-		digitalWrite(back, LOW);
+		digitalWrite(this->front, HIGH);
+		digitalWrite(this->back, LOW);
 	} else if(BACK){
-		digitalWrite(front, LOW);
-		digitalWrite(back, HIGH);
+		digitalWrite(this->front, LOW);
+		digitalWrite(this->back, HIGH);
 	}
 	
 	usleep(10000);

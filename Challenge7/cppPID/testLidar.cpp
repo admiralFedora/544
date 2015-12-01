@@ -24,7 +24,7 @@ int main(int argc, char* argv[]){
 		lidar->calculateAverages(&tempf, &tempb);
 		printf("front: %f back: %f \n", tempf, tempb);
 		printf("Distance: %d\n", lidar->getDistance());
-		usleep(50000);
+		usleep(100000);
 	}
 	
 	lidar->quit();
