@@ -3,7 +3,7 @@
 
 #define TURN 0x07
 
-#define ID 2
+#define ID 1
 
 XBee xbee = XBee();
 // XBeeResponse response = XBeeResponse();

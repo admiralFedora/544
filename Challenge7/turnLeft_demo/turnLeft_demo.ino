@@ -110,6 +110,7 @@ void loop()
   {
     driveStraight();
     Serial.println("No Turn Signal");
+    digitalWrite(led, LOW);
     delay(200);
   }
 
