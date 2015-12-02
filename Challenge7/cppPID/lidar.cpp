@@ -13,6 +13,8 @@ Lidar::Lidar(char* filename, int front, int back){
 	digitalWrite(this->front, LOW);
 	digitalWrite(this->back, LOW);
 	
+	usleep(10000);
+	
 	for(int i = 0; i < boxCarLength; i++){
 		swapSensors(FRONT);
 		frontReadings.push_front(getDistance());
