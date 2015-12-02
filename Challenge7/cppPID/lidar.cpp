@@ -15,10 +15,13 @@ Lidar::Lidar(char* filename, int front, int back){
 	
 	usleep(10000);
 	
+	swapSensors(FRONT);
 	for(int i = 0; i < boxCarLength; i++){
-		swapSensors(FRONT);
 		frontReadings.push_front(getDistance());
-		swapSensors(BACK);
+	}
+	
+	swapSensors(BACK);
+	for(int i = 0; i < boxCarLength; i++){
 		backReadings.push_front(getDistance());
 	}
 	
