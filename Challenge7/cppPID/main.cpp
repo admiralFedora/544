@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
+#include <pigpio.h>
 #include "controller.h"
 
 static Controller* controller;
@@ -16,17 +17,17 @@ int main(int argc, char* argv[]){
 		return -1;
 	}
 	
-	wiringPiSetup();
+	gpioInitialise();
 	signal(SIGINT, quit);
 	bool init = false;
 	if(argc > 2 && strcmp(argv[2], "-i")){
 		init = true;
 	}
-	controller = new Controller(argv[1], init);
+	controller = new Controller(argv[1], true);
 	
 	controller->run()->join();
 	delete controller;
-	
+	gpioTerminate();
 	printf("Quit was sucessful\n");
 	return 0;
 }

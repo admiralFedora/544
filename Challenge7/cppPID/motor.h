@@ -1,7 +1,7 @@
 #ifndef MOTOR
 #define MOTOR
 
-#include <wiringPi.h>
+#include <pigpio.h>
 
 using namespace std;
 
@@ -12,6 +12,8 @@ public:
 	void writeNoSafe(int value); // no safety margin, use with caution you could break the motors
 private:
 	int pin;
+	
+	int angleToPulseWidth(int value);
 };
 
 #endif

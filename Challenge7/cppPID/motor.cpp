@@ -2,19 +2,22 @@
 
 Motor::Motor(int pin){
 	this->pin = pin;
-	pinMode(pin, PWM_OUTPUT);
 }
 
 void Motor::write(int value){
 	if(value > 135){
-		pwmWrite(pin, 135);
+		gpioServo(pin, angleToPulseWidth(135));
 	} else if(value < 45){
-		pwmWrite(pin, 45);
+		gpioServo(pin, angleToPulseWidth(45));
 	} else {
-		pwmWrite(pin, value);
+		gpioServo(pin, angleToPulseWidth(value));
 	}
 }
 
 void Motor::writeNoSafe(int value){
-	pwmWrite(pin, value);
+	gpioServo(pin, angleToPulseWidth(value));
+}
+
+int Motor::angleToPulseWidth(int value){
+	return (1000/90)*value+500;
 }

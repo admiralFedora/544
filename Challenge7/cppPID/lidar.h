@@ -3,7 +3,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <linux/i2c-dev.h>
-#include <wiringPi.h>
+#include <pigpio.h>
 #include <deque>
 #include <math.h>
 #include <unistd.h>
@@ -39,7 +39,7 @@ using namespace std;
 
 class Lidar{
 public:
-	Lidar(char* filename, int front = 0, int back = 1);
+	Lidar(char* filename, int front = 17, int back = 18);
 	~Lidar();
 	thread* run();
 	void quit();

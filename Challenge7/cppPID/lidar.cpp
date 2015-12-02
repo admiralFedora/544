@@ -7,11 +7,11 @@ Lidar::Lidar(char* filename, int front, int back){
 	this->file = open(filename, O_RDWR);
 	ioctl(this->file, I2C_SLAVE_FORCE, DEF_ADDR);
 	
-	pinMode(this->front, OUTPUT);
-	pinMode(this->back, OUTPUT);
+	gpioSetMode(this->front, PI_OUTPUT);
+	gpioSetMode(this->back, PI_OUTPUT);
 	
-	digitalWrite(this->front, LOW);
-	digitalWrite(this->back, LOW);
+	gpioWrite(this->front, 0);
+	gpioWrite(this->back, 1);
 	
 	usleep(10000);
 	
@@ -30,8 +30,8 @@ Lidar::Lidar(char* filename, int front, int back){
 }
 
 Lidar::~Lidar(){
-	digitalWrite(this->front, LOW);
-	digitalWrite(this->back, LOW);
+	gpioWrite(this->front, 0);
+	gpioWrite(this->back, 0);
 	
 	close(this->file);
 }
@@ -100,11 +100,11 @@ int Lidar::getDistance(){
 
 void Lidar::swapSensors(int sensor){
 	if(FRONT == sensor){
-		digitalWrite(this->front, HIGH);
-		digitalWrite(this->back, LOW);
+		gpioWrite(this->front, 1);
+		gpiolWrite(this->back, 0);
 	} else if(BACK == sensor){
-		digitalWrite(this->front, LOW);
-		digitalWrite(this->back, HIGH);
+		gpioWrite(this->front, 0);
+		gpioWrite(this->back, 1);
 	}
 	
 	usleep(10000);
