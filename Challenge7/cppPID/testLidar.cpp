@@ -21,7 +21,7 @@ int main(int argc, char* argv[]){
 	printf("front: %f back: %f \n", tempf, tempb);
 	thread* lidarThread = lidar->run();
 	
-	sleep(10);
+	//sleep(10);
 	keeprunning = true;
 	while(keeprunning){
 		lidar->calculateAverages(&tempf, &tempb);
