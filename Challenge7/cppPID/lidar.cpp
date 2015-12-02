@@ -101,7 +101,7 @@ int Lidar::getDistance(){
 void Lidar::swapSensors(int sensor){
 	if(FRONT == sensor){
 		gpioWrite(this->front, 1);
-		gpiolWrite(this->back, 0);
+		gpioWrite(this->back, 0);
 	} else if(BACK == sensor){
 		gpioWrite(this->front, 0);
 		gpioWrite(this->back, 1);
