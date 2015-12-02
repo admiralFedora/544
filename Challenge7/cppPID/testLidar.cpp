@@ -17,7 +17,7 @@ int main(int argc, char* argv[]){
 	signal(SIGINT, quit);
 	float tempf, tempb;
 	
-	Lidar* lidar = new Lidar(argv[1], 0, 1);
+	Lidar* lidar = new Lidar(argv[1], 17, 18);
 	lidar->calculateAverages(&tempf, &tempb);
 	printf("front: %f back: %f \n", tempf, tempb);
 	thread* lidarThread = lidar->run();
