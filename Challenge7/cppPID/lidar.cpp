@@ -117,7 +117,8 @@ void Lidar::calculateAverages(float* frontAverage, float* backAverage){
 	while(backIt != backReadings.end()){
 		*backAverage += *backIt++;
 	}
+	readings.unlock();
+	
 	*frontAverage /= (float) boxCarLength;
 	*backAverage /= (float) boxCarLength;
-	readings.unlock();
 }

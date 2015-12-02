@@ -14,12 +14,16 @@ int main(int argc, char* argv[]){
 	}
 	wiringPiSetup();
 	signal(SIGINT, quit);
+	float tempf, tempb;
 	
 	Lidar* lidar = new Lidar(argv[1], 0, 1);
+	lidar->calculateAverages(&tempf, &tempb);
+	printf("front: %f back: %f \n", tempf, tempb);
+	
+	sleep(10);
 	thread* lidarThread = lidar->run();
 	
 	keeprunning = true;
-	float tempf, tempb;
 	while(keeprunning){
 		lidar->calculateAverages(&tempf, &tempb);
 		printf("front: %f back: %f \n", tempf, tempb);
