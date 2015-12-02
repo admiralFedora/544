@@ -111,6 +111,8 @@ void Lidar::swapSensors(int sensor){
 }
 
 void Lidar::calculateAverages(float* frontAverage, float* backAverage){
+	*frontAverage = 0;
+	*backAverage = 0;
 	readings.lock();
 	deque<int>::iterator frontIt = frontReadings.begin();
 	deque<int>::iterator backIt = backReadings.begin();
