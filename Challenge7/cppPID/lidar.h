@@ -39,7 +39,7 @@ using namespace std;
 
 class Lidar{
 public:
-	Lidar(char* filename, int front = 17, int back = 18);
+	Lidar(char* filename, int front = 0, int back = 1);
 	~Lidar();
 	thread* run();
 	void quit();
