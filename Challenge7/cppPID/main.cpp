@@ -16,6 +16,7 @@ int main(int argc, char* argv[]){
 		return -1;
 	}
 	
+	wiringPiSetup();
 	signal(SIGINT, quit);
 	bool init = false;
 	if(argc > 2 && strcmp(argv[2], "-i")){
