@@ -20,7 +20,6 @@ Controller::Controller(char* filename, bool runInit, int escPin, int wheelPin,fl
 	}
 	
 	this->lidarThread = this->lidar->run();
-	sleep(10);
 }
 
 Controller::~Controller(){
