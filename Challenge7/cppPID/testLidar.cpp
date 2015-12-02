@@ -3,7 +3,7 @@
 
 bool keeprunning = false;
 
-void quit(){
+void quit(int sig){
 	keeprunning = false;
 }
 
@@ -12,21 +12,25 @@ int main(int argc, char* argv[]){
 		printf("bad usaged\n");
 		return -1;
 	}
-	
+	wiringPiSetup();
 	signal(SIGINT, quit);
 	
-	Lidar* lidar = new Lidar(argv[1]);
+	Lidar* lidar = new Lidar(argv[1], 0, 1);
 	thread* lidarThread = lidar->run();
 	
 	keeprunning = true;
-	float temp;
+	float tempf, tempb;
 	while(keeprunning){
-		temp = lidar->getSensorDifference();
-		printf("%f", temp);
+		lidar->calculateAverages(&tempf, &tempb);
+		printf("front: %f back: %f \n", tempf, tempb);
+		printf("Distance: %d\n", lidar->getDistance());
+		usleep(100000);
 	}
 	
 	lidar->quit();
 	lidarThread->join();
+	
+	delete lidar;
 	
 	return 0;
 }

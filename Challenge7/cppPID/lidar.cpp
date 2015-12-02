@@ -21,6 +21,7 @@ Lidar::Lidar(char* filename, int front, int back){
 	}
 	
 	this->keepRunning = false;
+	printf("Front: %d Back:%d\n", this->front, this->back);
 }
 
 Lidar::~Lidar(){
@@ -45,9 +46,6 @@ float Lidar::getWallDistance(){
 	
 	calculateAverages(&frontAverage, &backAverage);
 	
-	frontAverage /= (float) boxCarLength;
-	backAverage /= (float) boxCarLength;
-	
 	float angleFromWall = atan((frontAverage - backAverage) / sensorDistance);
 	
 	return frontAverage * cos(angleFromWall);
@@ -58,9 +56,6 @@ float Lidar::getSensorDifference(){
 	float backAverage;
 	
 	calculateAverages(&frontAverage, &backAverage);
-	
-	frontAverage /= (float) boxCarLength;
-	backAverage /= (float) boxCarLength;
 	
 	return frontAverage - backAverage;
 }
@@ -77,10 +72,14 @@ void Lidar::getNewReadings(){
 		int back = getDistance();
 		
 		readings.lock();
-		frontReadings.pop_back();
-		frontReadings.push_front(front);
-		backReadings.pop_back();
-		backReadings.push_front(back);
+		if(front > 0){
+			frontReadings.pop_back();
+			frontReadings.push_front(front);
+		}
+		if(back > 0){
+			backReadings.pop_back();
+			backReadings.push_front(back);
+		}
 		readings.unlock();
 	}
 }
@@ -95,12 +94,12 @@ int Lidar::getDistance(){
 }
 
 void Lidar::swapSensors(int sensor){
-	if(FRONT){
-		digitalWrite(front, HIGH);
-		digitalWrite(back, LOW);
-	} else if(BACK){
-		digitalWrite(front, LOW);
-		digitalWrite(back, HIGH);
+	if(FRONT == sensor){
+		digitalWrite(this->front, HIGH);
+		digitalWrite(this->back, LOW);
+	} else if(BACK == sensor){
+		digitalWrite(this->front, LOW);
+		digitalWrite(this->back, HIGH);
 	}
 	
 	usleep(10000);
@@ -116,5 +115,7 @@ void Lidar::calculateAverages(float* frontAverage, float* backAverage){
 	while(backIt != backReadings.end()){
 		*backAverage += *backIt++;
 	}
+	*frontAverage /= (float) boxCarLength;
+	*backAverage /= (float) boxCarLength;
 	readings.unlock();
 }

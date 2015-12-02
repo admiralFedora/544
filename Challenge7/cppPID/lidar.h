@@ -32,8 +32,8 @@
 #define INVALID_SIGNAL 0x08
 #define DEVICE_READY 0x01
 
-#define FRONT 9
-#define BACK 10
+#define FRONT 0
+#define BACK 1
 
 using namespace std;
 
@@ -46,7 +46,9 @@ public:
 	float getWallDistance();
 	float getSensorDifference();
 	int getSensorDistance();
-	
+	void calculateAverages(float* frontAverage, float* backAverage);
+	int getDistance();
+		
 	mutex readings;
 private:
 	deque<int> frontReadings;
@@ -60,9 +62,7 @@ private:
 	const int boxCarLength = 5;
 	
 	void getNewReadings();
-	int getDistance();
 	void swapSensors(int sensor);
-	void calculateAverages(float* frontAverage, float* backAverage);
 };
 
 #endif
