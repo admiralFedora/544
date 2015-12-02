@@ -1,4 +1,5 @@
 #include <signal.h>
+#include <pigpio.h>
 #include "lidar.h"
 
 bool keeprunning = false;
@@ -12,7 +13,7 @@ int main(int argc, char* argv[]){
 		printf("bad usaged\n");
 		return -1;
 	}
-	wiringPiSetup();
+	gpioInitialise();
 	signal(SIGINT, quit);
 	float tempf, tempb;
 	
@@ -34,6 +35,6 @@ int main(int argc, char* argv[]){
 	lidarThread->join();
 	
 	delete lidar;
-	
+	gpioTerminate();
 	return 0;
 }
