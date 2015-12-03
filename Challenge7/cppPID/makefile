@@ -30,4 +30,4 @@ testMotor.o: testMotor.cpp
 	$(GPP) -c $^ $(PPFLAGS) -o $@
 	
 clean:
-	rm -rf *.o straight testLidar
+	rm -rf *.o straight testLidar testMotor

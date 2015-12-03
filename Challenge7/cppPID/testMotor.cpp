@@ -9,10 +9,10 @@ int main(){
 	sleep(1);
 	esc->writeNoSafe(0);
 	sleep(1);
-	esc->writeNoSafe(STOP);
+	esc->writeNoSafe(90);
 	sleep(1);
 	
-	wheel->write(CENTERPOINT);
+	wheel->write(82);
 	
 	esc->write(80);
 	wheel->write(100);
