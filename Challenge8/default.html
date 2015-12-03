@@ -1,0 +1,286 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Challenge5 - Group1</title>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+  </head>
+  <body>
+  <style>
+    body{
+      background-image: url("http://hhao.hostei.com/doc/hao_hu_601termproject/img/bg.png");
+      background-repeat: repeat;
+    }
+
+    p.red{
+      color:#cc0000;
+      font-family:sans-serif;
+      font-weight:bold;
+      margin-left:60px;
+      font-size:22px;
+      margin-bottom:15px;
+      margin-top:10px;
+    }
+
+    .submit{
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      font-family:Calibri;
+      font-size:14px;
+      padding:6px 18px;
+      color: #ffffff;
+      background-color:#19a5c8;
+      border: #19a5c8 solid 1px;
+      border-radius:4px;
+      width:160px;
+      box-shadow: 0 1px gray;
+      margin-top:5px;
+      align-items: center;
+    }
+
+    .submit:hover{cursor:pointer; opacity:0.6;}
+    .input-text{ border:#9f9f9f solid 1px; width:90px;color:#19a5c8; padding: 6px 18px;margin:8px 6px;}
+    p.gray{	color:#646464; margin-left:60px;	margin-top:3px;margin-bottom:3px}
+
+    .ins{color:#646464; margin-left:60px;}
+    #info{display:block;}
+    #msg{color:#636363; margin-left:60px;}
+  </style>
+
+
+  <script>
+  /*len & hei are the drawing square inside the canvas*/
+  var len = 1000-45; // values are hard coded
+  var hei = 452-30; // values are hard coded
+  var hor = $("#x").val();
+  var ver = $("#y").val();
+  var grid = hei/hor;
+  var posData = [];
+
+  function updateGraph(){
+    hor = $("#x").val();
+    ver = $("#y").val();
+    grid = hei/hor;
+    /*clear*/
+    var canvas = document.getElementById("myCanvas");
+    var chart = canvas.getContext("2d");
+    chart.clearRect(0, 0, canvas.width, canvas.height);
+
+    /*boundary*/
+    var c = document.getElementById("myCanvas");
+    var chart = c.getContext("2d");
+    var img = document.getElementById("layout");
+    var picD = document.getElementById("picD");
+    var picU = document.getElementById("picU");
+    var picL = document.getElementById("picL");
+    var picR = document.getElementById("picR");
+
+    //chart.drawImage(picL, 0, 20);
+    //chart.drawImage(picU, 0, -30);
+    //chart.drawImage(picR, 850,-40 );
+    //chart.drawImage(picD, 0, 390);
+    chart.drawImage(img, 0, 0);
+    drawGrid(hor,ver,grid);
+
+    /*draw path*/
+    for(i = 0; i < posData.length-1; i++){ // last point is the cur position
+      drawPath( posData[i], posData[i+1]);
+    }
+
+    /*draw cur position*/
+    //chart.drawImage(img, 0, 0); //draw layout, not sure about the place
+    var pos = document.getElementById("pos");
+    var cen = document.getElementById("cen");
+    if(posData.length > 0){
+      var curX = Math.ceil((parseFloat(posData[posData.length-1].Y) + 0.5) * grid + 45); //convert to canvas value
+      var curY = Math.ceil((parseFloat(posData[posData.length-1].X) + 0.5) * grid + 30); //convert to canvas value
+      chart.drawImage(cen, curX - cen.width/2, curY - cen.height/2); //draw pos
+      chart.drawImage(pos, curX - pos.width/2, curY - pos.height/2 - 10); //draw pos
+    }
+  }
+  /*  if(posData.length = 1){
+      var curX = Math.ceil((parseFloat(posData[posData.length-1].Y) + 0.5) * grid + 45); //convert to canvas value
+      var curY = Math.ceil((parseFloat(posData[posData.length-1].X) + 0.5) * grid + 30); //convert to canvas value
+      chart.drawImage(cen, curX - cen.width/2, curY - cen.height/2); //draw pos
+      chart.drawImage(pos, curX - pos.width/2, curY - pos.height/2 - 10); //draw pos
+    }else if(posData.length > 1){
+        draw();
+        console.log("yes");
+    }
+
+
+    function draw(){
+        chart.save();
+        var lenX = parseFloat(posData[posData.length-1].X) - parseFloat(posData[posData.length-2].X);
+        var lenY = parseFloat(posData[posData.length-1].Y) - parseFloat(posData[posData.length-2].Y);
+        var cot =  lenX/lenY;
+        var shortX = (lenX/10 * (time.getMilliseconds() % 10 + 1)).toFixed(2);
+        var shortY = (shortX / cot).toFixed(2);
+        var curJson = {"X":parseFloat(posData[posData.length-2].X) + shortX,"Y":parseFloat(posData[posData.length-2].Y) + shortY};
+        drawPath(posData[posData.length-2],curJson);
+        var curX = Math.ceil((parseFloat(curJson.Y) + 0.5) * grid + 45); //convert to canvas value
+        var curY = Math.ceil((parseFloat(curJson.X) + 0.5) * grid + 30); //convert to canvas value
+        chart.drawImage(cen, curX - cen.width/2, curY - cen.height/2); //draw pos
+        chart.drawImage(pos, curX - pos.width/2, curY - pos.height/2 - 10); //draw pos
+        window.requestAnimationFrame(draw);
+    }
+  }*/
+
+  function drawGrid(hor,ver,d){
+    /*Relative value for diff resolution*/
+    var canvas = document.getElementById("myCanvas");
+    var chart = canvas.getContext("2d");
+
+    /*Draw Ver line*/
+    chart.fillStyle="#636363";
+    chart.strokeStyle = "rgba(163,212,214,0.2)";
+    chart.lineWidth=1;
+    chart.beginPath();
+    chart.fillText("Y--->:",42,15);
+    for(i = 0; i * d < len; i++){
+      chart.moveTo(i*d+45,30);
+      chart.lineTo(i*d+45,30+hei);
+      chart.fillText(i,i*d+42,25);
+      chart.fillText(i,i*d+42,405);
+    }
+    chart.stroke();
+
+    //Draw Hor line
+    chart.strokeStyle="rgba(70,70,70,0.1)";
+    chart.lineWidth=1;
+    chart.beginPath();
+    chart.fillText("X:",25,33);
+    for(i = 0; i < ver; i++){
+      chart.moveTo(45,i*d+30);
+      chart.lineTo(45+len,i*d+30);
+      chart.fillText(i,35,i*d+33);
+    }
+    chart.stroke();
+  }
+
+  function drawPath(p1,p2){
+  	  var canvas = document.getElementById("myCanvas");
+  	  var chart = canvas.getContext("2d");
+
+  		var x1 = Math.ceil((parseFloat(p1.Y)+0.5)*grid+45) ; //x1 is the time line position
+  		var x2 = Math.ceil((parseFloat(p2.Y)+0.5)*grid+45) ; //x2 is the time line position
+  		var y1 = Math.ceil((parseFloat(p1.X)+0.5)*grid+30) ; //y1 is the temp1 line position
+  		var y2 = Math.ceil((parseFloat(p2.X)+0.5)*grid+30) ; //y2 is the temp1 line position
+
+      /*Draw Line*/
+      chart.strokeStyle = "rgba(252,233,18,1)";
+      chart.lineWidth = 2;
+      chart.beginPath();
+      chart.moveTo(x1,y1);
+      chart.lineTo(x2,y2);
+      chart.closePath();
+      chart.stroke();
+
+    		/*Draw point1*/
+        chart.fillStyle = "rgba(252,233,18,1)";
+        chart.lineWidth = 2;
+    		chart.beginPath();
+    		chart.arc(x1, y1, 3, 0, 2 * Math.PI);
+        chart.closePath();
+    		chart.fill();
+
+    		/*Draw point2*/
+        chart.lineWidth = 2;
+    		chart.beginPath();
+    		chart.arc(x2, y2, 3, 0, 2 * Math.PI);
+        chart.closePath();
+    		chart.fill();
+  }
+
+  function cleanData(raw){
+      var count = 0;
+      var v1, v2;
+      for (i = 0 ; i < raw.length; i++){
+          if (i == 0) { v1 = raw[0].locx; v2 = raw[0].locy; count = 1;}    // count appeared times
+          else{
+            if(raw[i].locx == v1 && raw[i].locy == v2){count ++; }
+            else{
+              count--;
+              if(count < 0){v1 = raw[i].locx; v2 = raw[i].locy; count = 1;}// reset
+            }
+          }
+      }
+      return {"X":v1,"Y":v2};
+  }
+
+  function getData(){
+    var rawData;
+    $.when(
+      $.ajax({
+          url: "/startMapping",
+          type: 'GET',
+          async: false,
+          cache: false,
+          timeout: 10000,
+          error: function(msg){
+              $("#msg").html("Server : Update failed");
+          },
+          success: function(msg){
+            if(typeof(msg) == "object" && !(typeof(msg.msg) === 'undefined')){ // no sensor
+                $("#msg").html("Server:" + msg.msg);
+            }
+                rawData = msg;
+          }
+      })
+    ).then(function() {
+      var newData = cleanData(rawData);
+      if(posData.length < 100){ //only keep most 100 data
+          posData.push(newData);
+          console.log("Get pos X:"+newData.X + ", Y:" + newData.Y);
+          updateGraph();
+      }else{
+          posData.splice(0,1);
+          posData.push(newData);
+          console.log("Get pos X:"+newData.X + ", Y:" + newData.Y);
+          updateGraph();
+      }
+    });
+
+    }
+
+  //layout position: (45,30) - (848,392)
+  window.onload = function() {
+      updateGraph()
+  }
+
+  $( document ).ready(function() {
+     setInterval(getData, 12000); //update every 12 secs
+
+  });
+  </script>
+
+    <div class="head">
+      <div id = "info">
+      <p class="red" >Boston University</p>
+      <p class="gray" >GROUP 1, Challenge 8</p>
+      <p class="gray" >Pete, Carlos, Hao, Avi, Ying</p>
+      <br/><br/><br/>
+      </div>
+      <p id="msg"></p>
+      <canvas id="myCanvas"  width="1020px" height="420px"style="margin-left:62px; border:1px solid #d3d3d3;">
+        Your browser does not support the HTML5 canvas tag.</canvas>
+      <div class="canvas">
+      <p class="ins">Current position: <img id="pos" src="http://hhao.hostei.com/doc/files/CDN/star.png"/>&nbsp;
+        X:<input id="x" class="input-text" type="text" value="5">&nbsp;
+        Y:<input id="y" class="input-text" type="text" value="12">&nbsp;
+      </p>
+      </div>
+
+
+      <img id="layout" src="http://hhao.hostei.com/doc/files/CDN/layout.png" style="display:none;"/>
+      <img id="cen" src="http://hhao.hostei.com/doc/files/CDN/cen.png" style="display:none;"/>
+      <img id="picD" src="http://hhao.hostei.com/doc/files/CDN/D.png" style="display:none;"/>
+      <img id="picU" src="http://hhao.hostei.com/doc/files/CDN/U.png" style="display:none;"/>
+      <img id="picL" src="http://hhao.hostei.com/doc/files/CDN/L.png" style="display:none;"/>
+      <img id="picR" src="http://hhao.hostei.com/doc/files/CDN/R.png" style="display:none;"/>
+    </div>
+
+  </body>
+</html>
