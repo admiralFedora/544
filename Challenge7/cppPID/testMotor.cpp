@@ -16,8 +16,8 @@ int main(){
 	sleep(1);
 	
 	
-	gpioSetPWMfrequency(22, 50);
-	gpioSetPWMrange(22, 5000);
+	//gpioSetPWMfrequency(22, 50);
+	//gpioSetPWMrange(22, 5000);
 	int val;
 	while(1){
 		cin >> val;
