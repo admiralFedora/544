@@ -19,6 +19,9 @@ int main(){
 	esc->write(80);
 	wheel->write(100);
 	
+	printf("val:%d\n", esc->angleToPulseWidth(80));
+	printf("val:%d\n", esc->angleToPulseWidth(100))
+	
 	sleep(10);
 	
 	esc->write(90);
