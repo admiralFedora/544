@@ -37,6 +37,8 @@ XBeeAddress64 broadcast64 = XBeeAddress64(0x00000000, 0x0000ffff);
 SoftwareSerial XBee(2, 3); // Rx, Tx
 
 int led = 11;
+int wheelPIN = 8;
+int escPIN = 9;
 
 void setup() 
 {
@@ -46,8 +48,8 @@ void setup()
   
   pinMode(led, OUTPUT);
 
-  wheels.attach(8); // initialize wheel servo to Digital IO Pin #8
-  esc.attach(9); // initialize ESC to Digital IO Pin #9
+  wheels.attach(wheelPIN); // initialize wheel servo to Digital IO Pin #8
+  esc.attach(escPIN); // initialize ESC to Digital IO Pin #9
   /*  If you're re-uploading code via USB while leaving the ESC powered on, 
    *  you don't need to re-calibrate each time, and you can comment this part out.
    */

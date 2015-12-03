@@ -16,7 +16,8 @@ XBeeAddress64 broadcast64 = XBeeAddress64(0x00000000, 0x0000ffff);
 
 SoftwareSerial XBee(2, 3); // Rx, Tx
 
-int led = 11;
+int ledPIN = 11;
+int piPIN = 7;
 
 
 void setup() 
@@ -25,7 +26,8 @@ void setup()
   XBee.begin(9600);
   xbee.begin(XBee);
   
-  pinMode(led, OUTPUT);
+  pinMode(ledPIN, OUTPUT);
+  pinMode(piPIN, OUTPUT);
 
   Serial.println("Done with Setup!");
 
@@ -44,14 +46,20 @@ void loop()
       switch(rx.getData(0))
       {
         case TURN:
-          digitalWrite(led, HIGH);
+          digitalWrite(ledPIN, HIGH);
+          digitalWrite(piPIN, HIGH);
           Serial.println("Turning!!!!!!!!!!!!");
           delay(3000);
           break;
       }
     }
   }
-  Serial.println("No Turn Signal");
-  delay(200);
+  else
+  {
+    digitalWrite(ledPIN, LOW);
+    digitalWrite(piPIN, LOW);
+    Serial.println("No Turn Signal");
+    delay(200);
+  }
 }
 
