@@ -8,7 +8,7 @@ all: main.o controller.o lidar.o motor.o
 testLidar: testLidar.o lidar.o
 	$(GPP) -s $^ $(PPFLAGS) -o $@
 	
-testMotor: testMotor.o controller.o
+testMotor: testMotor.o motor.o
 	$(GPP) -s $^ $(PPFLAGS) -o $@
 
 main.o: main.cpp
