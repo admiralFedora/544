@@ -52,8 +52,8 @@
 
   <script>
   /*len & hei are the drawing square inside the canvas*/
-  var len = 1000-45; // values are hard coded
-  var hei = 452-30; // values are hard coded
+  var len = 980-19; // values are hard coded
+  var hei = 406-15; // values are hard coded
   var hor = $("#x").val();
   var ver = $("#y").val();
   var grid = hei/hor;
@@ -72,10 +72,10 @@
     var c = document.getElementById("myCanvas");
     var chart = c.getContext("2d");
     var img = document.getElementById("layout");
-    var picD = document.getElementById("picD");
-    var picU = document.getElementById("picU");
-    var picL = document.getElementById("picL");
-    var picR = document.getElementById("picR");
+    //var picD = document.getElementById("picD");
+    //var picU = document.getElementById("picU");
+    //var picL = document.getElementById("picL");
+    //var picR = document.getElementById("picR");
 
     //chart.drawImage(picL, 0, 20);
     //chart.drawImage(picU, 0, -30);
@@ -135,15 +135,13 @@
 
     /*Draw Ver line*/
     chart.fillStyle="#636363";
-    chart.strokeStyle = "rgba(163,212,214,0.2)";
+    chart.strokeStyle = "rgba(163,212,214,0.4)";
     chart.lineWidth=1;
     chart.beginPath();
-    chart.fillText("Y--->:",42,15);
+    chart.stroke();
     for(i = 0; i * d < len; i++){
-      chart.moveTo(i*d+45,30);
-      chart.lineTo(i*d+45,30+hei);
-      chart.fillText(i,i*d+42,25);
-      chart.fillText(i,i*d+42,405);
+      chart.moveTo(i*d+19,15);
+      chart.lineTo(i*d+19,15+hei);
     }
     chart.stroke();
 
@@ -151,11 +149,9 @@
     chart.strokeStyle="rgba(70,70,70,0.1)";
     chart.lineWidth=1;
     chart.beginPath();
-    chart.fillText("X:",25,33);
     for(i = 0; i < ver; i++){
-      chart.moveTo(45,i*d+30);
-      chart.lineTo(45+len,i*d+30);
-      chart.fillText(i,35,i*d+33);
+      chart.moveTo(19,i*d+15);
+      chart.lineTo(19+len,i*d+15);
     }
     chart.stroke();
   }
@@ -268,8 +264,8 @@
         Your browser does not support the HTML5 canvas tag.</canvas>
       <div class="canvas">
       <p class="ins">Current position: <img id="pos" src="http://hhao.hostei.com/doc/files/CDN/star.png"/>&nbsp;
-        X:<input id="x" class="input-text" type="text" value="5">&nbsp;
-        Y:<input id="y" class="input-text" type="text" value="12">&nbsp;
+        X:<input id="x" class="input-text" type="text" value="8">&nbsp;
+        Y:<input id="y" class="input-text" type="text" value="15">&nbsp;
       </p>
       </div>
 
