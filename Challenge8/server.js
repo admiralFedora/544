@@ -1,18 +1,68 @@
 var fs = require('fs');
 var app = require('express')();
 var SerialPort = require("serialport");
-var xbee = require("xbee-api");
 var Q = require("q");
 var knn = require("alike");
-var xbeeAPI = new xbee.XBeeAPI({
-  api_mode: 2
-});
-var xbeeConst = xbee.constants;
 
-var sp = new SerialPort.SerialPort(process.argv[2], {
-  baudrate: 9600,
-  parser: xbeeAPI.rawParser()
+
+//--------------------------------------------------------------------
+
+
+//Setup and read the value of a pin
+var gpio = require('rpi-gpio');
+
+gpio.setup(7, gpio.DIR_IN, readInput);
+
+function readInput() {
+    gpio.read(7, function(err, value) {
+        console.log('The value is ' + value);
+    });
+}
+
+//Setup and write to a pin
+var gpio = require('rpi-gpio');
+
+gpio.setup(7, gpio.DIR_OUT, write);
+
+function write() {
+    gpio.write(7, true, function(err) {
+        if (err) throw err;
+        console.log('Written to pin');
+    });
+}
+Listen for changes on a pin
+var gpio = require('rpi-gpio');
+
+gpio.on('change', function(channel, value) {
+    console.log('Channel ' + channel + ' value is now ' + value);
 });
+gpio.setup(7, gpio.DIR_IN, gpio.EDGE_BOTH);
+
+//Unexport pins opened by the module when finished
+var gpio = require('../rpi-gpio');
+
+gpio.on('export', function(channel) {
+    console.log('Channel set: ' + channel);
+});
+
+gpio.setup(7, gpio.DIR_OUT);
+gpio.setup(15, gpio.DIR_OUT);
+gpio.setup(16, gpio.DIR_OUT, pause);
+
+function pause() {
+    setTimeout(closePins, 2000);
+}
+
+function closePins() {
+    gpio.destroy(function() {
+        console.log('All pins unexported');
+    });
+}
+
+
+
+
+//-------------------------------------------------------------------------
 
 var options = {
   k:5,
