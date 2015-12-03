@@ -62,7 +62,7 @@ void Controller::PID(){
 		
 		float output = radToDeg( (kp * error) + (ki * this->integral) + (kd * this->derivative));
 		
-		esc->write(CENTERPOINT + MOTORSPEED);
+		esc->write(STOP + MOTORSPEED);
 		output += CENTERPOINT;
 		wheel->write(output);
 		usleep(this->delay*1000);
