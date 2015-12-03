@@ -7,7 +7,7 @@
 int main(){
 	gpioInitialise();
 	gpioSetPWMfrequency(22, 50);
-	gpioSetPWMrangee(22, 5000);
+	gpioSetPWMrange(22, 5000);
 	int val;
 	while(1){
 		cin >> val;
