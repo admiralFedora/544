@@ -21,7 +21,7 @@ int main(){
 	wheel->write(100);
 	
 	printf("val:%d\n", esc->angleToPulseWidth(80));
-	printf("val:%d\n", esc->angleToPulseWidth(100))
+	printf("val:%d\n", esc->angleToPulseWidth(100));
 	
 	sleep(10);
 	
