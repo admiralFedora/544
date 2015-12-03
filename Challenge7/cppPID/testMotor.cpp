@@ -1,5 +1,6 @@
 #include <pigpio.h>
 #include <unistd.h>
+#include <stdio.h>
 #include "motor.h"
 
 int main(){
