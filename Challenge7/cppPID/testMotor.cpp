@@ -1,3 +1,4 @@
+#include <pigpio.h>
 #include "motor.h"
 
 int main(){
@@ -22,5 +23,6 @@ int main(){
 	esc->write(90);
 	wheel->write(90);
 	
+	gpioTerminate();
 	return 0;
 }
