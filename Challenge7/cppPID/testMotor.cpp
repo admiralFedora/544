@@ -1,6 +1,7 @@
 #include <pigpio.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <iostream>
 #include "motor.h"
 
 int main(){
@@ -17,11 +18,11 @@ int main(){
 	
 	wheel->write(82);
 	
-	esc->write(80);
-	wheel->write(100);
-	
-	printf("val:%d\n", esc->angleToPulseWidth(80));
-	printf("val:%d\n", esc->angleToPulseWidth(100));
+	int val;
+	while(1){
+		cin >> val;
+		gpioServo(22, val);
+	}
 	
 	sleep(10);
 	
