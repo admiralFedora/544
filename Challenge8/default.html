@@ -47,11 +47,17 @@
     .ins{color:#646464; margin-left:60px;}
     #info{display:block;}
     #msg{color:#636363; margin-left:60px;}
-    #control_panel{background-color: #646464; height:200px;width:200px;border-radius:100px;}
+
+    #control_panel{background-color: #646464; height:200px;width:200px;border-radius:100px;opacity:0.35;
+    position:absolute; left:36%; top:45%}
+
     #b_u{margin-left:60px;margin-top: 10px}
-    #b_d{margin-left:60px;}
+    #b_d{margin-left:60px;margin-top:-5px}
     #b_l{margin-left:10px;}
-    #b_r{margin-left:80px;}
+    #b_r{}
+    #b_s{color:#ffffff;background-color:#ff4848 ;width:75px; height:75px;border: #ff4848 solid 0px;
+         margin-top: -65px;vertical-align: text-top;border-radius: 8px;}
+    #b_u:hover,#b_d:hover,#b_l:hover,#b_r:hover,#b_s:hover{cursor:pointer}
   </style>
 
 
@@ -254,6 +260,25 @@
   $( document ).ready(function() {
      setInterval(getData, 12000); //update every 12 secs
 
+     $(".button").hover(function(){
+			$(this).stop().animate({
+				opacity:"0.8"
+				},300);
+			},function(){
+				$(this).stop().animate({
+				      opacity:"1"
+			  }, 300);
+      });
+
+      $("#control_panel").hover(function(){
+ 			    $(this).stop().animate({
+ 				       opacity:"1"
+ 				        },300); //default 800
+ 			    },function(){
+ 				             $(this).stop().animate({
+ 				                  opacity:"0.35"
+ 			               }, 800);//default 800
+	        })
   });
   </script>
 
@@ -262,7 +287,7 @@
       <p class="red" >Boston University</p>
       <p class="gray" >GROUP 1, Challenge 8</p>
       <p class="gray" >Pete, Carlos, Hao, Avi, Ying</p>
-      <br/><br/><br/>
+      <br/>
       </div>
       <p id="msg"></p>
       <canvas id="myCanvas"  width="1020px" height="420px"style="margin-left:62px; border:1px solid #d3d3d3;">
@@ -274,10 +299,11 @@
       </p>
       </div>
       <div id = "control_panel">
-        <img id= "b_u" src="http://hhao.hostei.com/doc/files/CDN/up.png" alt="up"/><br/>
-        <img id= "b_l" src="http://hhao.hostei.com/doc/files/CDN/left.png" alt="down"/>
-        <img id= "b_r" src="http://hhao.hostei.com/doc/files/CDN/right.png" alt="left"/>
-        <img id= "b_d" src="http://hhao.hostei.com/doc/files/CDN/down.png" alt="right"/><br/>
+        <img id= "b_u" class="button" src="http://hhao.hostei.com/doc/files/CDN/up.png" alt="up"/><br/>
+        <img id= "b_l" class="button" src="http://hhao.hostei.com/doc/files/CDN/left.png" alt="down"/>
+        <input id="b_s" class="button" type="submit" value="Start">
+        <img id= "b_r" class="button" src="http://hhao.hostei.com/doc/files/CDN/right.png" alt="left"/>
+        <img id= "b_d" class="button" src="http://hhao.hostei.com/doc/files/CDN/down.png" alt="right"/><br/>
       </div>
 
 
