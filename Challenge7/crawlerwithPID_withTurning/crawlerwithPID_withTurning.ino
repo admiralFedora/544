@@ -1,3 +1,5 @@
+//Input from sharpReader to GPIO Digital pin 4
+
 #include <Servo.h>
 #include <Wire.h>
 #include <math.h>
@@ -13,7 +15,7 @@
 #define LIDAR_FRONT 5
 #define LIDAR_BACK 6
 #define SONAR_PIN 7
-#define XBEE_PIN 4
+#define XBEE_PIN 4 //Repurpose for Input from sharpReader
 #define WARNING_PIN 12
 
 #define K_p .8
@@ -126,6 +128,14 @@ bool shouldRun(){
 }
 
 bool shouldStart(){
+  if(digitalRead(XBEE_PIN) == LOW){
+    return false;
+  } else {
+    return true;
+  }
+}
+
+bool shouldTurn(){
   if(digitalRead(XBEE_PIN) == LOW){
     return false;
   } else {
@@ -349,27 +359,33 @@ void driveStraight()
   Serial.print(pOutput);
 }
 
-void turnRight(){
+void turnLeft()
+{
+  wheels.write(135);
   esc.write(centerpoint + motorSpeed);
-
-  wheels.write(45);
+  delay(1000);
 }
 
 void driveCar()
 {
-   /*if (startRun && startup)
+   if (startRun && startup)
    {
-    getActual();
-    getError();
-    PID(); 
+    if (shouldTurn)
+    {
+      turnLeft();
+    }
+    else 
+    {
+      getActual();
+      getError();
+      PID(); 
    
-    driveStraight();
-    counter++;
+      driveStraight();
+      counter++;
+    }
    } else {
     esc.write(90);
-   }*/
-
-   turnRight();
+   }
 }
  
 void loop()
