@@ -83,15 +83,6 @@
     var c = document.getElementById("myCanvas");
     var chart = c.getContext("2d");
     var img = document.getElementById("layout");
-    //var picD = document.getElementById("picD");
-    //var picU = document.getElementById("picU");
-    //var picL = document.getElementById("picL");
-    //var picR = document.getElementById("picR");
-
-    //chart.drawImage(picL, 0, 20);
-    //chart.drawImage(picU, 0, -30);
-    //chart.drawImage(picR, 850,-40 );
-    //chart.drawImage(picD, 0, 390);
     chart.drawImage(img, 0, 0);
     drawGrid(hor,ver,grid);
 
@@ -296,6 +287,7 @@
       <p class="ins">Current position: <img id="pos" src="http://hhao.hostei.com/doc/files/CDN/star.png"/>&nbsp;
         X:<input id="x" class="input-text" type="text" value="8">&nbsp;
         Y:<input id="y" class="input-text" type="text" value="15">&nbsp;
+        <img id="picCar" src="http://hhao.hostei.com/doc/files/CDN/car.png"/>
       </p>
       </div>
       <div id = "control_panel">
@@ -305,14 +297,6 @@
         <img id= "b_r" class="button" src="http://hhao.hostei.com/doc/files/CDN/right.png" alt="left"/>
         <img id= "b_d" class="button" src="http://hhao.hostei.com/doc/files/CDN/down.png" alt="right"/><br/>
       </div>
-
-
-      <img id="layout" src="http://hhao.hostei.com/doc/files/CDN/layout.png" style="display:none;"/>
-      <img id="cen" src="http://hhao.hostei.com/doc/files/CDN/cen.png" style="display:none;"/>
-      <img id="picD" src="http://hhao.hostei.com/doc/files/CDN/D.png" style="display:none;"/>
-      <img id="picU" src="http://hhao.hostei.com/doc/files/CDN/U.png" style="display:none;"/>
-      <img id="picL" src="http://hhao.hostei.com/doc/files/CDN/L.png" style="display:none;"/>
-      <img id="picR" src="http://hhao.hostei.com/doc/files/CDN/R.png" style="display:none;"/>
     </div>
 
   </body>
