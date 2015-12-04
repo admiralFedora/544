@@ -23,33 +23,14 @@
       margin-top:10px;
     }
 
-    .submit{
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      font-family:Calibri;
-      font-size:14px;
-      padding:6px 18px;
-      color: #ffffff;
-      background-color:#19a5c8;
-      border: #19a5c8 solid 1px;
-      border-radius:4px;
-      width:160px;
-      box-shadow: 0 1px gray;
-      margin-top:5px;
-      align-items: center;
-    }
-
-    .submit:hover{cursor:pointer; opacity:0.6;}
     .input-text{ border:#9f9f9f solid 1px; width:90px;color:#19a5c8; padding: 6px 18px;margin:8px 6px;}
     p.gray{	color:#646464; margin-left:60px;	margin-top:3px;margin-bottom:3px}
 
     .ins{color:#646464; margin-left:60px;}
     #info{display:block;}
-    #msg{color:#636363; margin-left:60px;}
-
+    #msg{display:none; position:absolute; top:40px; width:50%;border-radius: 5px;margin-left:25%;background-color: #646464;color:#ffffff;display:block;opacity:0.8}
     #control_panel{background-color: #646464; height:200px;width:200px;border-radius:100px;opacity:0.35;
-    position:absolute; left:36%; top:45%}
+    position:absolute; left:36%; top:40%}
 
     #b_u{margin-left:60px;margin-top: 10px}
     #b_d{margin-left:60px;margin-top:-5px}
@@ -218,11 +199,15 @@
           cache: false,
           timeout: 10000,
           error: function(msg){
-              $("#msg").html("Server : Update failed");
+              $("#msg").html("<p>Server : Update failed</p>");
+              $("#msg>p").css({"margin":"8px 12px","margin-left": "15px"});
+              $("#msg").fadeIn(500);
           },
           success: function(msg){
             if(typeof(msg) == "object" && !(typeof(msg.msg) === 'undefined')){ // no sensor
-                $("#msg").html("Server:" + msg.msg);
+                $("#msg").html("<p>Server:" + msg.msg+"</p>");
+                $("#msg>p").css({"margin":"8px 12px","margin-left": "15px"});
+                $("#msg").fadeIn(500);
             }
                 rawData = msg;
           }
@@ -275,19 +260,19 @@
 
     <div class="head">
       <div id = "info">
-      <p class="red" >Boston University</p>
-      <p class="gray" >GROUP 1, Challenge 8</p>
-      <p class="gray" >Pete, Carlos, Hao, Avi, Ying</p>
+        <p class="red" >Boston University</p>
+        <p class="gray" >GROUP 1, Challenge 8</p>
+        <p class="gray" >Pete, Carlos, Hao, Avi, Ying</p>
       <br/>
       </div>
-      <p id="msg"></p>
+      <div  id="msg"></div>
       <canvas id="myCanvas"  width="1020px" height="420px"style="margin-left:62px; border:1px solid #d3d3d3;">
         Your browser does not support the HTML5 canvas tag.</canvas>
       <div class="canvas">
       <p class="ins">Current position: <img id="pos" src="http://hhao.hostei.com/doc/files/CDN/star.png"/>&nbsp;
         X:<input id="x" class="input-text" type="text" value="8">&nbsp;
         Y:<input id="y" class="input-text" type="text" value="15">&nbsp;
-        <img id="picCar" src="http://hhao.hostei.com/doc/files/CDN/car.png"/>
+        <img id="picCar" src="http://hhao.hostei.com/doc/files/CDN/car.png" style="vertical-align: middle"/>
       </p>
       </div>
       <div id = "control_panel">
