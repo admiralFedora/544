@@ -29,8 +29,9 @@
     .ins{color:#646464; margin-left:60px;}
     #info{display:block;}
     #msg{display:none; position:absolute; top:40px; width:50%;border-radius: 5px;margin-left:25%;background-color: #646464;color:#ffffff;display:block;opacity:0.8}
-    #control_panel{background-color: #646464; height:200px;width:200px;border-radius:100px;opacity:0.35;
-    position:absolute; margin-left:auto; margin-right:auto;top:40%}
+    #myCanvas{margin-left: 4%;width: 1020px;border:1px solid #d3d3d3;}
+    #control_panel{background-color: #646464; height:200px;width:200px;border-radius:100px;opacity:0.35;left:40%;top:40%;
+    position:absolute;}
 
     #b_u{margin-left:60px;margin-top: 10px}
     #b_d{margin-left:60px;margin-top:-5px}
@@ -266,7 +267,7 @@
       <br/>
       </div>
       <div  id="msg"></div>
-      <canvas id="myCanvas"  width="1020px" height="420px"style="margin-left:auto; margin-right:auto; border:1px solid #d3d3d3;">
+      <canvas id="myCanvas"  width="1020px" height="420px">
         Your browser does not support the HTML5 canvas tag.</canvas>
       <div class="canvas">
       <p class="ins">Current position: <img id="pos" src="http://hhao.hostei.com/doc/files/CDN/star.png"/>&nbsp;
@@ -285,7 +286,7 @@
 
       <img id="layout" src="http://hhao.hostei.com/doc/files/CDN/layout.png" style="display:none;"/>
       <img id="cen" src="http://hhao.hostei.com/doc/files/CDN/cen.png" style="display:none;"/>
-    
+
 
   </body>
 </html>
