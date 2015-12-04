@@ -133,6 +133,14 @@ bool shouldStart(){
   }
 }
 
+bool shouldTurn(){
+  if(digitalRead(XBEE_PIN) == LOW){
+    return false;
+  } else {
+    return true;
+  }
+}
+
 void deltaFrontBack_calc()
 {
   // get one new reading and remove the oldest
@@ -349,27 +357,33 @@ void driveStraight()
   Serial.print(pOutput);
 }
 
-void turnRight(){
+void turnLeft()
+{
+  wheels.write(135);
   esc.write(centerpoint + motorSpeed);
-
-  wheels.write(45);
+  delay(1000);
 }
 
 void driveCar()
 {
-   /*if (startRun && startup)
+   if (startRun && startup)
    {
-    getActual();
-    getError();
-    PID(); 
+    if (shouldTurn)
+    {
+      turnLeft();
+    }
+    else 
+    {
+      getActual();
+      getError();
+      PID(); 
    
-    driveStraight();
-    counter++;
+      driveStraight();
+      counter++;
+    }
    } else {
     esc.write(90);
-   }*/
-
-   turnRight();
+   }
 }
  
 void loop()
