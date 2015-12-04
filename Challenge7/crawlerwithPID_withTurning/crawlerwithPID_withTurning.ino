@@ -1,3 +1,5 @@
+//Input from sharpReader to GPIO Digital pin 4
+
 #include <Servo.h>
 #include <Wire.h>
 #include <math.h>
@@ -13,7 +15,7 @@
 #define LIDAR_FRONT 5
 #define LIDAR_BACK 6
 #define SONAR_PIN 7
-#define XBEE_PIN 4
+#define XBEE_PIN 4 //Repurpose for Input from sharpReader
 #define WARNING_PIN 12
 
 #define K_p .8
