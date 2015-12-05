@@ -14,9 +14,7 @@
 
 #define LIDAR_FRONT 5
 #define LIDAR_BACK 6
-#define SONAR_PIN 7
-#define XBEE_PIN 3 //Repurpose for Input from sharpReader
-#define TURNING_SIGNAL 4
+#define TURN_SIGNAL 2
 #define WARNING_PIN 12
 
 #define K_p .8
@@ -31,7 +29,7 @@ Servo wheels; // servo for turning the wheels
 Servo esc; // not actually a servo, but controlled like one!
 volatile bool startup = true; // used to ensure startup only happens once
 volatile bool startRun = true;
-volatile bool Turn = false; //DECLARE TURNING
+volatile bool turn = false; //DECLARE TURNING
 int frontDist = 0; 
 int backDist = 0;
 int deltaFrontBack = 0;
@@ -84,13 +82,10 @@ void setup()
   pinMode(LIDAR_FRONT, OUTPUT);
   pinMode(LIDAR_BACK, OUTPUT);
   pinMode(WARNING_PIN, OUTPUT);
-  pinMode(SONAR_PIN, INPUT_PULLUP);
-  pinMode(XBEE_PIN, INPUT_PULLUP);
-  pinMode(TURNING_SIGNAL, INPUT_PULLUP);
+  pinMode(TURN_SIGNAL, INPUT_PULLUP);
 
   digitalWrite(LIDAR_FRONT, LOW);
   digitalWrite(LIDAR_BACK, LOW);
-  digitalWrite(TURNING_SIGNAL, LOW);
 
   distanceDesired = 60.0;
 
@@ -98,14 +93,13 @@ void setup()
   initReadings(LIDAR_BACK, &back);
 
   deltaFrontBack_calc();
-    
-
-  //distanceDesired = getLidarDistance(LIDAR_FRONT);
   
   maxError = 1.0 * distanceDesired;
   minError = -1.0 * distanceDesired;
 
   timer.setInterval(50, driveCar);
+
+  attachInterrupt(digitalPinToInterrupt(TURN_SIGNAL), turnISR, CHANGE);
 }
 
 void initReadings(int sensor, Fifo **fifo){
@@ -122,34 +116,8 @@ void initReadings(int sensor, Fifo **fifo){
   }
 }
 
-bool shouldRun(){
-  if(digitalRead(SONAR_PIN) == LOW){
-    Serial.println("stopped");
-    return false;
-  } else {
-    return true;
-  }
-}
-
-bool shouldStart(){
-  if(digitalRead(XBEE_PIN) == LOW){
-    return false;
-  } else {
-    return true;
-  }
-}
-
-bool shouldTurn(){
-  if(digitalRead(TURNING_SIGNAL) == HIGH)
-  {
-    Serial.println("HIGH");
-    return true;
-  }
-  else
-  {
-    Serial.println("LOW");
-    return false;
-  }
+void turnISR(){
+  turn = !turn;
 }
 
 void deltaFrontBack_calc()
@@ -170,22 +138,6 @@ void deltaFrontBack_calc()
   // average the readings
   frontDist = returnAverage(front);
   backDist = returnAverage(back);
-  
-  /*if (abs(frontDist - backDist) <= 10)
-  {
-    deltaFrontBack = 0;
-  }
-  else
-  {
-    if (frontDist - backDist <=-10)
-    {
-      deltaFrontBack = frontDist - backDist + 10;
-    }
-    else
-    {
-      deltaFrontBack = frontDist - backDist - 10;
-    }
-   }*/
 
    deltaFrontBack = frontDist - backDist;
 }
@@ -260,20 +212,6 @@ void getActual()
 {
   thetaActual = atan ( (deltaFrontBack)/lengthbetweensensors);
   distanceActual = frontDist * cos (thetaActual);
-
-  //Serial.print("\n\nTime:");
-  //Serial.print(counter);
-
-  //Serial.print("\nFront:");
-  //Serial.print(frontDist);
-  //Serial.print("\nBack:");
-  //Serial.print(backDist);
-
-  //Serial.print("\nTheta Actual: ");
-  //Serial.print(thetaActual);
-
-  //Serial.print("\nDistance Actual: ");
-  //Serial.print(distanceActual); 
 }
 
 void getError()
@@ -282,46 +220,13 @@ void getError()
   distanceError = distanceDesired - distanceActual;
   float triangleTheta = -1 * atan(distanceError/distanceDesired);
   thetaTurn = triangleTheta;
-  /*if(triangleTheta < 0){
-    thetaTurn = -1 * (-(pi/2) - triangleTheta);
-  } else if (triangleTheta > 0) {
-    thetaTurn = -1 * ((pi/2) - triangleTheta);
-  } else {
-    thetaTurn = 0;
-  }*/
-  //thetaTurn = -1 * (90 - atan(distanceDesired/distanceError));
-  /*if (distanceError >= maxError)
-  {
-    thetaTurn = -thetaMax; //steer right all the way!
-  }
-  else if (distanceError <= minError)
-  {
-    thetaTurn = thetaMax; //steer left all the way!
-  }
-  else
-  {
-    thetaTurn = -(1/distanceRatio)*thetaMax * (distanceError/maxError);
-  }*/
-
-  //thetaTurn = -1*thetaMax * (distanceError/maxError);
 
   if(distanceRatio < 1){
     Error = (.1 * thetaActual) + (1/distanceRatio) * thetaTurn; //softer steer dependent on how large the Error is
   } else {
     Error = (.1 * thetaActual) + (distanceRatio) * thetaTurn; //softer steer dependent on how large the Error is
   }
-   
-  //Serial.print("\nDistanceRatio:");
-  //Serial.print(distanceRatio);
   
-  //Serial.print("\nDistanceError:");
-  //Serial.print(distanceError);
-
-  //Serial.print("\nThetaTurn: ");
-  //Serial.print(thetaTurn);
-  
-  //Serial.print("\nError: ");
-  //Serial.print(Error);
 }
 
 void PID() //THIS WILL GIVE YOU 'OUTPUT' TO THE DRIVESTRAIGHT FUNCTION
@@ -331,12 +236,7 @@ void PID() //THIS WILL GIVE YOU 'OUTPUT' TO THE DRIVESTRAIGHT FUNCTION
   Derivative = (Error - pError)/dt;
   //Derivative = (Error - returnAverage(bError))/dt;
   Output = radToDeg((K_p * Error) + (K_i * Integral) + (K_d * Derivative));
-  pError = Error;
-
-  /*Fifo *newError = (Fifo*) malloc(sizeof(Fifo));
-  newError->value = Error;
-  insertAndPop(newError, &bError);*/
-  
+  pError = Error; 
 }
 
 void driveStraight()
@@ -357,42 +257,24 @@ void driveStraight()
     digitalWrite(WARNING_PIN, LOW);
   }
 
-  //pOutput += Output;
   wheels.write(pOutput);
   
   deltaFrontBack_calc();
-
-  //Serial.print("\nPID Output:");
-  //Serial.print(Output);
-  //Serial.print("\nPID pOutput:");
-  //Serial.print(pOutput);
 }
-/*
-void shouldTurn(){
-  if(digitalRead(TURNING_SIGNAL) == HIGH){
-    //Serial.println("Reader is HIGH");
-    Serial.println("Car Detected");
-    Turn = true;
-  } else {
-    Turn = false;
-  }
-}*/
 
 void turnLeft()
 {
   wheels.write(135);
   esc.write(centerpoint + motorSpeed);
-  delay(1000);
-  //digitalWrite(TURNING_SIGNAL, LOW);//reset
 }
 
 void driveCar()
 {
    if (startRun && startup)
    {
-    if (shouldTurn() == true)
+    if (turn)
     {
-      //Serial.println("TURNING");
+      Serial.println("TURNING");
       turnLeft();
       counter++;
     }

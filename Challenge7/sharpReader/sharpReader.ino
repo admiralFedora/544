@@ -29,6 +29,8 @@ void setup()
   pinMode(ledPIN, OUTPUT);
   pinMode(piPIN, OUTPUT);
 
+  digitalWrite(piPIN, LOW);
+
   Serial.println("Done with Setup!");
 
 }
@@ -49,7 +51,7 @@ void loop()
           digitalWrite(ledPIN, HIGH);
           digitalWrite(piPIN, HIGH);
           Serial.println("Turning!!!!!!!!!!!!");
-          delay(3000);
+          delay(1000);
           break;
       }
     }
