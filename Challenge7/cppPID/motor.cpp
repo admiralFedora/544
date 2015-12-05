@@ -19,6 +19,6 @@ void Motor::writeNoSafe(int value){
 }
 
 int Motor::angleToPulseWidth(int value){
-	float temp = (1000.0/90.0)*value;
-	return (int) (temp+500);
+	float temp = (500.0/90.0)*value;
+	return (int) (temp+1000);
 }
