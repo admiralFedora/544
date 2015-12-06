@@ -40,6 +40,22 @@
     #b_s{color:#ffffff;background-color:#ff4848 ;width:75px; height:75px;border: #ff4848 solid 0px;
          margin-top: -65px;vertical-align: text-top;border-radius: 8px;}
     #b_u:hover,#b_d:hover,#b_l:hover,#b_r:hover,#b_s:hover{cursor:pointer}
+    #setPoint{
+      	-webkit-appearance: none;
+         	-moz-appearance: none;
+         	appearance: none;
+      	font-family:Calibri;
+      	font-size:14px;
+      	padding:6px 18px;
+      	color: #ffffff;
+      	background-color:#19a5c8;
+      	border: #19a5c8 solid 1px;
+      	border-radius:4px;
+      	width:150px;
+      	box-shadow: 0 1px gray;
+    }
+    #setPoint:hover{cursor:pointer;opacity: 0.8}
+    #monitor{position:absolute; right:20px; top: 20px; width:20%; height:20%}
   </style>
 
 
@@ -239,7 +255,7 @@
 
      $(".button").hover(function(){
 			$(this).stop().animate({
-				opacity:"0.8"
+				opacity:"0.4"
 				},300);
 			},function(){
 				$(this).stop().animate({
@@ -271,17 +287,22 @@
         Your browser does not support the HTML5 canvas tag.</canvas>
       <div class="canvas">
       <p class="ins">Current position: <img id="pos" src="http://hhao.hostei.com/doc/files/CDN/star.png"/>&nbsp;
+      Start Point: <img id="pos" src="http://hhao.hostei.com/doc/files/CDN/flag.png"/>&nbsp;
         X:<input id="x" class="input-text" type="text" value="8">&nbsp;
         Y:<input id="y" class="input-text" type="text" value="15">&nbsp;
+        <input id="setPoint" class="button" type="submit" value="Set Start Point">&nbsp;
         <img id="picCar" src="http://hhao.hostei.com/doc/files/CDN/car.png" style="vertical-align: middle"/>
       </p>
       </div>
       <div id = "control_panel">
         <img id= "b_u" class="button" src="http://hhao.hostei.com/doc/files/CDN/up.png" alt="up"/><br/>
         <img id= "b_l" class="button" src="http://hhao.hostei.com/doc/files/CDN/left.png" alt="down"/>
-        <input id="b_s" class="button" type="submit" value="Start">
+        <input id="b_s" class="button" type="submit" value="Stop">
         <img id= "b_r" class="button" src="http://hhao.hostei.com/doc/files/CDN/right.png" alt="left"/>
         <img id= "b_d" class="button" src="http://hhao.hostei.com/doc/files/CDN/down.png" alt="right"/><br/>
+      </div>
+
+      <div id="monitor">
       </div>
 
       <img id="layout" src="http://hhao.hostei.com/doc/files/CDN/layout.png" style="display:none;"/>
