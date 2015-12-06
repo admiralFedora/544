@@ -4,7 +4,6 @@
 #include <Wire.h>
 #include <math.h>
 #include "Fifo.h"
-#include <SimpleTimer.h>
 
 #define    LIDARLite_ADDRESS   0x62          // Default I2C Address of LIDAR-Lite.
 #define    RegisterMeasure     0x00          // Register to write to initiate ranging.
@@ -24,6 +23,8 @@
 #define lengthbetweensensors 20.0 //in centimeters, must be the same unit as getLidarDistance
 #define centerpoint 82 //CALIBRATED CENTER
 #define motorSpeed -10
+
+#define Delay(x) (spin(x, millis())) // don't use the built in delay function as that doesn't work so well with ISRs
 
 Servo wheels; // servo for turning the wheels
 Servo esc; // not actually a servo, but controlled like one!
@@ -54,7 +55,6 @@ float Derivative;
 
 Fifo *front, *back;
 
-SimpleTimer timer;
 int counter = 0;
 
 // wheel angle > 90 turns left (facing forward)
@@ -66,7 +66,6 @@ int counter = 0;
 void setup()
 {
   Serial.begin(9600);
-  //pinMode(2, INPUT);
   Serial.println("< START >");
   
   wheels.attach(8); // initialize wheel servo to Digital IO Pin #8
@@ -82,7 +81,10 @@ void setup()
   pinMode(LIDAR_FRONT, OUTPUT);
   pinMode(LIDAR_BACK, OUTPUT);
   pinMode(WARNING_PIN, OUTPUT);
-  pinMode(TURN_SIGNAL, INPUT_PULLUP);
+  pinMode(TURN_SIGNAL, INPUT);
+  pinMode(11, OUTPUT);
+
+  digitalWrite(11, LOW);
 
   digitalWrite(LIDAR_FRONT, LOW);
   digitalWrite(LIDAR_BACK, LOW);
@@ -96,8 +98,6 @@ void setup()
   
   maxError = 1.0 * distanceDesired;
   minError = -1.0 * distanceDesired;
-
-  timer.setInterval(50, driveCar);
 
   attachInterrupt(digitalPinToInterrupt(TURN_SIGNAL), turnISR, CHANGE);
 }
@@ -117,7 +117,15 @@ void initReadings(int sensor, Fifo **fifo){
 }
 
 void turnISR(){
+  Serial.println("ISR");
   turn = !turn;
+}
+
+// avoid using delay
+void spin(int period, unsigned long startTime){
+  while((millis() - startTime) < period){
+    // do nothing lol
+  }
 }
 
 void deltaFrontBack_calc()
@@ -139,6 +147,11 @@ void deltaFrontBack_calc()
   frontDist = returnAverage(front);
   backDist = returnAverage(back);
 
+  Serial.print("Front:");
+  Serial.println(frontDist);
+  Serial.print("Back:");
+  Serial.println(backDist);
+
    deltaFrontBack = frontDist - backDist;
 }
 
@@ -147,13 +160,11 @@ void calibrateESC()
 {
   int startupDelay = 1000; // time to pause at each calibration step
     esc.write(180); // full backwards
-    delay(startupDelay);
+    Delay(startupDelay);
     esc.write(0); // full forwards
-    delay(startupDelay);
+    Delay(startupDelay);
     esc.write(90); // neutral
-    delay(startupDelay);
-    esc.write(90); // reset the ESC to neutral (non-moving) value
-    wheels.write(82); // offset the trim of the wheels
+    Delay(startupDelay);
 }
 
 // Get a measurement from the LIDAR Lite
@@ -166,13 +177,13 @@ int lidarGetRange(void)
   Wire.write((int)MeasureValue); // sets register pointer to  (0x00)  
   Wire.endTransmission(); // stop transmitting
 
-  delay(20); // Wait 20ms for transmit
+  Delay(20); // Wait 20ms for transmit
 
   Wire.beginTransmission((int)LIDARLite_ADDRESS); // transmit to LIDAR-Lite
   Wire.write((int)RegisterHighLowB); // sets register pointer to (0x8f)
   Wire.endTransmission(); // stop transmitting
 
-  delay(20); // Wait 20ms for transmit
+  Delay(20); // Wait 20ms for transmit
   
   Wire.requestFrom((int)LIDARLite_ADDRESS, 2); // request 2 bytes from LIDAR-Lite
 
@@ -193,7 +204,7 @@ int getLidarDistance(int sensor)
   digitalWrite(LIDAR_BACK, LOW);
 
   digitalWrite(sensor, HIGH);
-  delay(10); // delay for turning on sensor
+  Delay(10); // delay for turning on sensor
 
   return lidarGetRange();
 }
@@ -257,6 +268,8 @@ void driveStraight()
     digitalWrite(WARNING_PIN, LOW);
   }
 
+  Serial.print("Output");
+  Serial.println(pOutput);
   wheels.write(pOutput);
   
   deltaFrontBack_calc();
@@ -270,36 +283,30 @@ void turnLeft()
 
 void driveCar()
 {
-   if (startRun && startup)
-   {
-    if (turn)
-    {
-      Serial.println("TURNING");
-      turnLeft();
-      counter++;
-    }
-    else 
-    {
-      getActual();
-      getError();
-      PID(); 
-   
-      driveStraight();
-      //shouldTurn();
-      counter++;
-    }
-   } else {
-    esc.write(90);
-   }
+  if (turn)
+  {
+    Serial.println("TURNING");
+    
+    turnLeft();
+    counter++;
+  }
+  else 
+  {
+    Serial.println("STRAIGHT DRIVE");
+    digitalWrite(11, HIGH);
+    getActual();
+    getError();
+    PID(); 
+ 
+    driveStraight();
+    //shouldTurn();
+    counter++;
+  }
 }
  
 void loop()
 {
-   //driveCar();
-   //startRun = shouldStart();
-   //startup = shouldRun();
-   //Turn = shouldTurn();
-   //delay(50);
-   timer.run();
+   driveCar();
+   Delay(50);
 }
 

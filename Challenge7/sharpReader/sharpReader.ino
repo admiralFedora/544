@@ -51,7 +51,7 @@ void loop()
           digitalWrite(ledPIN, HIGH);
           digitalWrite(piPIN, HIGH);
           Serial.println("Turning!!!!!!!!!!!!");
-          delay(1000);
+          delay(1500);
           break;
       }
     }
