@@ -3,14 +3,20 @@ var app = require('express')();
 var SerialPort = require("serialport");
 var Q = require("q");
 var knn = require("alike");
+var gpio = require('rpi-gpio');
 
 
 //--------------------------------------------------------------------
+//set of pin numbers
+var pinUp = 1;
+var pinDown = 2;
+var pinLeft = 3;
+var pinRight = 4;
+var pinStop = 0;
+var pinSpeed = 5;
 
 
 //Setup and read the value of a pin
-var gpio = require('rpi-gpio');
-
 gpio.setup(7, gpio.DIR_IN, readInput);
 
 function readInput() {
@@ -20,18 +26,16 @@ function readInput() {
 }
 
 //Setup and write to a pin
-var gpio = require('rpi-gpio');
-
 gpio.setup(7, gpio.DIR_OUT, write);
 
 function write() {
     gpio.write(7, true, function(err) {
         if (err) throw err;
-        console.log('Written to pin');
+        console.log('Written to pin 7');
     });
 }
-Listen for changes on a pin
-var gpio = require('rpi-gpio');
+
+
 
 gpio.on('change', function(channel, value) {
     console.log('Channel ' + channel + ' value is now ' + value);
@@ -39,7 +43,7 @@ gpio.on('change', function(channel, value) {
 gpio.setup(7, gpio.DIR_IN, gpio.EDGE_BOTH);
 
 //Unexport pins opened by the module when finished
-var gpio = require('../rpi-gpio');
+/*var gpio = require('../rpi-gpio');
 
 gpio.on('export', function(channel) {
     console.log('Channel set: ' + channel);
@@ -52,15 +56,12 @@ gpio.setup(16, gpio.DIR_OUT, pause);
 function pause() {
     setTimeout(closePins, 2000);
 }
-
+*/
 function closePins() {
     gpio.destroy(function() {
         console.log('All pins unexported');
     });
 }
-
-
-
 
 //-------------------------------------------------------------------------
 
