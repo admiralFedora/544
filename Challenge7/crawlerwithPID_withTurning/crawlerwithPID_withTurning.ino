@@ -61,6 +61,8 @@ Fifo *front, *back;
 
 int counter = 0;
 
+unsigned long timeStamp;
+
 // wheel angle > 90 turns left (facing forward)
 // wheel angle < 90 turns right (facing forward)
 
@@ -93,7 +95,7 @@ void setup()
   digitalWrite(LIDAR_FRONT, LOW);
   digitalWrite(LIDAR_BACK, LOW);
 
-  distanceDesired = 60.0;
+  distanceDesired = 80.0;
 
   initReadings(LIDAR_FRONT, &front);
   initReadings(LIDAR_BACK, &back);
@@ -285,6 +287,8 @@ void turnLeft()
   wheels.write(135); //MAYBE IT IS NO LONGER 135 SINCE TRUE CENTER IS SET TO 82
   esc.write(centerpoint + turnSpeed);
   turning = true;
+
+  timeStamp = millis();
 }
 
 //TESTING IT I FEEL LIKE WE NEED TO TURN RIGHT, RIGHT AFTER WE TURN LEFT
@@ -310,8 +314,12 @@ void driveCar()
     {
       esc.write(centerpoint + motorSpeed);
       wheels.write(centerpoint);
-      delay(4500);
-      turning = false;
+      getActual();
+      getError();
+
+      if((millis() - timeStamp) < 4500){
+        turning = false;
+      }
     } 
     else
     {
@@ -325,7 +333,7 @@ void driveCar()
    
       driveStraight();
       counter++;
-      }
+    }
   }
 }
  
