@@ -280,7 +280,14 @@ void driveStraight()
 
 void turnLeft()
 {
-  wheels.write(135);
+  wheels.write(135); //MAYBE IT IS NO LONGER 135 SINCE TRUE CENTER IS SET TO 82
+  esc.write(centerpoint + motorSpeed);
+}
+
+//TESTING IT I FEEL LIKE WE NEED TO TURN RIGHT, RIGHT AFTER WE TURN LEFT
+void turnRight()
+{
+  wheels.write(45);
   esc.write(centerpoint + motorSpeed);
 }
 
