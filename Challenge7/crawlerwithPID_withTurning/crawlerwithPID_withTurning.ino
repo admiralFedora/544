@@ -25,6 +25,7 @@
 //HARDCODED
 #define centerpoint 82 //CALIBRATED CENTER
 #define motorSpeed -10
+#define turnSpeed -20
 
 #define Delay(x) (spin(x, millis())) // don't use the built in delay function as that doesn't work so well with ISRs
 
@@ -33,6 +34,7 @@ Servo esc; // not actually a servo, but controlled like one!
 volatile bool startup = true; // used to ensure startup only happens once
 volatile bool startRun = true;
 volatile bool turn = false; //DECLARE TURNING
+bool turning = false;
 int frontDist = 0; 
 int backDist = 0;
 int deltaFrontBack = 0;
@@ -281,14 +283,16 @@ void driveStraight()
 void turnLeft()
 {
   wheels.write(135); //MAYBE IT IS NO LONGER 135 SINCE TRUE CENTER IS SET TO 82
-  esc.write(centerpoint + motorSpeed);
+  esc.write(centerpoint + turnSpeed);
+  turning = true;
 }
 
 //TESTING IT I FEEL LIKE WE NEED TO TURN RIGHT, RIGHT AFTER WE TURN LEFT
 void turnRight()
 {
   wheels.write(45);
-  esc.write(centerpoint + motorSpeed);
+  esc.write(centerpoint + turnSpeed);
+  turning = true;
 }
 
 void driveCar()
@@ -302,14 +306,26 @@ void driveCar()
   }
   else 
   {
-    Serial.println("STRAIGHT DRIVE");
-    digitalWrite(TURN_LED, HIGH);
-    getActual();
-    getError();
-    PID(); 
- 
-    driveStraight();
-    counter++;
+    if (turning)
+    {
+      esc.write(centerpoint + motorSpeed);
+      wheels.write(centerpoint);
+      delay(4500);
+      turning = false;
+    } 
+    else
+    {
+        
+      
+      Serial.println("STRAIGHT DRIVE");
+      digitalWrite(TURN_LED, HIGH);
+      getActual();
+      getError();
+      PID(); 
+   
+      driveStraight();
+      counter++;
+      }
   }
 }
  
