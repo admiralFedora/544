@@ -15,12 +15,14 @@
 #define LIDAR_BACK 6
 #define TURN_SIGNAL 2
 #define WARNING_PIN 12
+#define TURN_LED 11
 
 #define K_p .8
 #define K_i 0.0
 #define K_d 525.2
 #define dt 160
 #define lengthbetweensensors 20.0 //in centimeters, must be the same unit as getLidarDistance
+//HARDCODED
 #define centerpoint 82 //CALIBRATED CENTER
 #define motorSpeed -10
 
@@ -82,10 +84,10 @@ void setup()
   pinMode(LIDAR_BACK, OUTPUT);
   pinMode(WARNING_PIN, OUTPUT);
   pinMode(TURN_SIGNAL, INPUT);
-  pinMode(11, OUTPUT);
+  pinMode(TURN_LED, OUTPUT);
 
-  digitalWrite(11, LOW);
-
+  // Initialization
+  digitalWrite(TURN_LED, LOW);
   digitalWrite(LIDAR_FRONT, LOW);
   digitalWrite(LIDAR_BACK, LOW);
 
@@ -121,6 +123,7 @@ void turnISR(){
   turn = !turn;
 }
 
+// NEW DELAY FUNCTION
 // avoid using delay
 void spin(int period, unsigned long startTime){
   while((millis() - startTime) < period){
@@ -293,13 +296,12 @@ void driveCar()
   else 
   {
     Serial.println("STRAIGHT DRIVE");
-    digitalWrite(11, HIGH);
+    digitalWrite(TURN_LED, HIGH);
     getActual();
     getError();
     PID(); 
  
     driveStraight();
-    //shouldTurn();
     counter++;
   }
 }
