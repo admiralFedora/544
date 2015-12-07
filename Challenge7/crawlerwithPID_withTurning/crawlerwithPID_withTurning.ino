@@ -39,6 +39,9 @@ int frontDist = 0;
 int backDist = 0;
 int deltaFrontBack = 0;
 
+bool ignoreFront = false;
+bool ignoreBack = false;
+
 int Output = 82; //OUTPUT
 int pOutput = 82; // PREVIOUS OUTPUT
 
@@ -142,12 +145,18 @@ void deltaFrontBack_calc()
   newFront->value = getLidarDistance(LIDAR_FRONT);
   if(newFront->value <= (returnAverage(front)+150)){
     insertAndPop(newFront, &front);
+    ignoreFront = false;
+  } else {
+    ignoreFront = true;
   }
 
   Fifo *newBack = (Fifo*) malloc(sizeof(Fifo));
   newBack->value = getLidarDistance(LIDAR_BACK);
   if(newBack->value <= (returnAverage(back)+150)){
     insertAndPop(newBack, &back);
+    ignoreBack = false;
+  } else {
+    ignoreBack = true;
   }
 
   // average the readings
@@ -250,11 +259,12 @@ void getError()
 void PID() //THIS WILL GIVE YOU 'OUTPUT' TO THE DRIVESTRAIGHT FUNCTION
 {
   //Error = Error - pError;
-  Integral = Integral + (Error*dt);
-  Derivative = (Error - pError)/dt;
-  //Derivative = (Error - returnAverage(bError))/dt;
-  Output = radToDeg((K_p * Error) + (K_i * Integral) + (K_d * Derivative));
-  pError = Error; 
+  if(!ignoreFront && !ignoreBack){
+    Integral = Integral + (Error*dt);
+    Derivative = (Error - pError)/dt;
+    Output = radToDeg((K_p * Error) + (K_i * Integral) + (K_d * Derivative));
+    pError = Error; 
+  }
 }
 
 void driveStraight()
