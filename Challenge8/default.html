@@ -245,6 +245,115 @@
 
     }
 
+function up(){
+  var rawData;
+    $.when(
+      $.ajax({
+          url: "/up",
+          type: 'GET',
+          async: false,
+          cache: false,
+          timeout: 10000,
+          error: function(msg){
+              $("#msg").html("Server : Drive forward failed");
+          },
+          success: function(msg){
+            //messages
+          }
+      })
+    ).then(function() {
+      //update canvas
+    });
+}
+
+
+function down(){
+  var rawData;
+    $.when(
+      $.ajax({
+          url: "/down",
+          type: 'GET',
+          async: false,
+          cache: false,
+          timeout: 10000,
+          error: function(msg){
+              $("#msg").html("Server : Drive backward failed");
+          },
+          success: function(msg){
+            //messages
+          }
+      })
+    ).then(function() {
+      //update canvas
+    });
+}
+
+
+function left(){
+  var rawData;
+    $.when(
+      $.ajax({
+          url: "/left",
+          type: 'GET',
+          async: false,
+          cache: false,
+          timeout: 10000,
+          error: function(msg){
+              $("#msg").html("Server : Turn left failed");
+          },
+          success: function(msg){
+            //messages
+          }
+      })
+    ).then(function() {
+      //update canvas
+    });
+}
+
+
+function right(){
+  var rawData;
+    $.when(
+      $.ajax({
+          url: "/right",
+          type: 'GET',
+          async: false,
+          cache: false,
+          timeout: 10000,
+          error: function(msg){
+              $("#msg").html("Server : Turn right failed");
+          },
+          success: function(msg){
+            //messages
+          }
+      })
+    ).then(function() {
+      //update canvas
+    });
+
+    function stop(){
+      var rawData;
+        $.when(
+          $.ajax({
+              url: "/stop",
+              type: 'GET',
+              async: false,
+              cache: false,
+              timeout: 10000,
+              error: function(msg){
+                  $("#msg").html("Server : Stop failed");
+              },
+              success: function(msg){
+                //messages
+              }
+          })
+        ).then(function() {
+          //update canvas
+        });
+    }
+
+}
+
   //layout position: (45,30) - (848,392)
   window.onload = function() {
       updateGraph()
