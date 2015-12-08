@@ -169,11 +169,11 @@ app.get('/', function(req, res){
   res.sendfile("default.html"); //return the default page
 })
 
-app.get('/up', function(){console.log("\nup")});
-app.get('/down', function(){console.log("\ndown")});
-app.get('/right', function(){console.log("\nright")});
-app.get('/left', function(){console.log("\nleft")});
-app.get('/stop', function(){console.log("\nstop")});
+app.get('/up', function(req, res){res.json({"msg":"Drive forward;"});console.log("\nup")});
+app.get('/down', function(req, res){res.json({"msg":"Drive backward;"});console.log("\ndown")});
+app.get('/right', function(req, res){res.json({"msg":"Turn right;"});console.log("\nright")});
+app.get('/left', function(req, res){res.json({"msg":"Turn left;"});console.log("\nleft")});
+app.get('/stop', function(req, res){res.json({"msg":"Car stopped;"});console.log("\nstop")});
 
 //still need to read the speed
 

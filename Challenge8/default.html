@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Challenge5 - Group1</title>
+    <title>Challenge8 - Group1</title>
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
   </head>
@@ -19,16 +19,17 @@
       font-weight:bold;
       margin-left:60px;
       font-size:22px;
-      margin-bottom:15px;
+      margin-bottom:5px;
       margin-top:10px;
     }
 
     .input-text{ border:#9f9f9f solid 1px; width:90px;color:#19a5c8; padding: 6px 18px;margin:8px 6px;}
     p.gray{	color:#646464; margin-left:60px;	margin-top:3px;margin-bottom:3px}
 
-    .ins{color:#646464; margin-left:60px;}
+    .ins{color:#646464; margin-left:60px;margin-top:5px}
     #info{display:block;}
     #msg{display:none; position:absolute; top:40px; width:50%;border-radius: 5px;margin-left:25%;background-color: #646464;color:#ffffff;display:block;opacity:0.8}
+    #msg>p{margin:8px 12px;margin-left: 15px}
     #myCanvas{margin-left: 4%;width: 1020px;border:1px solid #d3d3d3;}
     #control_panel{background-color: #646464; height:200px;width:200px;border-radius:100px;opacity:0.35;left:40%;top:40%;
     position:absolute;}
@@ -213,7 +214,7 @@
       }
   }
 
-  function getData(){
+  /*function getData(){
     var rawData;
     $.when(
       $.ajax({
@@ -250,7 +251,7 @@
       }
     });
 
-    }
+  }*/
 
 function up(){
   var rawData;
@@ -262,10 +263,11 @@ function up(){
           cache: false,
           timeout: 10000,
           error: function(msg){
-              $("#msg").html("Server : Drive forward failed");
+              $("#msg").html("<p>Server : Drive forward failed</p>");
           },
           success: function(msg){
-            //messages
+            $("#msg").html("<p>"+msg.msg+"</p>");
+            $("#msg").fadeIn(500);
           }
       })
     ).then(function() {
@@ -284,10 +286,11 @@ function down(){
           cache: false,
           timeout: 10000,
           error: function(msg){
-              $("#msg").html("Server : Drive backward failed");
+              $("#msg").html("<p>Server : Drive backward failed</p>");
           },
           success: function(msg){
-            //messages
+            $("#msg").html("<p>"+msg.msg+"</p>");
+            $("#msg").fadeIn(500);
           }
       })
     ).then(function() {
@@ -306,10 +309,11 @@ function left(){
           cache: false,
           timeout: 10000,
           error: function(msg){
-              $("#msg").html("Server : Turn left failed");
+              $("#msg").html("<p>Server : Turn left failed</p>");
           },
           success: function(msg){
-            //messages
+            $("#msg").html("<p>"+msg.msg+"</p>");
+            $("#msg").fadeIn(500);
           }
       })
     ).then(function() {
@@ -328,10 +332,11 @@ function right(){
           cache: false,
           timeout: 10000,
           error: function(msg){
-              $("#msg").html("Server : Turn right failed");
+              $("#msg").html("<p>Server : Turn right failed</p>");
           },
           success: function(msg){
-            //messages
+            $("#msg").html("<p>"+msg.msg+"</p>");
+            $("#msg").fadeIn(500);
           }
       })
     ).then(function() {
@@ -348,10 +353,11 @@ function right(){
               cache: false,
               timeout: 10000,
               error: function(msg){
-                  $("#msg").html("Server : Stop failed");
+                  $("#msg").html("<p>Server : Stop failed</p>");
               },
               success: function(msg){
-                //messages
+                $("#msg").html("<p>"+msg.msg+"</p>");
+                $("#msg").fadeIn(500);
               }
           })
         ).then(function() {
@@ -367,7 +373,7 @@ function right(){
   }
 
   $( document ).ready(function() {
-     setInterval(getData, 12000); //update every 12 secs
+     //setInterval(getData, 12000); //update every 12 secs
 
      $(".button").hover(function(){
 			$(this).stop().animate({
@@ -437,19 +443,23 @@ function right(){
 
           /*button press functions */
           $("#b_u").click(function(){
-            console.log("w or up");
+            up();
+            console.log("Up");
           });
 
           $("#b_d").click(function(){
-            console.log("s or down");
+            down();
+            console.log("Down");
           });
 
           $("#b_l").click(function(){
-            console.log("a or left");;
+            left();
+            console.log("Left");;
           });
 
           $("#b_r").click(function(){
-            console.log("d or right");
+            right();
+            console.log("Right");
           });
 
   });
