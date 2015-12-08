@@ -15,7 +15,6 @@ var pinTurn = 27;
 
 var steps = 0;
 var stepsArray = [];
-
 gpio.on('change', function(channel, value) {
     if(channel == pinSpeed){
       console.log("change");
@@ -35,6 +34,7 @@ gpio.setup(pinUp, gpio.DIR_OUT);
 gpio.setup(pinDown, gpio.DIR_OUT);
 gpio.setup(pinLeft, gpio.DIR_OUT);
 gpio.setup(pinRight, gpio.DIR_OUT);
+
 
 function demandControl(){
   gpio.write(pinStop, true);
@@ -167,13 +167,14 @@ function closePins() {
 /*Ajax requests*/
 app.get('/', function(req, res){
   res.sendfile("default.html"); //return the default page
-});
+})
 
-app.get('/up', up(req));
-app.get('/down', down(req));
-app.get('/right', right(req));
-app.get('/left', left(req));
-app.get('/stop', demandControl(req));
+app.get('/up', function(){console.log("\nup")});
+app.get('/down', function(){console.log("\ndown")});
+app.get('/right', function(){console.log("\nright")});
+app.get('/left', function(){console.log("\nleft")});
+app.get('/stop', function(){console.log("\nstop")});
+
 //still need to read the speed
 
 function mapData(){
