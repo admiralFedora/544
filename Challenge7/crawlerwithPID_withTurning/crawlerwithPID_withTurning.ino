@@ -40,7 +40,6 @@ int backDist = 0;
 int deltaFrontBack = 0;
 
 bool ignoreFront = false;
-bool ignoreBack = false;
 
 int Output = 82; //OUTPUT
 int pOutput = 82; // PREVIOUS OUTPUT
@@ -154,9 +153,6 @@ void deltaFrontBack_calc()
   newBack->value = getLidarDistance(LIDAR_BACK);
   if(newBack->value <= (returnAverage(back)+150)){
     insertAndPop(newBack, &back);
-    ignoreBack = false;
-  } else {
-    ignoreBack = true;
   }
 
   // average the readings
@@ -259,11 +255,13 @@ void getError()
 void PID() //THIS WILL GIVE YOU 'OUTPUT' TO THE DRIVESTRAIGHT FUNCTION
 {
   //Error = Error - pError;
-  if(!ignoreFront && !ignoreBack){
+  if(!ignoreFront){
     Integral = Integral + (Error*dt);
     Derivative = (Error - pError)/dt;
     Output = radToDeg((K_p * Error) + (K_i * Integral) + (K_d * Derivative));
     pError = Error; 
+  } else {
+    Output = 0;
   }
 }
 
@@ -326,7 +324,7 @@ void driveCar()
       wheels.write(centerpoint);
       getActual();
       getError();
-
+      ignoreFront = false;
       if((millis() - timeStamp) < 4500){
         turning = false;
       }
