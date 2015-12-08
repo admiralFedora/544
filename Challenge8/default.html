@@ -295,6 +295,24 @@
               };
           })
 
+          $(window).keyup(function(){
+            if(event.which == 87 || event.which == 38 ){ // up arrow & w
+                    $("#b_u").stop().mouseout();
+            };
+
+            if(event.which == 83 || event.which == 40 ){ // udown arrow & s
+                    $("#b_d").stop().mouseout();
+            };
+
+            if(event.which == 65 || event.which == 37 ){ // left arrow & a
+                    $("#b_l").stop().mouseout();
+            };
+
+            if(event.which == 68 || event.which == 39 ){ // right arrow & d
+                    $("#b_r").stop().mouseout();
+            };
+          })
+
           /*button press functions */
           $("#b_u").click(function(){
             console.log("w or up");
