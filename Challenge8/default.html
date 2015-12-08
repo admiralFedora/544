@@ -67,6 +67,7 @@
   var ver = $("#y").val();
   var grid = hei/hor;
   var posData = [];
+  var isPointSet = true;
 
   function updateGraph(){
     hor = $("#x").val();
@@ -204,6 +205,12 @@
           }
       }
       return {"X":v1,"Y":v2};
+  }
+
+  function setstartPoint(){
+      if(!isPointSet){
+
+      }
   }
 
   function getData(){
@@ -382,7 +389,13 @@ function right(){
  			               }, 800);//default 800
 	        })
 
-          $(window).keydown(function(){ // cature key down and calling button press function
+      $("#setPoint").click(function(){
+        isPointSet = false;//set the start poin by clicking on canvas
+      });
+
+
+
+      $(window).keydown(function(){ // cature key down and calling button press function
               if(event.which == 87 || event.which == 38 ){ // up arrow & w
                       $("#b_u").stop().mouseover();
                       $("#b_u").click();
@@ -404,7 +417,7 @@ function right(){
               };
           })
 
-          $(window).keyup(function(){
+      $(window).keyup(function(){
             if(event.which == 87 || event.which == 38 ){ // up arrow & w
                     $("#b_u").stop().mouseout();
             };

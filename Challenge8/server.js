@@ -18,6 +18,7 @@ var stepsArray = [];
 
 gpio.on('change', function(channel, value) {
     if(channel == pinSpeed){
+      console.log("change");
       steps++;
     }
 
