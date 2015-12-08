@@ -272,6 +272,46 @@
  				                  opacity:"0.35"
  			               }, 800);//default 800
 	        })
+
+          $(window).keydown(function(){ // cature key down and calling button press function
+              if(event.which == 87 || event.which == 38 ){ // up arrow & w
+                      $("#b_u").stop().mouseover();
+                      $("#b_u").click();
+              };
+
+              if(event.which == 83 || event.which == 40 ){ // udown arrow & s
+                      $("#b_d").stop().mouseover();
+                      $("#b_d").click();
+              };
+
+              if(event.which == 65 || event.which == 37 ){ // left arrow & a
+                      $("#b_l").stop().mouseover();
+                      $("#b_l").click();
+              };
+
+              if(event.which == 68 || event.which == 39 ){ // right arrow & d
+                      $("#b_r").stop().mouseover();
+                      $("#b_r").click();
+              };
+          })
+
+          /*button press functions */
+          $("#b_u").click(function(){
+            console.log("w or up");
+          });
+
+          $("#b_d").click(function(){
+            console.log("s or down");
+          });
+
+          $("#b_l").click(function(){
+            console.log("a or left");;
+          });
+
+          $("#b_r").click(function(){
+            console.log("d or right");
+          });
+
   });
   </script>
 
