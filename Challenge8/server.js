@@ -20,7 +20,7 @@ gpio.on('change', function(channel, value) {
     if(channel == pinSpeed){
       steps++;
     }
-    
+
     if(channel == pinTurn){
       stepsArray.push(steps);
       steps = 0;
@@ -57,7 +57,7 @@ function right(value){
 
 function writeOut(up, down, left, right){
   var input = (up << 4) | (down << 3) | (left << 2) | right;
-  
+
   switch(input){
     case 0x0:
       up(false);
@@ -162,6 +162,18 @@ function closePins() {
         console.log('All pins unexported');
     });
 }
+
+/*Ajax requests*/
+app.get('/', function(req, res){
+  res.sendfile("default.html"); //return the default page
+});
+
+app.get('/up', up(req));
+app.get('/down', down(req));
+app.get('/right', right(req));
+app.get('/left', left(req));
+app.get('/stop', demandControl(req));
+//still need to read the speed
 
 function mapData(){
 }
