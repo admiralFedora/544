@@ -5,13 +5,13 @@ var gpio = require('rpi-gpio');
 
 //--------------------------------------------------------------------
 //set of pin numbers
-var pinUp = 1;
-var pinDown = 2;
-var pinLeft = 3;
-var pinRight = 4;
-var pinStop = 6;
-var pinSpeed = 5;
-var pinTurn = 7;
+var pinUp = 5;
+var pinDown = 6;
+var pinLeft = 13;
+var pinRight = 19;
+var pinStop = 26;
+var pinSpeed = 17;
+var pinTurn = 27;
 
 var steps = 0;
 var stepsArray = [];
