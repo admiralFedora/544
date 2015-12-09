@@ -132,10 +132,10 @@ app.get('/start', function(req, res){demandControl();res.json({"msg":"Car contro
 app.get('/stop', function(req, res){stopControl();res.json({"msg":"Car control stopped;"});console.log("Car status: Car control stopped")});
 
 app.get('/drive', function(req, res){
-  var valUp = req.query.u;
-  var valDown = req.query.d;
-  var valLeft = req.query.l;
-  var valRight= req.query.r;
+  var valUp = parseInt(req.query.u);
+  var valDown = parseInt(req.query.d);
+  var valLeft = parseInt(req.query.l);
+  var valRight = parseInt(req.query.r);
   writeOut(valUp, valDown, valLeft, valRight);
   console.log("Received U: "+valUp+" | D: "+valDown+" | L: "+valLeft+" | R: "+valRight);
   var status = "Drive";
