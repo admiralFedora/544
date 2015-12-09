@@ -17,6 +17,15 @@ var pinTurn = new GPIO(27, 'in', 'rising');
 var steps = 0;
 var stepsArray = [];
 
+var currDirection = 1;
+
+var globalAngle = 0;
+
+function stepsObject(){
+  var angle;
+  var steps;
+}
+
 pinSpeed.watch(function(err, value){
   if(err){
     throw err;
@@ -31,26 +40,71 @@ pinTurn.watch(function(err, value){
     throw err;
   }
 
-  stepsArray.push(steps);
+  var temp = new stepsObject();
+  temp.angle = globalAngle;
+  temp.steps = steps*currDirection;
+  stepsArray.push(temp);
+  
   steps = 0;
+  globalAngle += 90;
 });
 
 
 function demandControl(){
+  var temp = new stepsObject();
+  temp.angle = globalAngle;
+  temp.steps = steps;
+  steps = 0;
+  stepsArray.push(temp);
+  
+  currDirection = 0;
   writeOut(0,0,0,0);
   pinStop.writeSync(1);
 }
 
 function stopControl(){
+  var temp = new stepsObject();
+  temp.angle = globalAngle;
+  temps.steps = steps*currDirection;
+  steps = 0;
+  currDirection = 1;
+  stepsArray.push(temp);
+  
   writeOut(0,0,0,0);
   pinStop.writeSync(0);
 }
 
 function writeOut(up, down, left, right){
+  var temp = new stepsObject();
+  temp.angle = globalAngle;
+  temp.steps = steps*currDirection;
+  steps =  0;
+  stepsArray.push(temp);
+  
   pinUp.writeSync(up);
   pinDown.writeSync(down);
   pinLeft.writeSync(left);
   pinRight.writeSync(right);
+  
+  if(up){
+    currDirection = 1;
+  } else if(down){
+    currDirection = -1;
+  }
+  
+  if(left){
+    globalAngle += 20;
+  } else if(right) {
+    globalAngle += -20;
+  }
+}
+
+function updatePosition(){
+  var temp = new stepsObject();
+  temp.angle = globalAngle;
+  temp.steps = steps*currDirection;
+  steps = 0;
+  stepsArray.push(temp);
 }
 
 function closePins() {
