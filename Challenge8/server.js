@@ -69,8 +69,8 @@ app.get('/', function(req, res){
 
 app.get('/up', function(req, res){writeOut(1, 0, 0, 0);res.json({"msg":"Drive forward;"});console.log("Car status: Drive forward;")});
 app.get('/down', function(req, res){writeOut(0, 1, 0, 0);res.json({"msg":"Drive backward;"});console.log("Car status: Drive backward;")});
-app.get('/right', function(req, res){writeOut(0, 0, 1, 0);res.json({"msg":"Turn right;"});console.log("Car status: Turn right")});
-app.get('/left', function(req, res){writeOut(0, 0, 0, 1);res.json({"msg":"Turn left;"});console.log("Car status: Turn left")});
+app.get('/right', function(req, res){writeOut(0, 0, 0, 1);res.json({"msg":"Turn right;"});console.log("Car status: Turn right")});
+app.get('/left', function(req, res){writeOut(0, 0, 1, 0);res.json({"msg":"Turn left;"});console.log("Car status: Turn left")});
 app.get('/start', function(req, res){demandControl();res.json({"msg":"Car control start;"});console.log("Car status: Car control begin")});
 app.get('/stop', function(req, res){stopControl();res.json({"msg":"Car control stopped;"});console.log("Car status: Car control stopped")});
 
