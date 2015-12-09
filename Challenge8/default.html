@@ -343,7 +343,7 @@ function right(){
       //update canvas
     });
 
-    function stop(){
+    function control(){
       var rawData;
         $.when(
           $.ajax({
@@ -463,7 +463,7 @@ function right(){
           });
 
           $("#b_s").click(function(){
-            stop();
+            control();
             console.log("Control");
           });
 
