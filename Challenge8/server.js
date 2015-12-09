@@ -17,11 +17,11 @@ var pinTurn = new GPIO(27, 'in', 'rising');
 var steps = 0;
 var stepsArray = [];
 
-var currDirection = 1;
+var currDirection = 1; // 1 for forward and -1 for backward
 
-var globalAngle = 0;
+var globalAngle = 0; // 20 degrees
 
-function stepsObject(){
+function stepsObject(){//an object for each action
   var angle;
   var steps;
 }
@@ -44,7 +44,7 @@ pinTurn.watch(function(err, value){
   temp.angle = globalAngle;
   temp.steps = steps*currDirection;
   stepsArray.push(temp);
-  
+
   steps = 0;
   globalAngle += 90;
 });
@@ -56,7 +56,7 @@ function demandControl(){
   temp.steps = steps;
   steps = 0;
   stepsArray.push(temp);
-  
+
   currDirection = 0;
   writeOut(0,0,0,0);
   pinStop.writeSync(1);
@@ -69,7 +69,7 @@ function stopControl(){
   steps = 0;
   currDirection = 1;
   stepsArray.push(temp);
-  
+
   writeOut(0,0,0,0);
   pinStop.writeSync(0);
 }
@@ -80,18 +80,18 @@ function writeOut(up, down, left, right){
   temp.steps = steps*currDirection;
   steps =  0;
   stepsArray.push(temp);
-  
+
   pinUp.writeSync(up);
   pinDown.writeSync(down);
   pinLeft.writeSync(left);
   pinRight.writeSync(right);
-  
+
   if(up){
     currDirection = 1;
   } else if(down){
     currDirection = -1;
   }
-  
+
   if(left){
     globalAngle += 20;
   } else if(right) {
@@ -123,13 +123,34 @@ app.get('/', function(req, res){
   res.sendfile("default.html"); //return the default page
 })
 
-app.get('/up', function(req, res){writeOut(1, 0, 0, 0);res.json({"msg":"Drive forward;"});console.log("Car status: Drive forward;")});
+/*app.get('/up', function(req, res){writeOut(1, 0, 0, 0);res.json({"msg":"Drive forward;"});console.log("Car status: Drive forward;")});
 app.get('/down', function(req, res){writeOut(0, 1, 0, 0);res.json({"msg":"Drive backward;"});console.log("Car status: Drive backward;")});
 app.get('/right', function(req, res){writeOut(0, 0, 0, 1);res.json({"msg":"Turn right;"});console.log("Car status: Turn right")});
 app.get('/left', function(req, res){writeOut(0, 0, 1, 0);res.json({"msg":"Turn left;"});console.log("Car status: Turn left")});
+*/
 app.get('/start', function(req, res){demandControl();res.json({"msg":"Car control start;"});console.log("Car status: Car control begin")});
 app.get('/stop', function(req, res){stopControl();res.json({"msg":"Car control stopped;"});console.log("Car status: Car control stopped")});
 
+app.get('/drive', function(req, res){
+  var valUp = req.query.u;
+  var valDown = req.query.d;
+  var valLeft = req.query.l;
+  var valRight= req.query.r;
+  writeOut(valUp, valDown, valLeft, valRight);
+  
+  var status = "Drive";
+  if(valUp == 1) status +=" forward ";
+  if(valDown == 1) status +=" backward ";
+  if(valLeft == 1) status +=" left ";
+  if(valRight == 1) status +=" right ";
+  res.json({"msg":status});
+  console.log("Car status: "+ status)
+});
+
+
+app.get('/update', function(req, res){
+  ; //return the status: speed, turn & direction
+})
 //still need to read the speed
 
 function mapData(){
