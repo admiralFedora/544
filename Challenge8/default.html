@@ -70,6 +70,7 @@
   var posData = [];
   var isSetPoint = false; //if set start point button clicked
   var hasStartPoint =false;// have set the start point?
+  var  keyPressArray = [];   // collect the key pressed in 50 milliseconds
 
   function updateGraph(){
     hor = $("#x").val();
@@ -269,7 +270,7 @@
     });
 
   }*/
-
+/*
 function up(){
   var rawData;
     $.when(
@@ -359,7 +360,7 @@ function right(){
     ).then(function() {
       //update canvas
     });
-  }
+  }*/
 
   function drive(u,d,l,r){
     var rawData;
@@ -372,7 +373,7 @@ function right(){
             cache: false,
             timeout: 10000,
             error: function(msg){
-                $("#msg").html("<p>Server : Turn right failed</p>");
+                $("#msg").html("<p>Server : Drive signal send failed</p>");
             },
             success: function(msg){
               $("#msg").html("<p>"+msg.msg+"</p>");
@@ -464,25 +465,47 @@ function right(){
       $(window).keydown(function(){ // capture key down and calling button press function
               if(event.which == 87 || event.which == 38 ){ // up arrow & w
                       $("#b_u").stop().mouseover();
-                      $("#b_u").click();
+                      keyPressArray.push("u");
               };
 
-              if(event.which == 83 || event.which == 40 ){ // udown arrow & s
+              if(event.which == 83 || event.which == 40 ){ // down arrow & s
                       $("#b_d").stop().mouseover();
-                      $("#b_d").click();
+                      keyPressArray.push("d");
               };
 
               if(event.which == 65 || event.which == 37 ){ // left arrow & a
                       $("#b_l").stop().mouseover();
-                      $("#b_l").click();
+                      keyPressArray.push("l");
               };
 
               if(event.which == 68 || event.which == 39 ){ // right arrow & d
                       $("#b_r").stop().mouseover();
-                      $("#b_r").click();
+                      keyPressArray.push("r");
               };
-              console.log("pressed:"+ event.which);
-              drive(1,1,1,1);
+
+              setTimeout(function(){// collect the key pressed eery 50 milliseconds
+                  var u = 0,d = 0,l = 0,r = 0, count = 0;
+                  for(i = 0; i < 4; i++){
+                    count += keyPressArray[i];
+                    switch(keyPressArray[i]){
+                        case "u":
+                          if(d == 0) u = 1;
+                          break;
+                        case "d":
+                          if(u == 0) d = 1;
+                          break;
+                        case "l":
+                          if(r == 0) l = 1;
+                          break;
+                        case "r":
+                          if(l == 0) r = 1;
+                          break;
+                    }
+                  }
+                  if(count != 0){ drive(u,d,l,r); console.log(" | U: "+u+" | D: "+d+" | L: "+l+" | R: "+r);}//there are keys pressed
+                  keyPressArray = [];
+              }, 100);
+
           })
 
       $(window).keyup(function(){
@@ -503,25 +526,26 @@ function right(){
             };
           })
 
+
           /*button press functions */
           $("#b_u").click(function(){
-            up();
-            console.log("Up");
+            drive(1,0,0,0);
+            console.log("Up button clicked");
           });
 
           $("#b_d").click(function(){
-            down();
-            console.log("Down");
+            drive(0,1,0,0);
+            console.log("Down button clicked");
           });
 
           $("#b_l").click(function(){
-            left();
-            console.log("Left");;
+            drive(0,0,1,0);
+            console.log("Left button clicked");;
           });
 
           $("#b_r").click(function(){
-            right();
-            console.log("Right");
+            drive(0,0,0,1);
+            console.log("Right button clicked");
           });
 
           $("#b_s").click(function(){
