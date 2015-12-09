@@ -342,8 +342,9 @@ function right(){
     ).then(function() {
       //update canvas
     });
+  }
 
-    function control(){
+    function begin(){
       var rawData;
         $.when(
           $.ajax({
@@ -365,7 +366,6 @@ function right(){
         });
     }
 
-}
 
   //layout position: (45,30) - (848,392)
   window.onload = function() {
@@ -463,7 +463,7 @@ function right(){
           });
 
           $("#b_s").click(function(){
-            control();
+            begin();
             console.log("Control");
           });
 
