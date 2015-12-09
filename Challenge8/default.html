@@ -68,7 +68,8 @@
   var ver = $("#y").val();
   var grid = hei/hor;
   var posData = [];
-  var isPointSet = true;
+  var isSetPoint = false; //if set start point button clicked
+  var hasStartPoint =false;// have set the start point?
 
   function updateGraph(){
     hor = $("#x").val();
@@ -209,10 +210,26 @@
   }
 
   function setstartPoint(){
-      if(!isPointSet){
-
-      }
+    var canvas = document.getElementById("myCanvas");
+    canvas.addEventListener("mousedown", getPosition, false);
   }
+
+
+  function getPosition(event)
+    {
+      if(isSetPoint == true && hasStartPoint == false){
+        var canvas = document.getElementById("myCanvas");
+        var chart = canvas.getContext("2d");
+        var startFlag = document.getElementById("flag");
+        var rect = canvas.getBoundingClientRect();
+        var x = event.clientX - rect.left;
+        var y = event.clientY - rect.top;
+        x = (x - x % grid) + 17 + grid/2; //format
+        y = (y - y % grid) + 5 + grid/2; //format
+        chart.drawImage(startFlag, x, y);
+        hasStartPoint = true; //flag setted
+      }
+    }
 
   /*function getData(){
     var rawData;
@@ -441,10 +458,8 @@ function right(){
 	        })
 
       $("#setPoint").click(function(){
-        isPointSet = false;//set the start poin by clicking on canvas
+        isSetPoint = true;//set the start point by clicking on canvas
       });
-
-
 
       $(window).keydown(function(){ // capture key down and calling button press function
               if(event.which == 87 || event.which == 38 ){ // up arrow & w
@@ -521,6 +536,8 @@ function right(){
           });
 
   });
+
+  document.addEventListener("DOMContentLoaded", setstartPoint, false);
   </script>
 
 
@@ -535,7 +552,7 @@ function right(){
         Your browser does not support the HTML5 canvas tag.</canvas>
       <div class="canvas">
       <p class="ins">Current position: <img id="pos" src="http://hhao.hostei.com/doc/files/CDN/star.png"/>&nbsp;
-      Start Point: <img id="pos" src="http://hhao.hostei.com/doc/files/CDN/flag.png"/>&nbsp;
+      Start Point: <img id="flag" src="http://hhao.hostei.com/doc/files/CDN/flag.png"/>&nbsp;
         X:<input id="x" class="input-text" type="text" value="8">&nbsp;
         Y:<input id="y" class="input-text" type="text" value="15">&nbsp;
         <input id="setPoint" class="button" type="submit" value="Set Start Point">&nbsp;
