@@ -31,7 +31,7 @@ pinSpeed.watch(function(err, value){
     throw err;
   }
 
-  console.log("change");
+  //console.log("change");
   steps++
 });
 
@@ -65,7 +65,7 @@ function demandControl(){
 function stopControl(){
   var temp = new stepsObject();
   temp.angle = globalAngle;
-  temps.steps = steps*currDirection;
+  temp.steps = steps*currDirection;
   steps = 0;
   currDirection = 1;
   stepsArray.push(temp);
@@ -137,14 +137,14 @@ app.get('/drive', function(req, res){
   var valLeft = req.query.l;
   var valRight= req.query.r;
   writeOut(valUp, valDown, valLeft, valRight);
-  
+  console.log("Received U: "+valUp+" | D: "+valDown+" | L: "+valLeft+" | R: "+valRight);
   var status = "Drive";
   if(valUp == 1) status +=" forward ";
   if(valDown == 1) status +=" backward ";
   if(valLeft == 1) status +=" left ";
   if(valRight == 1) status +=" right ";
   res.json({"msg":status});
-  console.log("Car status: "+ status)
+  console.log("Car status: "+ status);
 });
 
 
