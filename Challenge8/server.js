@@ -6,13 +6,13 @@ var GPIO = require('onoff').Gpio
 //--------------------------------------------------------------------
 //set of pin numbers
 
-var pinUp = new GPIO(5, 'out');
-var pinDown = new GPIO(6, 'out');
-var pinLeft = new GPIO(13, 'out');
-var pinRight = new GPIO(19, 'out');
-var pinStop = new GPIO(26, 'out');
-var pinSpeed = new GPIO(17, 'in', 'rising');
-var pinTurn = new GPIO(27, 'in', 'rising');
+var pinUp = new GPIO(21, 'out');
+var pinDown = new GPIO(22, 'out');
+var pinLeft = new GPIO(23, 'out');
+var pinRight = new GPIO(24, 'out');
+var pinStop = new GPIO(25, 'out');
+var pinSpeed = new GPIO(0, 'in', 'rising');
+var pinTurn = new GPIO(2, 'in', 'rising');
 
 var steps = 0;
 var stepsArray = [];
