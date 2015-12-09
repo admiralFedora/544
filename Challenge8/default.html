@@ -49,8 +49,8 @@
       	font-size:14px;
       	padding:6px 18px;
       	color: #ffffff;
-      	background-color:#19a5c8;
-      	border: #19a5c8 solid 1px;
+      	background-color:#646464;
+      	border: #646464 solid 1px;
       	border-radius:4px;
       	width:150px;
       	box-shadow: 0 1px gray;
@@ -344,6 +344,29 @@ function right(){
     });
   }
 
+  function drive(u,d,l,r){
+    var rawData;
+    var URLString = "/drive?u=" + u +"&d="+ d +"&l="+ l +"&r="+ r ;
+      $.when(
+        $.ajax({
+            url: URLString,
+            dataType: 'json',
+            async: false,
+            cache: false,
+            timeout: 10000,
+            error: function(msg){
+                $("#msg").html("<p>Server : Turn right failed</p>");
+            },
+            success: function(msg){
+              $("#msg").html("<p>"+msg.msg+"</p>");
+              $("#msg").fadeIn(500);
+            }
+        })
+      ).then(function() {
+        //update canvas
+      });
+    }
+
     function begin(){
       var rawData;
         $.when(
@@ -410,11 +433,11 @@ function right(){
       $("#control_panel").hover(function(){
  			    $(this).stop().animate({
  				       opacity:"1"
- 				        },300); //default 800
+ 				        },300);
  			    },function(){
  				             $(this).stop().animate({
  				                  opacity:"0.35"
- 			               }, 800);//default 800
+ 			               }, 800);
 	        })
 
       $("#setPoint").click(function(){
@@ -423,7 +446,7 @@ function right(){
 
 
 
-      $(window).keydown(function(){ // cature key down and calling button press function
+      $(window).keydown(function(){ // capture key down and calling button press function
               if(event.which == 87 || event.which == 38 ){ // up arrow & w
                       $("#b_u").stop().mouseover();
                       $("#b_u").click();
@@ -443,6 +466,8 @@ function right(){
                       $("#b_r").stop().mouseover();
                       $("#b_r").click();
               };
+              console.log("pressed:"+ event.which);
+              drive(1,1,1,1);
           })
 
       $(window).keyup(function(){
