@@ -1,167 +1,60 @@
 var fs = require('fs');
 var app = require('express')();
-var gpio = require('rpi-gpio');
+var GPIO = require('onoff').Gpio
 
 
 //--------------------------------------------------------------------
 //set of pin numbers
-var pinUp = 5;
-var pinDown = 6;
-var pinLeft = 13;
-var pinRight = 19;
-var pinStop = 26;
-var pinSpeed = 17;
-var pinTurn = 27;
+
+var pinUp = new GPIO(5, 'out');
+var pinDown = new GPIO(6, 'out');
+var pinLeft = new GPIO(13, 'out');
+var pinRight = new GPIO(19, 'out');
+var pinStop = new GPIO(26, 'out');
+var pinSpeed = new GPIO(17, 'in', 'rising');
+var pinTurn = new GPIO(27, 'in', 'rising');
 
 var steps = 0;
 var stepsArray = [];
-gpio.on('change', function(channel, value) {
-    if(channel == pinSpeed){
-      console.log("change");
-      steps++;
-    }
 
-    if(channel == pinTurn){
-      stepsArray.push(steps);
-      steps = 0;
-    }
+pinSpeed.watch(function(err, value){
+  if(err){
+    throw err;
+  }
+  
+  console.log("change");
+  steps++
 });
 
-gpio.setup(pinSpeed, gpio.DIR_IN, gpio.EDGE_RISING);
-gpio.setup(pinTurn, gpio.DIR_IN, gpio.EDGE_RISING);
-gpio.setup(pinStop, gpio.DIR_OUT);
-gpio.setup(pinUp, gpio.DIR_OUT);
-gpio.setup(pinDown, gpio.DIR_OUT);
-gpio.setup(pinLeft, gpio.DIR_OUT);
-gpio.setup(pinRight, gpio.DIR_OUT);
+pinTurn.watch(function(err, value){
+  if(err){
+    throw err;
+  }
+  
+  stepsArray.push(steps);
+  steps = 0;
+});
 
 
 function demandControl(){
-  gpio.write(pinStop, true);
-}
-
-function up(value){
-  gpio.write(pinUp, value);
-}
-
-function down(value){
-  gpio.write(pinDown, value);
-}
-
-function left(value){
-  gpio.write(pinLeft, value);
-}
-
-function right(value){
-  gpio.write(pinRight, value);
+  pinStop.writeSync(1);
 }
 
 function writeOut(up, down, left, right){
-  var input = (up << 4) | (down << 3) | (left << 2) | right;
-
-  switch(input){
-    case 0x0:
-      up(false);
-      down(false);
-      left(false);
-      right(false);
-      break;
-    case 0x1:
-      up(false);
-      down(false);
-      left(false);
-      right(true);
-      break;
-    case 0x2:
-      up(false);
-      down(false);
-      left(true);
-      right(false);
-      break;
-    case 0x3:
-      up(false);
-      down(false);
-      left(true);
-      right(true);
-      break;
-    case 0x4:
-      up(false);
-      down(true);
-      left(false);
-      right(false);
-      break;
-    case 0x5:
-      up(false);
-      down(true);
-      left(false);
-      right(true);
-      break;
-    case 0x6:
-      up(false);
-      down(true);
-      left(true);
-      right(false);
-      break;
-    case 0x7:
-      up(false);
-      down(true);
-      left(true);
-      right(true);
-      break;
-    case 0x8:
-      up(true);
-      down(false);
-      left(false);
-      right(false);
-      break;
-    case 0x9:
-      up(true);
-      down(false);
-      left(false);
-      right(true);
-      break;
-    case 0xA:
-      up(true);
-      down(false);
-      left(true);
-      right(false);
-      break;
-    case 0xB:
-      up(true);
-      down(false);
-      left(true);
-      right(true);
-      break;
-    case 0xC:
-      up(true);
-      down(true);
-      left(false);
-      right(false);
-    case 0xD:
-      up(true);
-      down(true);
-      left(false);
-      right(true);
-      break;
-    case 0xE:
-      up(true);
-      down(true);
-      left(true);
-      right(false);
-      break;
-    case 0xF:
-      up(true);
-      down(true);
-      left(true);
-      right(true);
-  }
+  pinUp.writeSync(up);
+  pinDown.writeSync(down);
+  pinLeft.writeSync(left);
+  pinRight.writeSync(right);
 }
 
 function closePins() {
-    gpio.write(pinStop, false);
-    gpio.destroy(function() {
-        console.log('All pins unexported');
-    });
+    pinUp.unexport();
+    pinDown.unexport();
+    pinLeft.unexport();
+    pinRight.unexport();
+    pinStop.unexport();
+    pinTurn.unexport();
+    pinSpeed.unexport();
 }
 
 /*Ajax requests*/
