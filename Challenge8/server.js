@@ -21,7 +21,7 @@ pinSpeed.watch(function(err, value){
   if(err){
     throw err;
   }
-  
+
   console.log("change");
   steps++
 });
@@ -30,7 +30,7 @@ pinTurn.watch(function(err, value){
   if(err){
     throw err;
   }
-  
+
   stepsArray.push(steps);
   steps = 0;
 });
@@ -63,10 +63,10 @@ app.get('/', function(req, res){
   res.sendfile("default.html"); //return the default page
 })
 
-app.get('/up', function(req, res){up(1);res.json({"msg":"Drive forward;"});console.log("Car status: Drive forward;")});
-app.get('/down', function(req, res){down(1);res.json({"msg":"Drive backward;"});console.log("Car status: Drive backward;")});
-app.get('/right', function(req, res){res.json({"msg":"Turn right;"});console.log("Car status: Turn right")});
-app.get('/left', function(req, res){res.json({"msg":"Turn left;"});console.log("Car status: Turn left")});
+app.get('/up', function(req, res){writeOut(1, 0, 0, 0);res.json({"msg":"Drive forward;"});console.log("Car status: Drive forward;")});
+app.get('/down', function(req, res){writeOut(0, 1, 0, 0);res.json({"msg":"Drive backward;"});console.log("Car status: Drive backward;")});
+app.get('/right', function(req, res){writeOut(0, 0, 1, 0);res.json({"msg":"Turn right;"});console.log("Car status: Turn right")});
+app.get('/left', function(req, res){writeOut(0, 0, 0, 1);res.json({"msg":"Turn left;"});console.log("Car status: Turn left")});
 app.get('/stop', function(req, res){demandControl();res.json({"msg":"Car stopped;"});console.log("Car status: Car stopped")});
 
 //still need to read the speed
