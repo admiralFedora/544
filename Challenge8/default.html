@@ -486,7 +486,7 @@ function right(){
 
               setTimeout(function(){// collect the key pressed eery 50 milliseconds
                   var u = 0,d = 0,l = 0,r = 0, count = 0;
-                  for(i = 0; i < 4; i++){
+                  for(i = keyPressArray.length -1; i > keyPressArray.length -5; i--){
                     count += keyPressArray[i];
                     switch(keyPressArray[i]){
                         case "u":
@@ -504,7 +504,6 @@ function right(){
                     }
                   }
                   if(count != 0){ drive(u,d,l,r); console.log(" | U: "+u+" | D: "+d+" | L: "+l+" | R: "+r);}//there are keys pressed
-                  keyPressArray = [];
               }, 100);
 
           })
