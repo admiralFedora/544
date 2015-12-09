@@ -40,6 +40,10 @@ function demandControl(){
   pinStop.writeSync(1);
 }
 
+function stopControl(){
+  pinStop.writeSync(0);
+}
+
 function writeOut(up, down, left, right){
   pinUp.writeSync(up);
   pinDown.writeSync(down);
@@ -67,7 +71,8 @@ app.get('/up', function(req, res){writeOut(1, 0, 0, 0);res.json({"msg":"Drive fo
 app.get('/down', function(req, res){writeOut(0, 1, 0, 0);res.json({"msg":"Drive backward;"});console.log("Car status: Drive backward;")});
 app.get('/right', function(req, res){writeOut(0, 0, 1, 0);res.json({"msg":"Turn right;"});console.log("Car status: Turn right")});
 app.get('/left', function(req, res){writeOut(0, 0, 0, 1);res.json({"msg":"Turn left;"});console.log("Car status: Turn left")});
-app.get('/stop', function(req, res){demandControl();res.json({"msg":"Car stopped;"});console.log("Car status: Car stopped")});
+app.get('/start', function(req, res){demandControl();res.json({"msg":"Car control start;"});console.log("Car status: Car control begin")});
+app.get('/stop', function(req, res){stopControl();res.json({"msg":"Car control stopped;"});console.log("Car status: Car control stopped")});
 
 //still need to read the speed
 

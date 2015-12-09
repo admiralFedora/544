@@ -348,6 +348,29 @@ function right(){
       var rawData;
         $.when(
           $.ajax({
+              url: "/start",
+              type: 'GET',
+              async: false,
+              cache: false,
+              timeout: 10000,
+              error: function(msg){
+                  $("#msg").html("<p>Server : Start failed</p>");
+              },
+              success: function(msg){
+                $("#msg").html("<p>"+msg.msg+"</p>");
+                $("#msg").fadeIn(500);
+              }
+          })
+        ).then(function() {
+          //update canvas
+        });
+    }
+
+
+    function end(){
+      var rawData;
+        $.when(
+          $.ajax({
               url: "/stop",
               type: 'GET',
               async: false,
@@ -365,7 +388,6 @@ function right(){
           //update canvas
         });
     }
-
 
   //layout position: (45,30) - (848,392)
   window.onload = function() {
@@ -463,7 +485,13 @@ function right(){
           });
 
           $("#b_s").click(function(){
-            begin();
+            if($("#b_s").val() == "Start"){
+              $("#b_s").val("Stop");
+              begin();
+            }else{
+              $("#b_s").val("Start");
+              end();
+            }
             console.log("Control");
           });
 
@@ -492,7 +520,7 @@ function right(){
       <div id = "control_panel">
         <img id= "b_u" class="button" src="http://hhao.hostei.com/doc/files/CDN/up.png" alt="up"/><br/>
         <img id= "b_l" class="button" src="http://hhao.hostei.com/doc/files/CDN/left.png" alt="down"/>
-        <input id="b_s" class="button" type="submit" value="Stop">
+        <input id="b_s" class="button" type="submit" value="Start">
         <img id= "b_r" class="button" src="http://hhao.hostei.com/doc/files/CDN/right.png" alt="left"/>
         <img id= "b_d" class="button" src="http://hhao.hostei.com/doc/files/CDN/down.png" alt="right"/><br/>
       </div>
