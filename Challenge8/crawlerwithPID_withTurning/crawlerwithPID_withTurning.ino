@@ -26,8 +26,10 @@
 #define K_d 525.2
 #define dt 160
 #define lengthbetweensensors 20.0 //in centimeters, must be the same unit as getLidarDistance
+//HARDCODED
 #define centerpoint 82 //CALIBRATED CENTER
 #define motorSpeed -10
+#define turnSpeed -20
 
 #define Delay(x) (spin(x, millis())) // don't use the built in delay function as that doesn't work so well with ISRs
 
@@ -37,9 +39,12 @@ volatile bool startup = true; // used to ensure startup only happens once
 volatile bool startRun = true;
 volatile bool turn = false; //DECLARE TURNING
 volatile bool control = true;
+bool turning = false;
 int frontDist = 0; 
 int backDist = 0;
 int deltaFrontBack = 0;
+
+bool ignoreFront = false;
 
 int Output = 82; //OUTPUT
 int pOutput = 82; // PREVIOUS OUTPUT
@@ -62,6 +67,8 @@ float Derivative;
 Fifo *front, *back;
 
 int counter = 0;
+
+unsigned long timeStamp;
 
 // wheel angle > 90 turns left (facing forward)
 // wheel angle < 90 turns right (facing forward)
@@ -88,19 +95,12 @@ void setup()
   pinMode(LIDAR_BACK, OUTPUT);
   pinMode(TURN_SIGNAL, INPUT);
   pinMode(CONTROL_SIGNAL, INPUT);
-  pinMode(11, OUTPUT);
 
-  pinMode(UP, INPUT);
-  pinMode(DOWN, INPUT);
-  pinMode(LEFT, INPUT);
-  pinMode(RIGHT, INPUT);
-
-  digitalWrite(11, LOW);
-
+  // Initialization
   digitalWrite(LIDAR_FRONT, LOW);
   digitalWrite(LIDAR_BACK, LOW);
 
-  distanceDesired = 60.0;
+  distanceDesired = 80.0;
 
   initReadings(LIDAR_FRONT, &front);
   initReadings(LIDAR_BACK, &back);
@@ -136,8 +136,11 @@ void turnISR(){
 void controlISR(){
   Serial.println("Control ISR");
   control = !control;
+  esc.write(90);
+  wheels.write(90);
 }
 
+// NEW DELAY FUNCTION
 // avoid using delay
 void spin(int period, unsigned long startTime){
   while((millis() - startTime) < period){
@@ -152,6 +155,9 @@ void deltaFrontBack_calc()
   newFront->value = getLidarDistance(LIDAR_FRONT);
   if(newFront->value <= (returnAverage(front)+150)){
     insertAndPop(newFront, &front);
+    ignoreFront = false;
+  } else {
+    ignoreFront = true;
   }
 
   Fifo *newBack = (Fifo*) malloc(sizeof(Fifo));
@@ -260,11 +266,14 @@ void getError()
 void PID() //THIS WILL GIVE YOU 'OUTPUT' TO THE DRIVESTRAIGHT FUNCTION
 {
   //Error = Error - pError;
-  Integral = Integral + (Error*dt);
-  Derivative = (Error - pError)/dt;
-  //Derivative = (Error - returnAverage(bError))/dt;
-  Output = radToDeg((K_p * Error) + (K_i * Integral) + (K_d * Derivative));
-  pError = Error; 
+  if(!ignoreFront){
+    Integral = Integral + (Error*dt);
+    Derivative = (Error - pError)/dt;
+    Output = radToDeg((K_p * Error) + (K_i * Integral) + (K_d * Derivative));
+    pError = Error; 
+  } else {
+    Output = 0;
+  }
 }
 
 void driveStraight()
@@ -290,8 +299,19 @@ void driveStraight()
 
 void turnLeft()
 {
-  wheels.write(135);
-  esc.write(centerpoint + motorSpeed);
+  wheels.write(135); //MAYBE IT IS NO LONGER 135 SINCE TRUE CENTER IS SET TO 82
+  esc.write(centerpoint + turnSpeed);
+  turning = true;
+
+  timeStamp = millis();
+}
+
+//TESTING IT I FEEL LIKE WE NEED TO TURN RIGHT, RIGHT AFTER WE TURN LEFT
+void turnRight()
+{
+  wheels.write(45);
+  esc.write(centerpoint + turnSpeed);
+  turning = true;
 }
 
 void driveCar()
@@ -305,15 +325,27 @@ void driveCar()
   }
   else 
   {
-    Serial.println("STRAIGHT DRIVE");
-    digitalWrite(11, HIGH);
-    getActual();
-    getError();
-    PID(); 
- 
-    driveStraight();
-    //shouldTurn();
-    counter++;
+    if (turning)
+    {
+      esc.write(centerpoint + motorSpeed);
+      wheels.write(centerpoint);
+      getActual();
+      getError();
+      ignoreFront = false;
+      if((millis() - timeStamp) < 4500){
+        turning = false;
+      }
+    } 
+    else
+    {
+      Serial.println("STRAIGHT DRIVE");
+      getActual();
+      getError();
+      PID(); 
+   
+      driveStraight();
+      counter++;
+    }
   }
 }
 
@@ -387,7 +419,7 @@ void readControls(){
       break;
   }
 }
-
+ 
 void loop()
 {
   if(control){
@@ -395,8 +427,6 @@ void loop()
     Delay(50);
   } else {
     readControls();
-    esc.write(90);
-    wheels.write(90);
     Delay(10);
   }
 }
