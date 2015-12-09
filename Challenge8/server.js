@@ -55,6 +55,7 @@ function closePins() {
     pinStop.unexport();
     pinTurn.unexport();
     pinSpeed.unexport();
+    process.exit();
 }
 
 /*Ajax requests*/
