@@ -39,7 +39,7 @@
     #b_l{margin-left:10px;}
     #b_r{}
     #b_s{color:#ffffff;background-color:#ff4848 ;width:75px; height:75px;border: #ff4848 solid 0px;
-         margin-top: -65px;vertical-align: text-top;border-radius: 8px;}
+         margin-top: -65px;vertical-align: text-top;border-radius: 8px; -webkit-appearance: none;-moz-appearance: none;appearance: none;}
     #b_u:hover,#b_d:hover,#b_l:hover,#b_r:hover,#b_s:hover{cursor:pointer}
     #setPoint{
       	-webkit-appearance: none;
@@ -460,6 +460,11 @@ function right(){
           $("#b_r").click(function(){
             right();
             console.log("Right");
+          });
+
+          $("#b_s").click(function(){
+            stop();
+            console.log("Control");
           });
 
   });
