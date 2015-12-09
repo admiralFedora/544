@@ -365,7 +365,7 @@ void readControls(){
     case 0x1: // right only input
       Serial.println("right");
       esc.write(90);
-      wheels.write(70);
+      wheels.write(54);
       break;
     case 0x2: // left only input
       Serial.println("left");
@@ -385,7 +385,7 @@ void readControls(){
     case 0x5: // down & right input
       Serial.println("Down & right");
       esc.write(100);
-      wheels.write(70);
+      wheels.write(54);
       break;
     case 0x6: // down & left input
       Serial.println("Down & left");
@@ -405,7 +405,7 @@ void readControls(){
     case 0x9: // up & right input
       Serial.println("Up & Right");
       esc.write(80);
-      wheels.write(70);
+      wheels.write(54);
       break;
     case 0xA: // up & left input
       Serial.println("Up & Left");
@@ -425,7 +425,7 @@ void readControls(){
     case 0xD: // up, down, & right input
       Serial.println("up, down, & right");
       esc.write(90);
-      wheels.write(70);
+      wheels.write(54);
       break;
     case 0xE: // up, down, & left input
       Serial.println("up, down, & left");
