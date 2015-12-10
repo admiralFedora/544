@@ -466,45 +466,34 @@ function right(){
       $(window).keydown(function(){ // capture key down and calling button press function
               if(event.which == 87 || event.which == 38 ){ // up arrow & w
                       $("#b_u").stop().mouseover();
-                      keyPressArray[0] = "u";
+                      keyPressArray[0] = 1; //u
               };
 
               if(event.which == 83 || event.which == 40 ){ // down arrow & s
                       $("#b_d").stop().mouseover();
-                      keyPressArray[1] = "d";
+                      keyPressArray[1] = 1;//d
               };
 
               if(event.which == 65 || event.which == 37 ){ // left arrow & a
                       $("#b_l").stop().mouseover();
-                      keyPressArray[2] = "l";
+                      keyPressArray[2] = 1;//l
               };
 
               if(event.which == 68 || event.which == 39 ){ // right arrow & d
                       $("#b_r").stop().mouseover();
-                      keyPressArray[3] = "r";
+                      keyPressArray[3] = 1;//r
               };
 
 
               setTimeout(function(){// collect the key pressed eery 50 milliseconds
                 var u = 0,d = 0,l = 0,r = 0, count = 0;
-                  for(i = 0; i < 4; i++){
-                    count += parseInt(keyPressArray[i]);
-                    switch(keyPressArray[i]){
-                        case "u":
-                          if(d == 0) u = 1;
-                          break;
-                        case "d":
-                          if(u == 0) d = 1;
-                          break;
-                        case "l":
-                          if(r == 0) l = 1;
-                          break;
-                        case "r":
-                          if(l == 0) r = 1;
-                          break;
-                      }
-                    }
-                    if(count != 0){ drive(u,d,l,r); console.log(" | U: "+u+" | D: "+d+" | L: "+l+" | R: "+r);keyPressArray=["0","0","0","0"]}//there are keys pressed
+                count += parseInt(keyPressArray[0])+parseInt(keyPressArray[1])+parseInt(keyPressArray[2])+parseInt(keyPressArray[3]);
+                if( keyPressArray[0] == 1 && keyPressArray[1] != 1){u = 1;} // up signal
+                if( keyPressArray[1] == 1 && keyPressArray[0] != 1){d = 1;}
+                if( keyPressArray[2] == 1 && keyPressArray[3] != 1){l = 1;}
+                if( keyPressArray[3] == 1 && keyPressArray[2] != 1){r = 1;}
+
+                if(count != 0){ drive(u,d,l,r); console.log(" | U: "+u+" | D: "+d+" | L: "+l+" | R: "+r);keyPressArray=["0","0","0","0"]}//there are keys pressed
                 }, 100);
           })
 
