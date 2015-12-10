@@ -107,6 +107,8 @@
       chart.drawImage(cen, curX - cen.width/2, curY - cen.height/2); //draw pos
       chart.drawImage(pos, curX - pos.width/2, curY - pos.height/2 - 10); //draw pos
     }
+
+    //turnAMT(1,1);
   }
   /*  if(posData.length = 1){
       var curX = Math.ceil((parseFloat(posData[posData.length-1].Y) + 0.5) * grid + 45); //convert to canvas value
@@ -136,6 +138,7 @@
     }
   }*/
 
+  /*functions that updateGraph used*/
   function drawGrid(hor,ver,d){
     /*Relative value for diff resolution*/
     var canvas = document.getElementById("myCanvas");
@@ -198,21 +201,30 @@
     		chart.fill();
   }
 
-  /*function cleanData(raw){
-      var count = 0;
-      var v1, v2;
-      for (i = 0 ; i < raw.length; i++){
-          if (i == 0) { v1 = raw[0].locx; v2 = raw[0].locy; count = 1;}    // count appeared times
-          else{
-            if(raw[i].locx == v1 && raw[i].locy == v2){count ++; }
-            else{
-              count--;
-              if(count < 0){v1 = raw[i].locx; v2 = raw[i].locy; count = 1;}// reset
-            }
-          }
-      }
-      return {"X":v1,"Y":v2};
-  }*/
+  function lineAMT(p1,p2){ // straight animation
+    var canvas = document.getElementById("myCanvas");
+    var chart = canvas.getContext("2d");
+  }
+
+  function turnAMT(flag,p){//flag = 0 turn left, flag = 1 turn right
+    var canvas = document.getElementById("myCanvas");
+    var chart = canvas.getContext("2d");
+    var pos = document.getElementById("picCar");
+    chart.save();
+    chart.translate(150,150);
+    var time = new Date();
+
+    if(flag == 0){chart.rotate(((7*Math.PI)/18000)*time.getMilliseconds() );}
+    else{chart.rotate(((-7*Math.PI)/18000)*time.getMilliseconds() );}
+
+    chart.drawImage(pos,-28,-15); //car width and length
+
+    chart.restore();
+    window.requestAnimationFrame(updateGraph);
+  }
+
+  /*------------end-----------*/
+
 
   function setstartPoint(){
     var canvas = document.getElementById("myCanvas");
@@ -466,7 +478,7 @@ function right(){
         isSetPoint = true;//set the start point by clicking on canvas
       });
       $( "#hide" ).click(function() {
-        $( "#video" ).toggle( "slow");
+        $( "#video" ).toggle("slow");
       });
 
       $(window).keydown(function(){ // capture key down and calling button press function
@@ -500,7 +512,7 @@ function right(){
                 if( keyPressArray[3] == 1 && keyPressArray[2] != 1){r = 1;}
 
                 if(count != 0){ drive(u,d,l,r); console.log(" | U: "+u+" | D: "+d+" | L: "+l+" | R: "+r);keyPressArray=["0","0","0","0"]}//there are keys pressed
-                }, 100);
+              }, 500);
           })
 
       $(window).keyup(function(){
