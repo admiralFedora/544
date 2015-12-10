@@ -360,82 +360,82 @@ void readControls(){
   switch(input){
     case 0x0: // no input
       esc.write(90);
-      wheels.write(90);
+      wheels.write(82);
       break;
     case 0x1: // right only input
       Serial.println("right");
       esc.write(90);
-      wheels.write(54);
+      wheels.write(45);
       break;
     case 0x2: // left only input
       Serial.println("left");
       esc.write(90);
-      wheels.write(110);
+      wheels.write(120);
       break;
     case 0x3: // left & right input
       Serial.println("left & right");
       esc.write(90);
-      wheels.write(90);
+      wheels.write(82);
       break;
     case 0x4: // down only input
       Serial.println("down");
-      esc.write(100);
-      wheels.write(90);
+      esc.write(105);
+      wheels.write(82);
       break;
     case 0x5: // down & right input
       Serial.println("Down & right");
-      esc.write(100);
-      wheels.write(54);
+      esc.write(105);
+      wheels.write(45);
       break;
     case 0x6: // down & left input
       Serial.println("Down & left");
-      esc.write(100);
-      wheels.write(110);
+      esc.write(105);
+      wheels.write(120);
       break;
     case 0x7: // down, left & right input
       Serial.println("Down, left & right");
-      esc.write(100);
-      wheels.write(90);
+      esc.write(105);
+      wheels.write(82);
       break;
     case 0x8: // up only input
       Serial.println("Up");
-      esc.write(80);
-      wheels.write(90);
+      esc.write(75);
+      wheels.write(82);
       break;
     case 0x9: // up & right input
       Serial.println("Up & Right");
-      esc.write(80);
-      wheels.write(54);
+      esc.write(75);
+      wheels.write(45);
       break;
     case 0xA: // up & left input
       Serial.println("Up & Left");
-      esc.write(80);
-      wheels.write(110);
+      esc.write(75);
+      wheels.write(120);
       break;
     case 0xB: // up, right & left input
       Serial.println("Up, right, & left");
-      esc.write(80);
-      wheels.write(90);
+      esc.write(75);
+      wheels.write(82);
       break;
     case 0xC: // up & down input
       Serial.println("Up & Down");
       esc.write(90);
-      wheels.write(90);
+      wheels.write(82);
       break;
     case 0xD: // up, down, & right input
       Serial.println("up, down, & right");
       esc.write(90);
-      wheels.write(54);
+      wheels.write(45);
       break;
     case 0xE: // up, down, & left input
       Serial.println("up, down, & left");
       esc.write(90);
-      wheels.write(110);
+      wheels.write(120);
       break;
     case 0xF: // up, down, left, & right input
       Serial.println("everything");
       esc.write(90);
-      wheels.write(90);
+      wheels.write(82);
       break;
   }
 }
