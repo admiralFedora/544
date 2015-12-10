@@ -221,7 +221,7 @@
   function con(val,p){//convert to canvas value;
     var canvas = document.getElementById('myCanvas');
     var rect = canvas.getBoundingClientRect();
-    var result = (p==0)? val+rect.left-28:val+rect.top+15;
+    var result = (p==0)? val-17 +rect.left:val-5+rect.top;
     return result;
   }
 
@@ -237,8 +237,8 @@
         x = (x - x % grid) + 17 + grid/2; //format
         y = (y - y % grid) + 5 + grid/2; //format
         chart.drawImage(startFlag, x, y);
-        $("#car").css({"display":"block","position":"absolute","top":event.clientY-15,"left":event.clientX-28});
-        //hasStartPoint = true; //flag setted
+        $("#car").css({"display":"block","position":"absolute","top":con(y,1),"left":con(x,0)});
+        hasStartPoint = true; //flag setted
       }
     }
 
