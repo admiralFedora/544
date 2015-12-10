@@ -498,6 +498,8 @@ function right(){
 
       document.addEventListener('keyup', function(e) { //add keyup listener
          keyPressArray[e.keyCode] = false;
+         if(!keyPressArray[87] || !keyPressArray[38]) drive(0,0,0,0);
+         if(!keyPressArray[83] || !keyPressArray[40]) drive(0,0,0,0);   
       }, false);
 
           /*button press functions */
@@ -535,7 +537,7 @@ function right(){
   });
 
   document.addEventListener("DOMContentLoaded", setstartPoint, false);
-  window.setInterval(sendCommand, 400);
+  window.setInterval(sendCommand, 200);
   </script>
 
 
