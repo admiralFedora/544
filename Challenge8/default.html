@@ -58,6 +58,9 @@
     #setPoint:hover{cursor:pointer;opacity: 0.8}
     #monitor{position:absolute; right:20px; top: 15px;opacity:0.9}
     iframe{border: #ffffff solid 3px; border-radius: 5px;}
+    #hide{position:absolute; right:20px; top: 15px;opacity:0.9;border: #ffffff solid 3px;
+          border-radius: 5px;color: #ffffff; background-color:#646464;cursor:pointer;};
+    #video:hover{opacity:0.6}
   </style>
 
 
@@ -71,7 +74,7 @@
   var posData = [];
   var isSetPoint = false; //if set start point button clicked
   var hasStartPoint =false;// have set the start point?
-  var  keyPressArray =["","","",""];   // collect the key pressed in 50 milliseconds
+  var keyPressArray =["","","",""];   // collect the key pressed in 50 milliseconds
 
   function updateGraph(){
     hor = $("#x").val();
@@ -96,7 +99,7 @@
 
     /*draw cur position*/
     //chart.drawImage(img, 0, 0); //draw layout, not sure about the place
-    var pos = document.getElementById("pos");
+    var pos = document.getElementById("picCar");
     var cen = document.getElementById("cen");
     if(posData.length > 0){
       var curX = Math.ceil((parseFloat(posData[posData.length-1].Y) + 0.5) * grid + 45); //convert to canvas value
@@ -195,7 +198,7 @@
     		chart.fill();
   }
 
-  function cleanData(raw){
+  /*function cleanData(raw){
       var count = 0;
       var v1, v2;
       for (i = 0 ; i < raw.length; i++){
@@ -209,7 +212,7 @@
           }
       }
       return {"X":v1,"Y":v2};
-  }
+  }*/
 
   function setstartPoint(){
     var canvas = document.getElementById("myCanvas");
@@ -433,7 +436,7 @@ function right(){
 
   //layout position: (45,30) - (848,392)
   window.onload = function() {
-      updateGraph()
+      updateGraph();
   }
 
   $( document ).ready(function() {
@@ -461,6 +464,9 @@ function right(){
 
       $("#setPoint").click(function(){
         isSetPoint = true;//set the start point by clicking on canvas
+      });
+      $( "#hide" ).click(function() {
+        $( "#video" ).toggle( "slow");
       });
 
       $(window).keydown(function(){ // capture key down and calling button press function
@@ -519,7 +525,6 @@ function right(){
             };
           })
 
-
           /*button press functions */
           $("#b_u").click(function(){
             drive(1,0,0,0);
@@ -568,12 +573,12 @@ function right(){
       <canvas id="myCanvas"  width="1020px" height="420px">
         Your browser does not support the HTML5 canvas tag.</canvas>
       <div class="canvas">
-      <p class="ins">Current position: <img id="pos" src="http://hhao.hostei.com/doc/files/CDN/star.png"/>&nbsp;
+      <p class="ins">
       Start Point: <img id="flag" src="http://hhao.hostei.com/doc/files/CDN/flag.png"/>&nbsp;
+      Car: <img id="picCar" src="http://hhao.hostei.com/doc/files/CDN/car.png" style="vertical-align: middle"/>&nbsp;
         X:<input id="x" class="input-text" type="text" value="8">&nbsp;
         Y:<input id="y" class="input-text" type="text" value="15">&nbsp;
         <input id="setPoint" class="button" type="submit" value="Set Start Point">&nbsp;
-        <img id="picCar" src="http://hhao.hostei.com/doc/files/CDN/car.png" style="vertical-align: middle"/>
       </p>
       </div>
       <div id = "control_panel">
@@ -584,9 +589,11 @@ function right(){
         <img id= "b_d" class="button" src="http://hhao.hostei.com/doc/files/CDN/down.png" alt="right"/><br/>
       </div>
 
+
       <div id="monitor">
-        <iframe src="http://ec544a.ddns.net:8081" style="width: 320px; height: 240px"></iframe>
+        <iframe id="video" src="http://ec544a.ddns.net:8081" style="width: 320px; height: 240px"></iframe>
       </div>
+      <input id="hide" class="button" type="submit" value="Hide">
 
       <img id="layout" src="http://hhao.hostei.com/doc/files/CDN/layout.png" style="display:none;"/>
       <img id="cen" src="http://hhao.hostei.com/doc/files/CDN/cen.png" style="display:none;"/>

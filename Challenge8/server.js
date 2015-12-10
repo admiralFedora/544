@@ -140,7 +140,7 @@ app.get('/right', function(req, res){writeOut(0, 0, 0, 1);res.json({"msg":"Turn 
 app.get('/left', function(req, res){writeOut(0, 0, 1, 0);res.json({"msg":"Turn left;"});console.log("Car status: Turn left")});
 */
 app.get('/start', function(req, res){demandControl();res.json({"msg":"Car control start."});console.log("Car status: Car control begin");isDriving = false;});
-app.get('/stop', function(req, res){stopControl();res.json({"msg":"Car control stopped."});console.log("Car status: Car control stopped")isDriving = true;});
+app.get('/stop', function(req, res){stopControl();res.json({"msg":"Car control stopped."});console.log("Car status: Car control stopped");isDriving = true;});
 
 app.get('/drive', function(req, res){
   var valUp = parseInt(req.query.u);
