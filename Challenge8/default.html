@@ -82,7 +82,11 @@
   var carStatus = {dir:"E", x:0,y:0};
 
   function updateGraph(steps){
-    hor = $("#x").val();
+
+    for(i = 0 ; i< steps.length ; i++){
+      console.log("angle: "+steps[i]);
+    }
+   hor = $("#x").val();
     ver = $("#y").val();
     grid = hei/hor;
     /*clear*/
@@ -99,23 +103,106 @@
 
     /*draw path*/
     var turned = false;
+    var lastMove;
+    var lastTurn;
     if(hasStartPoint){
-      for(i = 0; i < steps.length-1; i++){ // last point is the cur position
+      for(i = 0; i < steps.length; i++){ // last point is the cur position
         if(steps[i].steps == 0 && steps[i].angles == 0){turned = false;};
 
         if(steps[i].steps != 0 && steps[i].angles == 0 ) {
-          var val = steps[i].steps;
-          var dir = (steps[i].steps > 0)? 1:0;
-          drawPath(Math.abs(val), dir);
+          lastMove = i;
+
         };
 
         if(steps[i].steps != 0 && steps[i].angles != 0 && turned == false ) {
-          var dir = (steps[i].steps > 0)? 1:0;
-          var turn = (steps[i].angles > 0)? 1:0;
-          drawTurn(dir,turn);
-          turned = true;
+          lastTurn = i;
         }
       }
+      if(lastMove != 0){
+        var val = steps[lastMove].steps;
+        var dir = (steps[lastMove].steps > 0)? 1:0;
+        drawCar(Math.abs(val), dir);
+      }
+
+      if(lastTurn != 0){
+        var dir = (steps[lastTurn].steps > 0)? 1:0;
+        var turn = (steps[lastTurn].angles > 0)? 0:1;
+        drawTurn(dir,turn);
+      }
+
+    }
+  }
+
+  function drawCar(val,dir){
+  	  var canvas = document.getElementById("myCanvas");
+  	  var chart = canvas.getContext("2d");
+
+  		var x1 = carStatus.x;//previous
+  		var y1 = carStatus.y;//previous
+      var x2 = carStatus.x;//previous
+  		var y2 = carStatus.y;//previous
+      if(carStatus.dir == "E" && dir == 1){x2 += Math.floor(val*2); lineAMT(0, x2-x1)} //dir 1 forward / 0 backward
+      else if(carStatus.dir == "E" && dir == 0){x2 -= Math.floor(val*2); lineAMT(0, x1-x2)} //dir 1 forward / 0 backward
+      else if(carStatus.dir == "W" && dir == 1){x2 -= Math.floor(val*2); lineAMT(1, x1-x2)} //dir 1 forward / 0 backward
+      else if(carStatus.dir == "W" && dir == 0){x2 += Math.floor(val*2); lineAMT(1, x2-x1)} //dir 1 forward / 0 backward
+      else if(carStatus.dir == "N" && dir == 1){y2 -= Math.floor(val*2); lineAMT(2, x1-x21)} //dir 1 forward / 0 backward
+      else if(carStatus.dir == "N" && dir == 0){y2 += Math.floor(val*2); lineAMT(2, x2-x1)} //dir 1 forward / 0 backward
+      else if(carStatus.dir == "S" && dir == 1){y2 += Math.floor(val*2); lineAMT(3, x2-x1)} //dir 1 forward / 0 backward
+      else if(carStatus.dir == "S" && dir == 0){y2 -= Math.floor(val*2); lineAMT(3, x1-x2)} //dir 1 forward / 0 backward
+
+      carStatus.x = x2;
+      carStatus.y = y2;//update
+      console.log("----------status- straight-----------");
+      console.log("");
+      console.log(carStatus.dir+"\n"+carStatus.x+"\n"+carStatus.y);
+  }
+
+  function drawTurn(dir,turn){
+    var de;
+    var face;
+    switch(carStatus.dir) {   //0:E , 1: W, 2:N, 3:S
+      case "E":
+          de = 0;  face = (turn == 0)? 2:3;  carStatus.dir = (turn == 0)? "N":"S"; (turn == 0)? carStatus.y-1:carStatus.y+1;
+          break;
+      case "W":
+          de = 180; face = (turn == 0)? 3:2; carStatus.dir = (turn == 0)? "S":"N"; (turn == 0)? carStatus.y+1:carStatus.y=1;
+          break;
+      case "N":
+          de = 270; face = (turn == 0)? 1:0; carStatus.dir = (turn == 0)? "W":"E"; (turn == 0)? carStatus.x-1:carStatus.x+1;
+          break;
+      case "S":
+          de = 90; face = (turn == 0)? 0:1; carStatus.dir = (turn == 0)? "E":"W"; (turn == 0)? carStatus.x+1:carStatus.x-1;
+          break;
+    }
+    if(dir == 1 && turn == 1){turnAMT(1,de);     lineAMT(face,grid);} //turn right
+    else if(dir == 0 && turn == 1){turnAMT(0,de);lineAMT(face,grid);} //turn left
+    else if(dir == 1 && turn == 0){turnAMT(1,de);lineAMT(face,grid);} //turn right
+    else if(dir == 0 && turn == 0){turnAMT(0,de);lineAMT(face,grid);}; //turn left
+    console.log("----------status-turn-----------");
+    console.log("");
+    console.log(carStatus.dir+"\n"+carStatus.x+"\n"+carStatus.y);
+  }
+
+  function lineAMT(dir, dis){ // straight animation dir: 0: up, 1: down; 2:left; 3:right
+    if(dir == 2) {$("#car").animate({top: '-='+dis, opacity: '0.8'}, "slow");}
+    if(dir == 3) {$("#car").animate({top: '+='+dis, opacity: '0.8'}, "slow");}
+    if(dir == 1) {$("#car").animate({left: '-='+dis, opacity: '0.8'}, "slow");}
+    if(dir == 0) {$("#car").animate({left: '+='+dis, opacity: '0.8'}, "slow");}
+  }
+
+  function turnAMT(flag,degree){//flag = 0 turn left, flag = 1 turn right
+    if(flag == 0){//turn left
+        $("#car").rotate({
+          duration:1000,
+          angle: degree,
+          animateTo:degree+90
+        })
+    }else{ //turn right
+        $("#car").rotate({
+          duration:1000,
+          angle: 0,
+          animateTo:degree-90
+        })
     }
   }
 
@@ -147,80 +234,6 @@
     }
     chart.stroke();
   }
-
-  function drawPath(val,dir){
-  	  var canvas = document.getElementById("myCanvas");
-  	  var chart = canvas.getContext("2d");
-
-  		var x1 = carStatus.x;//previous
-  		var y1 = carStatus.y;//previous
-      var x2 = carStatus.x;//previous
-  		var y2 = carStatus.y;//previous
-      if(carStatus.dir == "E" && dir == 1){x2 += Math.floor(val/10); lineAMT(0, x2-x1)} //dir 1 forward / 0 backward
-      else if(carStatus.dir == "E" && dir == 0){x2 -= Math.floor(val/10); lineAMT(0, x1-x2)} //dir 1 forward / 0 backward
-      else if(carStatus.dir == "W" && dir == 1){x2 -= Math.floor(val/10); lineAMT(1, x1-x2)} //dir 1 forward / 0 backward
-      else if(carStatus.dir == "W" && dir == 0){x2 += Math.floor(val/10); lineAMT(1, x2-x1)} //dir 1 forward / 0 backward
-      else if(carStatus.dir == "N" && dir == 1){y2 -= Math.floor(val/10); lineAMT(2, x1-x21)} //dir 1 forward / 0 backward
-      else if(carStatus.dir == "N" && dir == 0){y2 += Math.floor(val/10); lineAMT(2, x2-x1)} //dir 1 forward / 0 backward
-      else if(carStatus.dir == "S" && dir == 1){y2 += Math.floor(val/10); lineAMT(3, x2-x1)} //dir 1 forward / 0 backward
-      else if(carStatus.dir == "S" && dir == 0){y2 -= Math.floor(val/10); lineAMT(3, x1-x2)} //dir 1 forward / 0 backward
-
-      carStatus.x = x2;
-      carStatus.y = y2;//update
-      console.log("----------status- straight-----------");
-      console.log("");
-      console.log(carStatus.dir+"\n"+carStatus.x+"\n"+carStatus.y);
-  }
-
-  function drawTurn(dir,turn){
-    var de;
-    var face;
-    switch(carStatus.dir) {   //0:E , 1: W, 2:N, 3:S
-      case "E":
-          de = 0;  face = (turn == 0)? 2:3;  carStatus.dir = (turn == 0)? "N":"S"; (turn == 0)? carStatus.y-1:carStatus.y+1;
-          break;
-      case "W":
-          de = 180; face = (turn == 0)? 3:2; carStatus.dir = (turn == 0)? "S":"N"; (turn == 0)? carStatus.y+1:carStatus.y=1;
-          break;
-      case "N":
-          de = 270; face = (turn == 0)? 1:0; carStatus.dir = (turn == 0)? "W":"E"; (turn == 0)? carStatus.x-1:carStatus.x+1;
-          break;
-      case "S":
-          de = 90; face = (turn == 0)? 0:1; carStatus.dir = (turn == 0)? "E":"W"; (turn == 0)? carStatus.x+1:carStatus.x-1;
-          break;
-    }
-    if(dir == 1 && turn == 1){turnAMT(1,de);      lineAMT(face,grid);} //turn right
-    else if(dir == 0 && turn == 1){turnAMT(0,de);lineAMT(face,grid);} //turn left
-    else if(dir == 1 && turn == 0){turnAMT(1,de);lineAMT(face,grid);} //turn right
-    else if(dir == 0 && turn == 0){turnAMT(0,de);lineAMT(face,grid);}; //turn left
-    console.log("----------status-turn-----------");
-    console.log("");
-    console.log(carStatus.dir+"\n"+carStatus.x+"\n"+carStatus.y);
-  }
-
-  function lineAMT(dir, dis){ // straight animation dir: 0: up, 1: down; 2:left; 3:right
-    if(dir == 2) {$("#car").animate({top: '-='+dis*grid, opacity: '0.8'}, "slow");}
-    if(dir == 3) {$("#car").animate({top: '+='+dis*grid, opacity: '0.8'}, "slow");}
-    if(dir == 1) {$("#car").animate({left: '-='+dis*grid, opacity: '0.8'}, "slow");}
-    if(dir == 0) {$("#car").animate({left: '+='+dis*grid, opacity: '0.8'}, "slow");}
-  }
-
-  function turnAMT(flag,degree){//flag = 0 turn left, flag = 1 turn right
-    if(flag == 0){//turn left
-        $("#car").rotate({
-          duration:1000,
-          angle: degree,
-          animateTo:degree+90
-        })
-    }else{ //turn right
-        $("#car").rotate({
-          duration:1000,
-          angle: 0,
-          animateTo:degree-90
-        })
-    }
-  }
-
   /*------------end-----------*/
 
   function setstartPoint(){
@@ -261,7 +274,7 @@
               break;
         }
         $("#car").css({"display":"block","position":"absolute","top":con(y-2,1),"left":con(x-20,0)});
-        carStatus.dir = $("#dir").val();carStatus.x = Math.floor(x / grid);carStatus.y = Math.floor( y / grid);
+        carStatus.dir = $("#dir").val();carStatus.x = Math.floor(x);carStatus.y = Math.floor(y);
         hasStartPoint = true; //flag setted
       }
     }

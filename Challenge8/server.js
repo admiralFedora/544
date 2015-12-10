@@ -6,10 +6,10 @@ var GPIO = require('onoff').Gpio
 //--------------------------------------------------------------------
 //set of pin numbers
 
-var pinUp = new GPIO(5, 'out');
-var pinDown = new GPIO(6, 'out');
-var pinLeft = new GPIO(13, 'out');
-var pinRight = new GPIO(19, 'out');
+var pinUp = new GPIO(19, 'out');
+var pinDown = new GPIO(13, 'out');
+var pinLeft = new GPIO(6, 'out');
+var pinRight = new GPIO(5, 'out');
 var pinStop = new GPIO(26, 'out');
 var pinSpeed = new GPIO(17, 'in', 'rising');
 var pinTurn = new GPIO(27, 'in', 'rising');
@@ -158,7 +158,6 @@ app.get('/drive', function(req, res){
 app.get('/update', function(req, res){
   res.json({"data":stepsArray});
   printOutJson(stepsArray);
-  stepsArray = [];
 })
 
 
