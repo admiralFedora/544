@@ -74,7 +74,7 @@
   var posData = [];
   var isSetPoint = false; //if set start point button clicked
   var hasStartPoint =false;// have set the start point?
-  var keyPressArray =["","","",""];   // collect the key pressed in 50 milliseconds
+  var keyPressArray =["0","0","0","0"];   // collect the key pressed in 50 milliseconds
 
   function updateGraph(){
     hor = $("#x").val();
@@ -505,14 +505,14 @@ function right(){
 
               setTimeout(function(){// collect the key pressed eery 50 milliseconds
                 var u = 0,d = 0,l = 0,r = 0, count = 0;
-                count += parseInt(keyPressArray[0])+parseInt(keyPressArray[1])+parseInt(keyPressArray[2])+parseInt(keyPressArray[3]);
+                count = parseInt(keyPressArray[0])+parseInt(keyPressArray[1])+parseInt(keyPressArray[2])+parseInt(keyPressArray[3]);
                 if( keyPressArray[0] == 1 && keyPressArray[1] != 1){u = 1;} // up signal
-                if( keyPressArray[1] == 1 && keyPressArray[0] != 1){d = 1;}
-                if( keyPressArray[2] == 1 && keyPressArray[3] != 1){l = 1;}
-                if( keyPressArray[3] == 1 && keyPressArray[2] != 1){r = 1;}
+                if( keyPressArray[1] == 1 && keyPressArray[0] != 1){d = 1;} // up signal
+                if( keyPressArray[2] == 1 && keyPressArray[3] != 1){l = 1;} // up signal
+                if( keyPressArray[3] == 1 && keyPressArray[2] != 1){r = 1;} // up signal
 
-                if(count != 0){ drive(u,d,l,r); console.log(" | U: "+u+" | D: "+d+" | L: "+l+" | R: "+r);keyPressArray=["0","0","0","0"]}//there are keys pressed
-              }, 500);
+                if(count != 0){console.log(count); drive(u,d,l,r); console.log(" | U: "+u+" | D: "+d+" | L: "+l+" | R: "+r);keyPressArray=["0","0","0","0"]}//there are keys pressed
+              }, 20);
           })
 
       $(window).keyup(function(){
