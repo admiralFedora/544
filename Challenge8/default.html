@@ -167,8 +167,11 @@
 
       carStatus.x = x2;
       carStatus.y = y2;//update
+      console.log("----------status------------");
+      console.log("");
+      console.log(carStatus.dir+"\n"+carStatus.x+"\n"+carStatus.y);
       /*Draw Line*/
-      chart.strokeStyle = "rgba(252,233,18,1)";
+      /*chart.strokeStyle = "rgba(252,233,18,1)";
       chart.lineWidth = 2;
       chart.beginPath();
       chart.moveTo(x1,y1);
@@ -176,7 +179,7 @@
       chart.closePath();
       chart.stroke();
 
-    		/*Draw point1*/
+    		/*Draw point1*//*
         chart.fillStyle = "rgba(252,233,18,1)";
         chart.lineWidth = 2;
     		chart.beginPath();
@@ -184,12 +187,12 @@
         chart.closePath();
     		chart.fill();
 
-    		/*Draw point2*/
+    		/*Draw point2*//*
         chart.lineWidth = 2;
     		chart.beginPath();
     		chart.arc(x2, y2, 3, 0, 2 * Math.PI);
         chart.closePath();
-    		chart.fill();
+    		chart.fill();*/
   }
 
   function drawTurn(dir,turn){
@@ -213,6 +216,9 @@
     else if(dir == 0 && turn == 1){turnAMT(0,de);lineAMT(face,grid);} //turn left
     else if(dir == 1 && turn == 0){turnAMT(1,de);lineAMT(face,grid);} //turn right
     else if(dir == 0 && turn == 0){turnAMT(0,de);lineAMT(face,grid);}; //turn left
+    console.log("----------status------------");
+    console.log("");
+    console.log(carStatus.dir+"\n"+carStatus.x+"\n"+carStatus.y);
   }
 
   function lineAMT(dir, dis){ // straight animation dir: 0: up, 1: down; 2:left; 3:right
@@ -529,7 +535,7 @@
 
 
       <div id="monitor">
-        <iframe id="video" src="http://192.168.2.149:8081" style="width: 320px; height: 240px"></iframe>
+        <iframe id="video" src="http://192.168.2.127:8081" style="width: 320px; height: 240px"></iframe>
       </div>
       <input id="hide" class="button" type="submit" value="Hide">
 
