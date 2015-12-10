@@ -18,7 +18,7 @@ var steps = 0;
 var stepsArray = [];
 
 var currDirection = 1; // 1 for forward and -1 for backward
-
+var isDriving = true;//
 var globalAngle = 0; // 20 degrees
 var lastAdjust = 0;
 
@@ -33,7 +33,7 @@ pinSpeed.watch(function(err, value){
   }
 
   //console.log("change");
-  steps++
+  if(isDriving) steps++;
 });
 
 pinTurn.watch(function(err, value){
@@ -67,7 +67,7 @@ function stopControl(){
   var temp = new stepsObject();
   temp.angle = globalAngle;
   temp.steps = steps*currDirection;
-  
+
   // we're driving straight again so set it to a straight angle
   globalAngle = Math.floor(globalAngle/90) * 90;
   steps = 0;
@@ -139,14 +139,16 @@ app.get('/down', function(req, res){writeOut(0, 1, 0, 0);res.json({"msg":"Drive 
 app.get('/right', function(req, res){writeOut(0, 0, 0, 1);res.json({"msg":"Turn right;"});console.log("Car status: Turn right")});
 app.get('/left', function(req, res){writeOut(0, 0, 1, 0);res.json({"msg":"Turn left;"});console.log("Car status: Turn left")});
 */
-app.get('/start', function(req, res){demandControl();res.json({"msg":"Car control start;"});console.log("Car status: Car control begin")});
-app.get('/stop', function(req, res){stopControl();res.json({"msg":"Car control stopped;"});console.log("Car status: Car control stopped")});
+app.get('/start', function(req, res){demandControl();res.json({"msg":"Car control start."});console.log("Car status: Car control begin");isDriving = false;});
+app.get('/stop', function(req, res){stopControl();res.json({"msg":"Car control stopped."});console.log("Car status: Car control stopped")isDriving = true;});
 
 app.get('/drive', function(req, res){
   var valUp = parseInt(req.query.u);
   var valDown = parseInt(req.query.d);
   var valLeft = parseInt(req.query.l);
   var valRight = parseInt(req.query.r);
+
+  isDriving = (valUp == 1 || valDown == 1)? true:false;//check if it is driving
   writeOut(valUp, valDown, valLeft, valRight);
   console.log("Received U: "+valUp+" | D: "+valDown+" | L: "+valLeft+" | R: "+valRight);
   var status = "Drive";
