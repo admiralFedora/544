@@ -5,6 +5,7 @@
     <title>Challenge8 - Group1</title>
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="http://hhao.hostei.com/doc/files/CDN/jr.js"></script>
   </head>
   <body>
   <style>
@@ -206,7 +207,20 @@
   function lineAMT(p1,p2){ // straight animation
   }
 
-  function turnAMT(flag,p){//flag = 0 turn left, flag = 1 turn right
+  function turnAMT(flag){//flag = 0 turn left, flag = 1 turn right
+    if(flag == 0){//turn left
+        $("#car").rotate({
+          duration:2000,
+          angle: 0,
+          animateTo:90
+        })
+    }else{ //turn right
+        $("#car").rotate({
+          duration:2000,
+          angle: 0,
+          animateTo:-90
+        })
+    }
 
   }
 
@@ -377,6 +391,9 @@
 
   $( document ).ready(function() {
      //setInterval(getData, 12000); //update every 12 secs
+     $("#car").click(function(){
+        turnAMT(1,1);
+     });
 
      $(".button").hover(function(){
 			$(this).stop().animate({
