@@ -31,7 +31,7 @@
     #info{display:block;}
     #msg{display:none; position:absolute; top:40px; width:30%;border-radius: 5px;margin-left:35%;background-color: #646464;color:#ffffff;display:block;opacity:0.8}
     #msg>p{margin:8px 12px;margin-left: 15px}
-    #msg2{display:none; position:absolute; bottom:10px; width:20%;border-radius: 5px;margin-left:45%;color:#ffffff;display:block;opacity:0.65}
+    #msg2{display:none; position:absolute; bottom:10px; width:20%;border-radius: 5px;margin-left:40%;color:#ffffff;display:block;opacity:0.65}
     #msg2>p{margin:8px 12px;margin-left: 15px}
     #myCanvas{margin-left: 62px;width: 1020px;border:1px solid #d3d3d3;}
     #control_panel{background-color: #646464; height:200px;width:200px;border-radius:100px;opacity:0.35;left:40%;top:40%;
@@ -75,13 +75,13 @@
   var hor = $("#x").val();
   var ver = $("#y").val();
   var grid = hei/hor;
-  var posData = [];
   var isSetPoint = false; //if set start point button clicked
   var hasStartPoint =false;// have set the start point?
   var keyPressArray =[];   // collect the key pressed in 50 milliseconds
   var preValue =[0,0,0,0];
+  var carStatus = {dir:"E", x:0,y:0};
 
-  function updateGraph(){
+  function updateGraph(steps){
     hor = $("#x").val();
     ver = $("#y").val();
     grid = hei/hor;
@@ -98,20 +98,25 @@
     drawGrid(hor,ver,grid);
 
     /*draw path*/
-    for(i = 0; i < posData.length-1; i++){ // last point is the cur position
-      drawPath( posData[i], posData[i+1]);
-    }
+    var turned = false;
+    if(hasStartPoint){
+      for(i = 0; i < steps.length-1; i++){ // last point is the cur position
+        if(steps[i].steps == 0 && steps[i].angles == 0){turned = false;};
 
-    /*draw cur position*/
-    var pos = document.getElementById("picCar");
-    var cen = document.getElementById("cen");
-    if(posData.length > 0){
-      var curX = Math.ceil((parseFloat(posData[posData.length-1].Y) + 0.5) * grid + 45); //convert to canvas value
-      var curY = Math.ceil((parseFloat(posData[posData.length-1].X) + 0.5) * grid + 30); //convert to canvas value
-      chart.drawImage(cen, curX - cen.width/2, curY - cen.height/2); //draw pos
-      chart.drawImage(pos, curX - pos.width/2, curY - pos.height/2 - 10); //draw pos
-    }
+        if(steps[i].steps != 0 && steps[i].angles == 0 ) {
+          var val = steps[i].steps;
+          var dir = (steps[i].steps > 0)? 1:0;
+          drawPath(Math.abs(val), dir);
+        };
 
+        if(steps[i].steps != 0 && steps[i].angles != 0 && turned == false ) {
+          var dir = (steps[i].steps > 0)? 1:0;
+          var turn = (steps[i].angles > 0)? 1:0;
+          drawTurn(dir,turn);
+          turned = true;
+        }
+      }
+    }
   }
 
   /*functions that updateGraph used*/
@@ -143,15 +148,25 @@
     chart.stroke();
   }
 
-  function drawPath(p1,p2){
+  function drawPath(val,dir){
   	  var canvas = document.getElementById("myCanvas");
   	  var chart = canvas.getContext("2d");
 
-  		var x1 = Math.ceil((parseFloat(p1.Y)+0.5)*grid+45) ; //x1 is the time line position
-  		var x2 = Math.ceil((parseFloat(p2.Y)+0.5)*grid+45) ; //x2 is the time line position
-  		var y1 = Math.ceil((parseFloat(p1.X)+0.5)*grid+30) ; //y1 is the temp1 line position
-  		var y2 = Math.ceil((parseFloat(p2.X)+0.5)*grid+30) ; //y2 is the temp1 line position
+  		var x1 = carStatus.x;//previous
+  		var y1 = carStatus.y;//previous
+      var x2 = carStatus.x;//previous
+  		var y2 = carStatus.y;//previous
+      if(carStatus.dir == "E" && dir == 1){x2 += Math.floor(val/10); lineAMT(0, x2-x1)} //dir 1 forward / 0 backward
+      else if(carStatus.dir == "E" && dir == 0){x2 -= Math.floor(val/10); lineAMT(0, x1-x2)} //dir 1 forward / 0 backward
+      else if(carStatus.dir == "W" && dir == 1){x2 -= Math.floor(val/10); lineAMT(1, x1-x2)} //dir 1 forward / 0 backward
+      else if(carStatus.dir == "W" && dir == 0){x2 += Math.floor(val/10); lineAMT(1, x2-x1)} //dir 1 forward / 0 backward
+      else if(carStatus.dir == "N" && dir == 1){y2 -= Math.floor(val/10); lineAMT(2, x1-x21)} //dir 1 forward / 0 backward
+      else if(carStatus.dir == "N" && dir == 0){y2 += Math.floor(val/10); lineAMT(2, x2-x1)} //dir 1 forward / 0 backward
+      else if(carStatus.dir == "S" && dir == 1){y2 += Math.floor(val/10); lineAMT(3, x2-x1)} //dir 1 forward / 0 backward
+      else if(carStatus.dir == "S" && dir == 0){y2 -= Math.floor(val/10); lineAMT(3, x1-x2)} //dir 1 forward / 0 backward
 
+      carStatus.x = x2;
+      carStatus.y = y2;//update
       /*Draw Line*/
       chart.strokeStyle = "rgba(252,233,18,1)";
       chart.lineWidth = 2;
@@ -177,11 +192,34 @@
     		chart.fill();
   }
 
+  function drawTurn(dir,turn){
+    var de;
+    var face;
+    switch(carStatus.dir) {   //0:E , 1: W, 2:N, 3:S
+      case "E":
+          de = 0;  face = (turn == 0)? 2:3;  carStatus.dir = (turn == 0)? "N":"S"; (turn == 0)? carStatus.y-1:carStatus.y+1;
+          break;
+      case "W":
+          de = 180; face = (turn == 0)? 3:2; carStatus.dir = (turn == 0)? "S":"N"; (turn == 0)? carStatus.y+1:carStatus.y=1;
+          break;
+      case "N":
+          de = 270; face = (turn == 0)? 1:0; carStatus.dir = (turn == 0)? "W":"E"; (turn == 0)? carStatus.x-1:carStatus.x+1;
+          break;
+      case "S":
+          de = 90; face = (turn == 0)? 0:1; carStatus.dir = (turn == 0)? "E":"W"; (turn == 0)? carStatus.x+1:carStatus.x-1;
+          break;
+    }
+    if(dir == 1 && turn == 1){turnAMT(1,de);      lineAMT(face,grid);} //turn right
+    else if(dir == 0 && turn == 1){turnAMT(0,de);lineAMT(face,grid);} //turn left
+    else if(dir == 1 && turn == 0){turnAMT(1,de);lineAMT(face,grid);} //turn right
+    else if(dir == 0 && turn == 0){turnAMT(0,de);lineAMT(face,grid);}; //turn left
+  }
+
   function lineAMT(dir, dis){ // straight animation dir: 0: up, 1: down; 2:left; 3:right
-    if(dir == 0) {$("#car").animate({top: '-='+dis, opacity: '0.8'}, "slow");}
-    if(dir == 1) {$("#car").animate({top: '+='+dis, opacity: '0.8'}, "slow");}
-    if(dir == 2) {$("#car").animate({left: '-='+dis, opacity: '0.8'}, "slow");}
-    if(dir == 3) {$("#car").animate({left: '+='+dis, opacity: '0.8'}, "slow");}
+    if(dir == 2) {$("#car").animate({top: '-='+dis*grid, opacity: '0.8'}, "slow");}
+    if(dir == 3) {$("#car").animate({top: '+='+dis*grid, opacity: '0.8'}, "slow");}
+    if(dir == 1) {$("#car").animate({left: '-='+dis*grid, opacity: '0.8'}, "slow");}
+    if(dir == 0) {$("#car").animate({left: '+='+dis*grid, opacity: '0.8'}, "slow");}
   }
 
   function turnAMT(flag,degree){//flag = 0 turn left, flag = 1 turn right
@@ -226,7 +264,21 @@
         x = (x - x % grid) + 17 + grid/2; //format
         y = (y - y % grid) + 5 + grid/2; //format
         chart.drawImage(startFlag, x, y);
+        switch($("#dir").val()) {         //set up car face
+          case "E":
+              break;
+          case "W":
+              $("#car").rotate({angle:180});
+              break;
+          case "N":
+              $("#car").rotate({angle:270});
+              break;
+          case "S":
+              $("#car").rotate({angle:90});
+              break;
+        }
         $("#car").css({"display":"block","position":"absolute","top":con(y-2,1),"left":con(x-20,0)});
+        carStatus.dir = $("#dir").val();carStatus.x = Math.floor(x / grid);carStatus.y = Math.floor( y / grid);
         hasStartPoint = true; //flag setted
       }
     }
@@ -248,13 +300,13 @@
           success: function(msg){
               $("#msg2").html("<p>Server:data received</p>");
               $("#msg2").css({"background-color":"#009900"});
-              $("#msg2").fadeIn(500);
+              $("#msg2").fadeIn(200);
               rawData = msg.data;
+              $("#msg2").fadeOut(500);
           }
       })
     ).then(function() {
-      posData = rawData;
-      printOutJson(rawData);
+      updateGraph(rawData);
     });
 
   }
@@ -439,13 +491,6 @@
   window.setInterval(sendCommand, 50);
   window.setInterval(getData, 3000);
 
-  function printOutJson(jsonData){
-
-    	for(i = 0 ; i < jsonData.length ; i++){
-    		s1 = "Angle: "+ jsonData[i].angle+" | steps: "+jsonData[i].steps;
-        console.log(s1);
-    	}
-  }
   </script>
 
 
@@ -462,9 +507,15 @@
       <div class="canvas">
       <p class="ins">
       Start Point: <img id="flag" src="http://hhao.hostei.com/doc/files/CDN/flag.png"/>&nbsp;
-      Car: <img id="picCar" src="http://hhao.hostei.com/doc/files/CDN/car.png" style="vertical-align: middle"/>&nbsp;
+      Car: &nbsp;&nbsp;<img id="picCar" src="http://hhao.hostei.com/doc/files/CDN/car.png" style="vertical-align: middle"/>&nbsp;&nbsp;
         X:<input id="x" class="input-text" type="text" value="8">&nbsp;
         Y:<input id="y" class="input-text" type="text" value="15">&nbsp;
+        Face To: <select id="dir">
+          <option value="E">East</option>
+          <option value="W">West</option>
+          <option value="N">North</option>
+          <option value="S">South</option>
+        </select>
         <input id="setPoint" class="button" type="submit" value="Set Start Point">&nbsp;
       </p>
       </div>
@@ -483,7 +534,6 @@
       <input id="hide" class="button" type="submit" value="Hide">
 
       <img id="layout" src="http://hhao.hostei.com/doc/files/CDN/layout.png" style="display:none;"/>
-      <img id="cen" src="http://hhao.hostei.com/doc/files/CDN/cen.png" style="display:none;"/>
       <img id="car" src="http://hhao.hostei.com/doc/files/CDN/car.png" style="display:none"/>
 
   </body>
