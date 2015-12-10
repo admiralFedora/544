@@ -20,6 +20,7 @@ var stepsArray = [];
 var currDirection = 1; // 1 for forward and -1 for backward
 
 var globalAngle = 0; // 20 degrees
+var lastAdjust = 0;
 
 function stepsObject(){//an object for each action
   var angle;
@@ -66,6 +67,9 @@ function stopControl(){
   var temp = new stepsObject();
   temp.angle = globalAngle;
   temp.steps = steps*currDirection;
+  
+  // we're driving straight again so set it to a straight angle
+  globalAngle = Math.floor(globalAngle/90) * 90;
   steps = 0;
   currDirection = 1;
   stepsArray.push(temp);
@@ -78,6 +82,9 @@ function writeOut(up, down, left, right){
   var temp = new stepsObject();
   temp.angle = globalAngle;
   temp.steps = steps*currDirection;
+  if(steps == 0){
+    globalAngle -= lastAdjust;
+  }
   steps =  0;
   stepsArray.push(temp);
 
@@ -94,8 +101,12 @@ function writeOut(up, down, left, right){
 
   if(left){
     globalAngle += 20;
+    lastAdjust = 20;
   } else if(right) {
     globalAngle += -20;
+    lastAdjust = -20;
+  } else {
+    lastAdjust = 0;
   }
 }
 
