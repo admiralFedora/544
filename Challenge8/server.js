@@ -134,11 +134,6 @@ app.get('/', function(req, res){
   res.sendfile("default.html"); //return the default page
 })
 
-/*app.get('/up', function(req, res){writeOut(1, 0, 0, 0);res.json({"msg":"Drive forward;"});console.log("Car status: Drive forward;")});
-app.get('/down', function(req, res){writeOut(0, 1, 0, 0);res.json({"msg":"Drive backward;"});console.log("Car status: Drive backward;")});
-app.get('/right', function(req, res){writeOut(0, 0, 0, 1);res.json({"msg":"Turn right;"});console.log("Car status: Turn right")});
-app.get('/left', function(req, res){writeOut(0, 0, 1, 0);res.json({"msg":"Turn left;"});console.log("Car status: Turn left")});
-*/
 app.get('/start', function(req, res){demandControl();res.json({"msg":"Car control start."});console.log("Car status: Car control begin");isDriving = false;});
 app.get('/stop', function(req, res){stopControl();res.json({"msg":"Car control stopped."});console.log("Car status: Car control stopped");isDriving = true;});
 
@@ -160,14 +155,10 @@ app.get('/drive', function(req, res){
   console.log("Car status: "+ status);
 });
 
-
 app.get('/update', function(req, res){
-  ; //return the status: speed, turn & direction
+  res.json({"data":stepsArray});
 })
-//still need to read the speed
 
-function mapData(){
-}
 
 var server = app.listen(3000, '0.0.0.0', function(){
   console.log("listening on *:3000");

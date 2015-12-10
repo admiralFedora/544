@@ -31,6 +31,8 @@
     #info{display:block;}
     #msg{display:none; position:absolute; top:40px; width:30%;border-radius: 5px;margin-left:35%;background-color: #646464;color:#ffffff;display:block;opacity:0.8}
     #msg>p{margin:8px 12px;margin-left: 15px}
+    #msg2{display:none; position:absolute; bottom:10px; width:10%;border-radius: 5px;margin-left:45%;color:#ffffff;display:block;opacity:0.8}
+    #msg2>p{margin:8px 12px;margin-left: 15px}
     #myCanvas{margin-left: 62px;width: 1020px;border:1px solid #d3d3d3;}
     #control_panel{background-color: #646464; height:200px;width:200px;border-radius:100px;opacity:0.35;left:40%;top:40%;
     position:absolute;}
@@ -101,7 +103,6 @@
     }
 
     /*draw cur position*/
-    //chart.drawImage(img, 0, 0); //draw layout, not sure about the place
     var pos = document.getElementById("picCar");
     var cen = document.getElementById("cen");
     if(posData.length > 0){
@@ -112,33 +113,6 @@
     }
 
   }
-  /*  if(posData.length = 1){
-      var curX = Math.ceil((parseFloat(posData[posData.length-1].Y) + 0.5) * grid + 45); //convert to canvas value
-      var curY = Math.ceil((parseFloat(posData[posData.length-1].X) + 0.5) * grid + 30); //convert to canvas value
-      chart.drawImage(cen, curX - cen.width/2, curY - cen.height/2); //draw pos
-      chart.drawImage(pos, curX - pos.width/2, curY - pos.height/2 - 10); //draw pos
-    }else if(posData.length > 1){
-        draw();
-        console.log("yes");
-    }
-
-
-    function draw(){
-        chart.save();
-        var lenX = parseFloat(posData[posData.length-1].X) - parseFloat(posData[posData.length-2].X);
-        var lenY = parseFloat(posData[posData.length-1].Y) - parseFloat(posData[posData.length-2].Y);
-        var cot =  lenX/lenY;
-        var shortX = (lenX/10 * (time.getMilliseconds() % 10 + 1)).toFixed(2);
-        var shortY = (shortX / cot).toFixed(2);
-        var curJson = {"X":parseFloat(posData[posData.length-2].X) + shortX,"Y":parseFloat(posData[posData.length-2].Y) + shortY};
-        drawPath(posData[posData.length-2],curJson);
-        var curX = Math.ceil((parseFloat(curJson.Y) + 0.5) * grid + 45); //convert to canvas value
-        var curY = Math.ceil((parseFloat(curJson.X) + 0.5) * grid + 30); //convert to canvas value
-        chart.drawImage(cen, curX - cen.width/2, curY - cen.height/2); //draw pos
-        chart.drawImage(pos, curX - pos.width/2, curY - pos.height/2 - 10); //draw pos
-        window.requestAnimationFrame(draw);
-    }
-  }*/
 
   /*functions that updateGraph used*/
   function drawGrid(hor,ver,d){
@@ -210,24 +184,23 @@
     if(dir == 3) {$("#car").animate({left: '+='+dis, opacity: '0.8'}, "slow");}
   }
 
-  function turnAMT(flag){//flag = 0 turn left, flag = 1 turn right
+  function turnAMT(flag,degree){//flag = 0 turn left, flag = 1 turn right
     if(flag == 0){//turn left
         $("#car").rotate({
-          duration:2000,
-          angle: 0,
-          animateTo:90
+          duration:1000,
+          angle: degree,
+          animateTo:degree+90
         })
     }else{ //turn right
         $("#car").rotate({
-          duration:2000,
+          duration:1000,
           angle: 0,
-          animateTo:-90
+          animateTo:degree-90
         })
     }
   }
 
   /*------------end-----------*/
-
 
   function setstartPoint(){
     var canvas = document.getElementById("myCanvas");
@@ -258,46 +231,34 @@
       }
     }
 
-  /*function getData(){
+  function getData(){
     var rawData;
     $.when(
       $.ajax({
-          url: "/startMapping",
+          url: "/update",
           type: 'GET',
           async: false,
           cache: false,
           timeout: 10000,
           error: function(msg){
-              $("#msg").html("<p>Server : Update failed</p>");
-              $("#msg>p").css({"margin":"8px 12px","margin-left": "15px"});
-              $("#msg").fadeIn(500);
+              $("#msg2").html("<p>Server : Update failed</p>");
+              $("#msg2").css({"background-color":"#cc0000"});
+              $("#msg2").fadeIn(500);
           },
           success: function(msg){
-            if(typeof(msg) == "object" && !(typeof(msg.msg) === 'undefined')){ // no sensor
-                $("#msg").html("<p>Server:" + msg.msg+"</p>");
-                $("#msg>p").css({"margin":"8px 12px","margin-left": "15px"});
-                $("#msg").fadeIn(500);
-            }
-                rawData = msg;
+              $("#msg2").html("<p>Server:data received</p>");
+              $("#msg2").css({"background-color":"#ccff00"});
+              $("#msg2").fadeIn(500);
+              rawData = msg.data;
           }
       })
     ).then(function() {
-      var newData = cleanData(rawData);
-      if(posData.length < 100){ //only keep most 100 data
-          posData.push(newData);
-          console.log("Get pos X:"+newData.X + ", Y:" + newData.Y);
-          updateGraph();
-      }else{
-          posData.splice(0,1);
-          posData.push(newData);
-          console.log("Get pos X:"+newData.X + ", Y:" + newData.Y);
-          updateGraph();
-      }
+      posData = rawData;
+      printOutJson(rawData);
+      //getData();
     });
 
-  }*/
-
-
+  }
 
   function drive(u,d,l,r){
     var rawData;
@@ -322,7 +283,7 @@
       });
     }
 
-    function begin(){
+  function begin(){
       var rawData;
         $.when(
           $.ajax({
@@ -344,8 +305,7 @@
         });
     }
 
-
-    function end(){
+  function end(){
       var rawData;
         $.when(
           $.ajax({
@@ -367,7 +327,7 @@
         });
     }
 
-    function sendCommand(){
+  function sendCommand(){
       var u,d,l,r, count = 0;
       u = (keyPressArray[87] || keyPressArray[38])? 1:0;
       d = (keyPressArray[83] || keyPressArray[40])? 1:0;
@@ -389,12 +349,14 @@
   //layout position: (45,30) - (848,392)
   window.onload = function() {
       updateGraph();
+      getData();
   }
 
   $( document ).ready(function() {
      //setInterval(getData, 12000); //update every 12 secs
      $("#car").click(function(){
-        lineAMT(3,grid);
+        turnAMT(1,0);
+        lineAMT(0,grid);
      });
 
      $(".button").hover(function(){
@@ -476,6 +438,18 @@
 
   document.addEventListener("DOMContentLoaded", setstartPoint, false);
   window.setInterval(sendCommand, 50);
+
+
+
+  function printOutJson(jsonData){
+  	var s1 = "";
+
+  	for(i = 0 ; i < jsonData.length ; i++){
+  		s1 += "Angle: "+ jsonData[i].angle+" | steps: "+jsonData[i].steps;
+      console.log(s1);
+  	}
+
+}
   </script>
 
 
@@ -486,6 +460,7 @@
       <br/>
       </div>
       <div  id="msg"></div>
+      <div  id="msg2"></div>
       <canvas id="myCanvas"  width="1020px" height="420px">
         Your browser does not support the HTML5 canvas tag.</canvas>
       <div class="canvas">
