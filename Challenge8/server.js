@@ -158,6 +158,7 @@ app.get('/drive', function(req, res){
 app.get('/update', function(req, res){
   res.json({"data":stepsArray});
   printOutJson(stepsArray);
+  stepsArray = [];
 })
 
 

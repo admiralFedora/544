@@ -167,7 +167,7 @@
 
       carStatus.x = x2;
       carStatus.y = y2;//update
-      console.log("----------status------------");
+      console.log("----------status- straight-----------");
       console.log("");
       console.log(carStatus.dir+"\n"+carStatus.x+"\n"+carStatus.y);
       /*Draw Line*/
@@ -216,7 +216,7 @@
     else if(dir == 0 && turn == 1){turnAMT(0,de);lineAMT(face,grid);} //turn left
     else if(dir == 1 && turn == 0){turnAMT(1,de);lineAMT(face,grid);} //turn right
     else if(dir == 0 && turn == 0){turnAMT(0,de);lineAMT(face,grid);}; //turn left
-    console.log("----------status------------");
+    console.log("----------status-turn-----------");
     console.log("");
     console.log(carStatus.dir+"\n"+carStatus.x+"\n"+carStatus.y);
   }
