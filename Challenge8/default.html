@@ -74,7 +74,7 @@
   var posData = [];
   var isSetPoint = false; //if set start point button clicked
   var hasStartPoint =false;// have set the start point?
-  var keyPressArray =["0","0","0","0"];   // collect the key pressed in 50 milliseconds
+  var keyPressArray =[];   // collect the key pressed in 50 milliseconds
 
   function updateGraph(){
     hor = $("#x").val();
@@ -446,6 +446,17 @@ function right(){
         });
     }
 
+    function sendCommand(){
+      var u,d,l,r, count = 0;
+      u = (keyPressArray[87] || keyPressArray[38])? 1:0;
+      d = (keyPressArray[83] || keyPressArray[40])? 1:0;
+      l = (keyPressArray[65] || keyPressArray[37])? 1:0;
+      r = (keyPressArray[68] || keyPressArray[39])? 1:0;
+      count =  parseInt(u)+parseInt(d)+parseInt(l)+parseInt(r);
+      if(count != 0){console.log(count); drive(u,d,l,r); console.log(" | U: "+u+" | D: "+d+" | L: "+l+" | R: "+r);}//there are keys pressed
+      setTimeout(sendCommand, 5);
+    }
+
   //layout position: (45,30) - (848,392)
   window.onload = function() {
       updateGraph();
@@ -481,61 +492,13 @@ function right(){
         $( "#video" ).toggle("slow");
       });
 
-      $(window).keydown(function(){ // capture key down and calling button press function
-              if(event.which == 87 || event.which == 38 ){ // up arrow & w
-                      $("#b_u").stop().mouseover();
-                      keyPressArray[0] = 1; //u
-              };
+      document.addEventListener('keydown', function(e) { //add keydown listener
+         keyPressArray[e.keyCode] = true;
+      }, false);
 
-              if(event.which == 83 || event.which == 40 ){ // down arrow & s
-                      $("#b_d").stop().mouseover();
-                      keyPressArray[1] = 1;//d
-              };
-
-              if(event.which == 65 || event.which == 37 ){ // left arrow & a
-                      $("#b_l").stop().mouseover();
-                      keyPressArray[2] = 1;//l
-              };
-
-              if(event.which == 68 || event.which == 39 ){ // right arrow & d
-                      $("#b_r").stop().mouseover();
-                      keyPressArray[3] = 1;//r
-              };
-
-
-              setTimeout(function(){// collect the key pressed eery 50 milliseconds
-                var u = 0,d = 0,l = 0,r = 0, count = 0;
-                count = parseInt(keyPressArray[0])+parseInt(keyPressArray[1])+parseInt(keyPressArray[2])+parseInt(keyPressArray[3]);
-                if( keyPressArray[0] == 1 && keyPressArray[1] != 1){u = 1;} // up signal
-                if( keyPressArray[1] == 1 && keyPressArray[0] != 1){d = 1;} // up signal
-                if( keyPressArray[2] == 1 && keyPressArray[3] != 1){l = 1;} // up signal
-                if( keyPressArray[3] == 1 && keyPressArray[2] != 1){r = 1;} // up signal
-
-                if(count != 0){console.log(count); drive(u,d,l,r); console.log(" | U: "+u+" | D: "+d+" | L: "+l+" | R: "+r);keyPressArray=["0","0","0","0"]}//there are keys pressed
-              }, 20);
-          })
-
-      $(window).keyup(function(){
-            if(event.which == 87 || event.which == 38 ){ // up arrow & w
-                    $("#b_u").stop().mouseout();
-                    drive(0,0,0,0);
-            };
-
-            if(event.which == 83 || event.which == 40 ){ // udown arrow & s
-                    $("#b_d").stop().mouseout();
-                    drive(0,0,0,0);
-            };
-
-            if(event.which == 65 || event.which == 37 ){ // left arrow & a
-                    $("#b_l").stop().mouseout();
-                    drive(0,0,0,0);
-            };
-
-            if(event.which == 68 || event.which == 39 ){ // right arrow & d
-                    $("#b_r").stop().mouseout();
-                    drive(0,0,0,0);
-            };
-          })
+      document.addEventListener('keyup', function(e) { //add keyup listener
+         keyPressArray[e.keyCode] = false;
+      }, false);
 
           /*button press functions */
           $("#b_u").click(function(){
@@ -572,6 +535,7 @@ function right(){
   });
 
   document.addEventListener("DOMContentLoaded", setstartPoint, false);
+  window.setInterval(sendCommand, 400);
   </script>
 
 
