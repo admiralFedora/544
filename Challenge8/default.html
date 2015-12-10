@@ -75,6 +75,7 @@
   var isSetPoint = false; //if set start point button clicked
   var hasStartPoint =false;// have set the start point?
   var keyPressArray =[];   // collect the key pressed in 50 milliseconds
+  var preValue =[0,0,0,0];
 
   function updateGraph(){
     hor = $("#x").val();
@@ -286,97 +287,8 @@
     });
 
   }*/
-/*
-function up(){
-  var rawData;
-    $.when(
-      $.ajax({
-          url: "/up",
-          type: 'GET',
-          async: false,
-          cache: false,
-          timeout: 10000,
-          error: function(msg){
-              $("#msg").html("<p>Server : Drive forward failed</p>");
-          },
-          success: function(msg){
-            $("#msg").html("<p>"+msg.msg+"</p>");
-            $("#msg").fadeIn(500);
-          }
-      })
-    ).then(function() {
-      //update canvas
-    });
-}
 
 
-function down(){
-  var rawData;
-    $.when(
-      $.ajax({
-          url: "/down",
-          type: 'GET',
-          async: false,
-          cache: false,
-          timeout: 10000,
-          error: function(msg){
-              $("#msg").html("<p>Server : Drive backward failed</p>");
-          },
-          success: function(msg){
-            $("#msg").html("<p>"+msg.msg+"</p>");
-            $("#msg").fadeIn(500);
-          }
-      })
-    ).then(function() {
-      //update canvas
-    });
-}
-
-
-function left(){
-  var rawData;
-    $.when(
-      $.ajax({
-          url: "/left",
-          type: 'GET',
-          async: false,
-          cache: false,
-          timeout: 10000,
-          error: function(msg){
-              $("#msg").html("<p>Server : Turn left failed</p>");
-          },
-          success: function(msg){
-            $("#msg").html("<p>"+msg.msg+"</p>");
-            $("#msg").fadeIn(500);
-          }
-      })
-    ).then(function() {
-      //update canvas
-    });
-}
-
-
-function right(){
-  var rawData;
-    $.when(
-      $.ajax({
-          url: "/right",
-          type: 'GET',
-          async: false,
-          cache: false,
-          timeout: 10000,
-          error: function(msg){
-              $("#msg").html("<p>Server : Turn right failed</p>");
-          },
-          success: function(msg){
-            $("#msg").html("<p>"+msg.msg+"</p>");
-            $("#msg").fadeIn(500);
-          }
-      })
-    ).then(function() {
-      //update canvas
-    });
-  }*/
 
   function drive(u,d,l,r){
     var rawData;
@@ -453,7 +365,14 @@ function right(){
       l = (keyPressArray[65] || keyPressArray[37])? 1:0;
       r = (keyPressArray[68] || keyPressArray[39])? 1:0;
       count =  parseInt(u)+parseInt(d)+parseInt(l)+parseInt(r);
-      if(count != 0){console.log(count); drive(u,d,l,r); console.log(" | U: "+u+" | D: "+d+" | L: "+l+" | R: "+r);}//there are keys pressed
+      if(count != 0 && (preValue[0]!=u || preValue[1]!=d || preValue[2]!=l || preValue[3]!=r ) ){
+        drive(u,d,l,r);
+        console.log(" | U: "+u+" | D: "+d+" | L: "+l+" | R: "+r);
+        preValue[0] = u;
+        preValue[1] = d;
+        preValue[2] = l;
+        preValue[3] = r;
+      }//there are keys pressed
       setTimeout(sendCommand, 5);
     }
 
@@ -499,7 +418,7 @@ function right(){
       document.addEventListener('keyup', function(e) { //add keyup listener
          keyPressArray[e.keyCode] = false;
          if(!keyPressArray[87] || !keyPressArray[38]) drive(0,0,0,0);
-         if(!keyPressArray[83] || !keyPressArray[40]) drive(0,0,0,0);   
+         if(!keyPressArray[83] || !keyPressArray[40]) drive(0,0,0,0);
       }, false);
 
           /*button press functions */
@@ -537,7 +456,7 @@ function right(){
   });
 
   document.addEventListener("DOMContentLoaded", setstartPoint, false);
-  window.setInterval(sendCommand, 200);
+  window.setInterval(sendCommand, 50);
   </script>
 
 
