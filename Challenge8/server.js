@@ -156,7 +156,8 @@ app.get('/drive', function(req, res){
 });
 
 app.get('/update', function(req, res){
-  res.json({"data":stepsArray});
+  res.json({"data":"something"});
+  printOutJson(stepsArray);
 })
 
 
@@ -165,3 +166,13 @@ var server = app.listen(3000, '0.0.0.0', function(){
 });
 
 process.on('SIGINT', closePins);
+
+
+function printOutJson(jsonData){
+    var s1 = "";
+
+    for(i = 0 ; i < jsonData.length ; i++){
+      s1 += "Angle: "+ jsonData[i].angle+" | steps: "+jsonData[i].steps;
+      console.log(s1);
+    }
+}
