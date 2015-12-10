@@ -30,7 +30,7 @@
     #info{display:block;}
     #msg{display:none; position:absolute; top:40px; width:30%;border-radius: 5px;margin-left:35%;background-color: #646464;color:#ffffff;display:block;opacity:0.8}
     #msg>p{margin:8px 12px;margin-left: 15px}
-    #myCanvas{margin-left: 4%;width: 1020px;border:1px solid #d3d3d3;}
+    #myCanvas{margin-left: 62px;width: 1020px;border:1px solid #d3d3d3;}
     #control_panel{background-color: #646464; height:200px;width:200px;border-radius:100px;opacity:0.35;left:40%;top:40%;
     position:absolute;}
 
@@ -59,8 +59,9 @@
     #monitor{position:absolute; right:20px; top: 15px;opacity:0.9}
     iframe{border: #ffffff solid 3px; border-radius: 5px;}
     #hide{position:absolute; right:20px; top: 15px;opacity:0.9;border: #ffffff solid 3px;
-          border-radius: 5px;color: #ffffff; background-color:#646464;cursor:pointer;};
+          border-radius: 5px;color: #ffffff; background-color:#646464;cursor:pointer;}
     #video:hover{opacity:0.6}
+    #car:hover{opacity:0.6;cursor:pointer;}
   </style>
 
 
@@ -109,7 +110,7 @@
       chart.drawImage(pos, curX - pos.width/2, curY - pos.height/2 - 10); //draw pos
     }
 
-    //turnAMT(1,1);
+    turnAMT(1,1);
   }
   /*  if(posData.length = 1){
       var curX = Math.ceil((parseFloat(posData[posData.length-1].Y) + 0.5) * grid + 45); //convert to canvas value
@@ -203,25 +204,10 @@
   }
 
   function lineAMT(p1,p2){ // straight animation
-    var canvas = document.getElementById("myCanvas");
-    var chart = canvas.getContext("2d");
   }
 
   function turnAMT(flag,p){//flag = 0 turn left, flag = 1 turn right
-    var canvas = document.getElementById("myCanvas");
-    var chart = canvas.getContext("2d");
-    var pos = document.getElementById("picCar");
-    chart.save();
-    chart.translate(150,150);
-    var time = new Date();
 
-    if(flag == 0){chart.rotate(((7*Math.PI)/18000)*time.getMilliseconds() );}
-    else{chart.rotate(((-7*Math.PI)/18000)*time.getMilliseconds() );}
-
-    chart.drawImage(pos,-28,-15); //car width and length
-
-    chart.restore();
-    window.requestAnimationFrame(updateGraph);
   }
 
   /*------------end-----------*/
@@ -232,6 +218,12 @@
     canvas.addEventListener("mousedown", getPosition, false);
   }
 
+  function con(val,p){//convert to canvas value;
+    var canvas = document.getElementById('myCanvas');
+    var rect = canvas.getBoundingClientRect();
+    var result = (p==0)? val+rect.left-28:val+rect.top+15;
+    return result;
+  }
 
   function getPosition(event)
     {
@@ -245,7 +237,8 @@
         x = (x - x % grid) + 17 + grid/2; //format
         y = (y - y % grid) + 5 + grid/2; //format
         chart.drawImage(startFlag, x, y);
-        hasStartPoint = true; //flag setted
+        $("#car").css({"display":"block","position":"absolute","top":event.clientY-15,"left":event.clientX-28});
+        //hasStartPoint = true; //flag setted
       }
     }
 
@@ -364,6 +357,7 @@
       d = (keyPressArray[83] || keyPressArray[40])? 1:0;
       l = (keyPressArray[65] || keyPressArray[37])? 1:0;
       r = (keyPressArray[68] || keyPressArray[39])? 1:0;
+
       count =  parseInt(u)+parseInt(d)+parseInt(l)+parseInt(r);
       if(count != 0 && (preValue[0]!=u || preValue[1]!=d || preValue[2]!=l || preValue[3]!=r ) ){
         drive(u,d,l,r);
@@ -413,12 +407,18 @@
 
       document.addEventListener('keydown', function(e) { //add keydown listener
          keyPressArray[e.keyCode] = true;
+         if(keyPressArray[87] || keyPressArray[38]) $("#b_u").stop().mouseover();
+         if(keyPressArray[83] || keyPressArray[40]) $("#b_d").stop().mouseover();
+         if(keyPressArray[65] || keyPressArray[37]) $("#b_l").stop().mouseover();
+         if(keyPressArray[68] || keyPressArray[39]) $("#b_r").stop().mouseover();
       }, false);
 
       document.addEventListener('keyup', function(e) { //add keyup listener
          keyPressArray[e.keyCode] = false;
-         if(!keyPressArray[87] || !keyPressArray[38]) drive(0,0,0,0);
-         if(!keyPressArray[83] || !keyPressArray[40]) drive(0,0,0,0);
+         if(!keyPressArray[87] || !keyPressArray[38]) {drive(0,0,0,0);$("#b_u").stop().mouseout();}
+         if(!keyPressArray[83] || !keyPressArray[40]) {drive(0,0,0,0);$("#b_d").stop().mouseout();}
+         if(!keyPressArray[65] || !keyPressArray[37]) $("#b_l").stop().mouseout();
+         if(!keyPressArray[68] || !keyPressArray[39]) $("#b_r").stop().mouseout();
       }, false);
 
           /*button press functions */
@@ -494,7 +494,7 @@
 
       <img id="layout" src="http://hhao.hostei.com/doc/files/CDN/layout.png" style="display:none;"/>
       <img id="cen" src="http://hhao.hostei.com/doc/files/CDN/cen.png" style="display:none;"/>
-
+      <img id="car" src="http://hhao.hostei.com/doc/files/CDN/car.png" style="display:none"/>
 
   </body>
 </html>
