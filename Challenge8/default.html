@@ -254,8 +254,7 @@
       })
     ).then(function() {
       posData = rawData;
-      console.log(rawData);
-      //printOutJson(rawData);
+      printOutJson(rawData);
     });
 
   }
@@ -438,14 +437,12 @@
 
   document.addEventListener("DOMContentLoaded", setstartPoint, false);
   window.setInterval(sendCommand, 50);
-  window.setInterval(getData, 100);
-
+  window.setInterval(getData, 3000);
 
   function printOutJson(jsonData){
-    	var s1 = "";
 
     	for(i = 0 ; i < jsonData.length ; i++){
-    		s1 += "Angle: "+ jsonData[i].angle+" | steps: "+jsonData[i].steps;
+    		s1 = "Angle: "+ jsonData[i].angle+" | steps: "+jsonData[i].steps;
         console.log(s1);
     	}
   }
