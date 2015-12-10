@@ -111,7 +111,6 @@
       chart.drawImage(pos, curX - pos.width/2, curY - pos.height/2 - 10); //draw pos
     }
 
-    turnAMT(1,1);
   }
   /*  if(posData.length = 1){
       var curX = Math.ceil((parseFloat(posData[posData.length-1].Y) + 0.5) * grid + 45); //convert to canvas value
@@ -204,7 +203,11 @@
     		chart.fill();
   }
 
-  function lineAMT(p1,p2){ // straight animation
+  function lineAMT(dir, dis){ // straight animation dir: 0: up, 1: down; 2:left; 3:right
+    if(dir == 0) {$("#car").animate({top: '-='+dis, opacity: '0.8'}, "slow");}
+    if(dir == 1) {$("#car").animate({top: '+='+dis, opacity: '0.8'}, "slow");}
+    if(dir == 2) {$("#car").animate({left: '-='+dis, opacity: '0.8'}, "slow");}
+    if(dir == 3) {$("#car").animate({left: '+='+dis, opacity: '0.8'}, "slow");}
   }
 
   function turnAMT(flag){//flag = 0 turn left, flag = 1 turn right
@@ -221,7 +224,6 @@
           animateTo:-90
         })
     }
-
   }
 
   /*------------end-----------*/
@@ -235,7 +237,7 @@
   function con(val,p){//convert to canvas value;
     var canvas = document.getElementById('myCanvas');
     var rect = canvas.getBoundingClientRect();
-    var result = (p==0)? val-17 +rect.left:val-5+rect.top;
+    var result = (p==0)? val+rect.left:val+rect.top;
     return result;
   }
 
@@ -251,7 +253,7 @@
         x = (x - x % grid) + 17 + grid/2; //format
         y = (y - y % grid) + 5 + grid/2; //format
         chart.drawImage(startFlag, x, y);
-        $("#car").css({"display":"block","position":"absolute","top":con(y,1),"left":con(x,0)});
+        $("#car").css({"display":"block","position":"absolute","top":con(y-2,1),"left":con(x-20,0)});
         hasStartPoint = true; //flag setted
       }
     }
@@ -392,7 +394,7 @@
   $( document ).ready(function() {
      //setInterval(getData, 12000); //update every 12 secs
      $("#car").click(function(){
-        turnAMT(1,1);
+        lineAMT(3,grid);
      });
 
      $(".button").hover(function(){
